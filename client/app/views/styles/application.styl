@@ -2,11 +2,80 @@
 @import 'nib'
 
 @import '_base'
-@import '_ui'
+@import '_cozy'
+@import '_menu'
 
-// Import your styles here
+*
+    box-sizing border-box
 
-@import '_states'
-@import '_layout'
-@import '_responsive'
+.container
+    margin-left 20%
 
+i.tag-icon
+    background url('/images/tag.png') no-repeat
+    width 13px
+    height 17px
+    margin-right 5px
+    display inline-block
+    opacity 0.5
+
+h1
+    border-bottom 1px solid #ccc
+    margin 20px 20px
+    font-family styled
+    font-weight normal
+    font-size 25px
+
+#new-task
+    margin 15px 20px
+
+    .button.disabled
+        padding 8px
+
+    .todo-field input
+        border 1px solid #ccc
+
+ul#task-list
+    list-style-type none
+    padding 0
+    padding-bottom 10px
+
+.task
+    margin 15px 20px
+    padding 0
+
+    .task-container
+        display table
+
+    .button
+    .todo-field
+        display table-cell
+
+    .button
+        width 60px
+        padding 8px
+        font-size 13px
+
+        &.done
+            background green
+
+        &.disabled
+            box-shadow none
+
+        &:focus
+            outline none
+
+    .todo-field
+        width 100%
+        padding-left 10px
+
+        input
+            width 100%
+            padding 6px
+
+            border 1px solid transparent
+            &:hover
+                border 1px solid orange
+            &:focus
+                border 1px solid blue
+                outline none

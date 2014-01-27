@@ -1,0 +1,48 @@
+#menu
+  width 20%
+  float left
+  background #F2F2F2
+  height 100%
+  position fixed
+
+  ul
+    margin 0
+    padding 0
+    list-style-type none
+
+    &.permanent
+      border-bottom 1px solid #ddd
+
+    li
+      display block
+      font-family styled
+      font-weight normal
+
+      a
+        display inline-block
+        width 100%
+        height 100%
+
+        &:hover
+          background #FFC47F
+
+        // remove inherit styles
+        text-decoration none
+        color #333
+        padding 10px
+
+
+      .submenu
+        border-bottom 1px solid #ddd
+
+        li
+          &.selected
+            background #cfcfcf
+
+          a
+            padding-left 25px
+
+      &.active > a
+        background #aedbff
+
+

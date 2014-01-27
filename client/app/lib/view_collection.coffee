@@ -69,7 +69,7 @@ module.exports = class ViewCollection extends BaseView
     # event listeners for add
     addItem: (model) =>
         options = _.extend {}, {model: model}, @itemViewOptions(model)
-        view = new @itemview(options)
+        view = new @itemView(options)
         @views[model.cid] = view.render()
         @appendView view
         @onChange @views
