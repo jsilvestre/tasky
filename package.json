@@ -1,14 +1,14 @@
 {
-  "name": "cozy-template",
+  "name": "task",
   "version": "1.0.0",
   "engines": [
     "node = 0.8.x"
   ],
-  "description": "A template project for cozy applications",
+  "description": "A reboot of cozy-todos",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mycozycloud/cozy-template.git"
+    "url": "https://github.com/jsilvestre/tasky.git"
   },
   "main": "server.coffee",
   "dependencies": {
@@ -23,9 +23,8 @@
     "coffeelint": "0.6.1"
   },
   "scripts": {
-    "test": "cake tests",
     "start": "coffee server.coffee"
   },
   "cozy-permissions": {},
-  "cozy-displayName": "Template"
+  "cozy-displayName": "Tasky"
 }
