@@ -37,3 +37,9 @@ module.exports = class TaskView extends BaseView
     onBlur: ->
         @model.set 'content', @$('input').val()
 
+    setFocus: ->
+        inputField = @$ 'input'
+        inputField.focus()
+        index = inputField.val().length
+        inputField[0].setSelectionRange index, index
+

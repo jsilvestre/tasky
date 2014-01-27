@@ -16,18 +16,24 @@ module.exports = class MenuView extends BaseView
     activeTags: null
     subMenuHandler: null
 
+    constructor: (options) ->
+
+        @baseCollection = options.baseCollection
+
+        super options
+
     initialize: (options) ->
 
-        @listenTo @collection,
+        @listenTo @baseCollection,
             'add': @onChange
             'change': @onChange
             'remove': @onChange
 
-        super()
+        super options
 
     getRenderData: ->
-        allCount: @collection.length
-        untaggedCount: @collection
+        allCount: @baseCollection.length
+        untaggedCount: @baseCollection
                             .filter((task) ->
                                 task.get('tags').length is 0
                             ).length
@@ -35,9 +41,10 @@ module.exports = class MenuView extends BaseView
         # empty tag list
         # TODO: use $el.detach() instead
         Object.keys(@views).forEach (item) => @views[item].destroy()
+        @views = {}
 
     afterRender: ->
-        tags = @collection.getAllTags()
+        tags = @baseCollection.getAllTags()
         tags.forEach (tagInfo) =>
             menuItem = new MenuItemView model: new Backbone.Model
                                                 tagName: tagInfo.get 'id'
@@ -95,7 +102,7 @@ module.exports = class MenuView extends BaseView
         # create new one
         relatedView = @views[menuItemId]
         @submenu = new SubmenuView
-                        collection: @collection
+                        baseCollection: @baseCollection
                         relatedView: relatedView
                         selectedTags: selectedTags
         @submenu.render()

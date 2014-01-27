@@ -80,7 +80,7 @@ module.exports = class Router extends Backbone.Router
         @mainView = new AppView()
         @mainView.render()
 
-        @menu = new MenuView collection: @collection
+        @menu = new MenuView baseCollection: @collection
         @menu.render()
 
         @taskList = new TaskListView baseCollection: @collection

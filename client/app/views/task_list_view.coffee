@@ -20,23 +20,20 @@ module.exports = class TaskListView extends BaseView
         super options
 
     setTags: (tags) ->
-        console.log "set tags"
-
-        @tags = tags
+        @selectedTags = tags
 
         if @collection? and @collection isnt @baseCollection
             @stopListening @collection
             delete @collection
 
-        @collection = @baseCollection.getByTags @tags
+        @collection = @baseCollection.getByTags @selectedTags
 
-        @listenTo @baseCollection, 'add', =>
-            console.log "added to base collection"
-            @render()
+        @listenTo @baseCollection, 'add', @render
         @listenTo @collection, 'remove', (task) =>
-            previousTaskID = task.get 'previous'
-            previousTask = @baseCollection.get previousTaskID
-            @taskModelCIDToFocus = previousTask.cid if previousTask?
+            # set the focus to the previous view
+            previousVisibleTask = task.getPreviousWithTags @selectedTags
+            if previousVisibleTask?
+                @taskModelCIDToFocus = previousVisibleTask.cid
             @render()
 
     getRenderData: -> title: @getTitle()
@@ -51,21 +48,18 @@ module.exports = class TaskListView extends BaseView
                 taskView.destroy()
 
     afterRender: ->
-        console.log "render"
         if @taskForm?
             @stopListening @taskForm
             @taskForm.destroy()
-        @taskForm = new TaskFormView tags: @tags
+        @taskForm = new TaskFormView tags: @selectedTags
         @listenTo @taskForm, 'new-task-submitted', @createNewTask
         @listenTo @taskForm, 'focus-down', @onFocusDown
         @taskForm.render()
 
         @collection.forEach (task) =>
             taskView = @views.findByModel task
-
             unless taskView?
-                taskView = new TaskView
-                            model: task
+                taskView = new TaskView model: task
                 @views.add taskView
                 @listenTo taskView, 'new-task-submitted', @createNewTask
                 @listenTo taskView, 'focus-up', @onFocusUp
@@ -73,11 +67,9 @@ module.exports = class TaskListView extends BaseView
 
             $(@collectionEl).append taskView.render().$el
 
-        #console.debug @views.pluck 'cid'
-
         # if an element has been created or removed, focus task accordingly
         if @taskModelCIDToFocus?
-            @views.findByModelCid(@taskModelCIDToFocus).$el.find('input').focus()
+            @views.findByModelCid(@taskModelCIDToFocus).setFocus()
             @taskModelCIDToFocus = null
         else
             @taskForm.$el.find('input').focus()
@@ -87,10 +79,10 @@ module.exports = class TaskListView extends BaseView
     getTitle: ->
         if @collection.length is @baseCollection.length
             return "All tasks"
-        else if @tags? and @tags.length is 0
+        else if @selectedTags? and @selectedTags.length is 0
             return "Untagged tasks"
         else
-            tagsList = Utils.buildTagsList @tags,
+            tagsList = Utils.buildTagsList @selectedTags,
                             tagPrefix: '#'
                             regularSeparator: ', '
                             lastSeparator: ' and '
@@ -98,7 +90,9 @@ module.exports = class TaskListView extends BaseView
             return "Tasks of #{tagsList}"
 
     createNewTask: (options = {}) ->
-        content = options.content or ""
+        tagsList = Utils.buildTagsList @selectedTags, tagPrefix: '#'
+        tagsList =  "#{tagsList} " if tagsList isnt ""
+        content = options.content or tagsList
 
         if options.previous?
             previousModel = @views.findByModelCid(options.previous).model

@@ -9,8 +9,6 @@ module.exports = class TaskCollection extends Backbone.Collection
 
     getByTags: (tags) ->
 
-        console.log "get projection collection"
-
         # all the tasks, no matter how tagged they are
         return @ if tags is undefined or tags is null
 
@@ -48,4 +46,8 @@ module.exports = class TaskCollection extends Backbone.Collection
         nextTask.set 'previous', nextTask.get 'id' if nextTask?
 
         super task, options
+
+
+
+
 

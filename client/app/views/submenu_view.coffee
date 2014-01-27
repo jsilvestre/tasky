@@ -10,18 +10,21 @@ module.exports = class SubmenuView extends BaseView
 
     views: {}
 
-    initialize: (options) ->
-        @baseCollection = @collection
+    constructor: (options) ->
+        @baseCollection = options.baseCollection
         @relatedView = options.relatedView
         @selectedTags = options.selectedTags or []
+        super options
 
     getRootTagName: -> return @relatedView.model.get 'tagName'
 
     # Get the tags from displayed tasks
     buildTagsList: ->
-        @collection = @baseCollection.getByTags @selectedTags unless @collection?
+        delete @collection if @collection?
+        @collection = @baseCollection.getByTags @selectedTags
         @tagsList = TagsCollection.extractFromTasks @collection,
-                                                    [@getRootTagName()]
+                                                    [@getRootTagName()],
+                                                    @selectedTags
 
     beforeRender: ->
         @buildTagsList()

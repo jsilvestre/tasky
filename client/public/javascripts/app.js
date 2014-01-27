@@ -111,17 +111,32 @@ window.require.register("collections/tags", function(exports, require, module) {
       if (a.get('count') > b.get('count')) {
         return -1;
       } else if (a.get('count') === b.get('count')) {
-        return 0;
+        if (a.get('selectIndex') === -1 && b.get('selectIndex') === -1) {
+          return 0;
+        } else if (a.get('selectIndex') > -1 && b.get('selectIndex') === -1) {
+          return -1;
+        } else if (a.get('selectIndex') === -1 && b.get('selectIndex') > -1) {
+          return 1;
+        } else {
+          if (a.get('selectIndex') < b.get('selectIndex')) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }
       } else {
         return 1;
       }
     };
 
-    TagsCollection.extractFromTasks = function(taskCollection, excludes) {
+    TagsCollection.extractFromTasks = function(taskCollection, excludes, selectedTags) {
       var tagsList;
 
       if (excludes == null) {
         excludes = [];
+      }
+      if (selectedTags == null) {
+        selectedTags = [];
       }
       tagsList = new TagsCollection();
       taskCollection.pluck('tags').forEach(function(tagsOfTask) {
@@ -133,7 +148,8 @@ window.require.register("collections/tags", function(exports, require, module) {
             if (tagsList.get(tag) == null) {
               tagsList.add(new Backbone.Model({
                 id: tag,
-                count: 0
+                count: 0,
+                selectIndex: selectedTags.indexOf(tag)
               }));
             }
             tagInfo = tagsList.get(tag);
@@ -172,7 +188,6 @@ window.require.register("collections/tasks", function(exports, require, module) 
     };
 
     TaskCollection.prototype.getByTags = function(tags) {
-      console.log("get projection collection");
       if (tags === void 0 || tags === null) {
         return this;
       }
@@ -475,6 +490,22 @@ window.require.register("models/task", function(exports, require, module) {
       return _.every(tags, _.partial(_.contains, this.get('tags')));
     };
 
+    Task.prototype.getPreviousWithTags = function(tags) {
+      var previousPosition, previousTask;
+
+      previousTask = this.collection.get(this.get('previous'));
+      previousPosition = this.collection.indexOf(previousTask);
+      while (!((previousTask == null) || previousTask.containsTags(tags))) {
+        previousTask = this.collection.get(previousTask.get('previous'));
+        previousPosition = this.collection.indexOf(previousTask);
+      }
+      if ((previousTask != null) && previousTask.containsTags(tags)) {
+        return previousTask;
+      } else {
+        return null;
+      }
+    };
+
     return Task;
 
   })(Backbone.Model);
@@ -586,7 +617,7 @@ window.require.register("router", function(exports, require, module) {
       this.mainView = new AppView();
       this.mainView.render();
       this.menu = new MenuView({
-        collection: this.collection
+        baseCollection: this.collection
       });
       this.menu.render();
       return this.taskList = new TaskListView({
@@ -702,7 +733,7 @@ window.require.register("views/menu_item_view", function(exports, require, modul
   
 });
 window.require.register("views/menu_view", function(exports, require, module) {
-  var BaseView, MenuItemView, MenuView, SubmenuView, _ref,
+  var BaseView, MenuItemView, MenuView, SubmenuView,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -714,11 +745,6 @@ window.require.register("views/menu_view", function(exports, require, module) {
 
   module.exports = MenuView = (function(_super) {
     __extends(MenuView, _super);
-
-    function MenuView() {
-      _ref = MenuView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
 
     MenuView.prototype.el = '#menu';
 
@@ -736,19 +762,24 @@ window.require.register("views/menu_view", function(exports, require, module) {
 
     MenuView.prototype.subMenuHandler = null;
 
+    function MenuView(options) {
+      this.baseCollection = options.baseCollection;
+      MenuView.__super__.constructor.call(this, options);
+    }
+
     MenuView.prototype.initialize = function(options) {
-      this.listenTo(this.collection, {
+      this.listenTo(this.baseCollection, {
         'add': this.onChange,
         'change': this.onChange,
         'remove': this.onChange
       });
-      return MenuView.__super__.initialize.call(this);
+      return MenuView.__super__.initialize.call(this, options);
     };
 
     MenuView.prototype.getRenderData = function() {
       return {
-        allCount: this.collection.length,
-        untaggedCount: this.collection.filter(function(task) {
+        allCount: this.baseCollection.length,
+        untaggedCount: this.baseCollection.filter(function(task) {
           return task.get('tags').length === 0;
         }).length
       };
@@ -757,16 +788,17 @@ window.require.register("views/menu_view", function(exports, require, module) {
     MenuView.prototype.beforeRender = function() {
       var _this = this;
 
-      return Object.keys(this.views).forEach(function(item) {
+      Object.keys(this.views).forEach(function(item) {
         return _this.views[item].destroy();
       });
+      return this.views = {};
     };
 
     MenuView.prototype.afterRender = function() {
       var tags,
         _this = this;
 
-      tags = this.collection.getAllTags();
+      tags = this.baseCollection.getAllTags();
       tags.forEach(function(tagInfo) {
         var menuItem;
 
@@ -838,7 +870,7 @@ window.require.register("views/menu_view", function(exports, require, module) {
       }
       relatedView = this.views[menuItemId];
       this.submenu = new SubmenuView({
-        collection: this.collection,
+        baseCollection: this.baseCollection,
         relatedView: relatedView,
         selectedTags: selectedTags
       });
@@ -934,7 +966,7 @@ window.require.register("views/submenu_item_view", function(exports, require, mo
   
 });
 window.require.register("views/submenu_view", function(exports, require, module) {
-  var BaseView, SubmenuItemView, SubmenuView, TagsCollection, _ref,
+  var BaseView, SubmenuItemView, SubmenuView, TagsCollection,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -947,32 +979,29 @@ window.require.register("views/submenu_view", function(exports, require, module)
   module.exports = SubmenuView = (function(_super) {
     __extends(SubmenuView, _super);
 
-    function SubmenuView() {
-      _ref = SubmenuView.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
     SubmenuView.prototype.tagName = 'ul';
 
     SubmenuView.prototype.className = 'submenu';
 
     SubmenuView.prototype.views = {};
 
-    SubmenuView.prototype.initialize = function(options) {
-      this.baseCollection = this.collection;
+    function SubmenuView(options) {
+      this.baseCollection = options.baseCollection;
       this.relatedView = options.relatedView;
-      return this.selectedTags = options.selectedTags || [];
-    };
+      this.selectedTags = options.selectedTags || [];
+      SubmenuView.__super__.constructor.call(this, options);
+    }
 
     SubmenuView.prototype.getRootTagName = function() {
       return this.relatedView.model.get('tagName');
     };
 
     SubmenuView.prototype.buildTagsList = function() {
-      if (this.collection == null) {
-        this.collection = this.baseCollection.getByTags(this.selectedTags);
+      if (this.collection != null) {
+        delete this.collection;
       }
-      return this.tagsList = TagsCollection.extractFromTasks(this.collection, [this.getRootTagName()]);
+      this.collection = this.baseCollection.getByTags(this.selectedTags);
+      return this.tagsList = TagsCollection.extractFromTasks(this.collection, [this.getRootTagName()], this.selectedTags);
     };
 
     SubmenuView.prototype.beforeRender = function() {
@@ -1159,24 +1188,19 @@ window.require.register("views/task_list_view", function(exports, require, modul
     TaskListView.prototype.setTags = function(tags) {
       var _this = this;
 
-      console.log("set tags");
-      this.tags = tags;
+      this.selectedTags = tags;
       if ((this.collection != null) && this.collection !== this.baseCollection) {
         this.stopListening(this.collection);
         delete this.collection;
       }
-      this.collection = this.baseCollection.getByTags(this.tags);
-      this.listenTo(this.baseCollection, 'add', function() {
-        console.log("added to base collection");
-        return _this.render();
-      });
+      this.collection = this.baseCollection.getByTags(this.selectedTags);
+      this.listenTo(this.baseCollection, 'add', this.render);
       return this.listenTo(this.collection, 'remove', function(task) {
-        var previousTask, previousTaskID;
+        var previousVisibleTask;
 
-        previousTaskID = task.get('previous');
-        previousTask = _this.baseCollection.get(previousTaskID);
-        if (previousTask != null) {
-          _this.taskModelCIDToFocus = previousTask.cid;
+        previousVisibleTask = task.getPreviousWithTags(_this.selectedTags);
+        if (previousVisibleTask != null) {
+          _this.taskModelCIDToFocus = previousVisibleTask.cid;
         }
         return _this.render();
       });
@@ -1205,13 +1229,12 @@ window.require.register("views/task_list_view", function(exports, require, modul
     TaskListView.prototype.afterRender = function() {
       var _this = this;
 
-      console.log("render");
       if (this.taskForm != null) {
         this.stopListening(this.taskForm);
         this.taskForm.destroy();
       }
       this.taskForm = new TaskFormView({
-        tags: this.tags
+        tags: this.selectedTags
       });
       this.listenTo(this.taskForm, 'new-task-submitted', this.createNewTask);
       this.listenTo(this.taskForm, 'focus-down', this.onFocusDown);
@@ -1232,7 +1255,7 @@ window.require.register("views/task_list_view", function(exports, require, modul
         return $(_this.collectionEl).append(taskView.render().$el);
       });
       if (this.taskModelCIDToFocus != null) {
-        this.views.findByModelCid(this.taskModelCIDToFocus).$el.find('input').focus();
+        this.views.findByModelCid(this.taskModelCIDToFocus).setFocus();
         this.taskModelCIDToFocus = null;
       } else {
         this.taskForm.$el.find('input').focus();
@@ -1245,10 +1268,10 @@ window.require.register("views/task_list_view", function(exports, require, modul
 
       if (this.collection.length === this.baseCollection.length) {
         return "All tasks";
-      } else if ((this.tags != null) && this.tags.length === 0) {
+      } else if ((this.selectedTags != null) && this.selectedTags.length === 0) {
         return "Untagged tasks";
       } else {
-        tagsList = Utils.buildTagsList(this.tags, {
+        tagsList = Utils.buildTagsList(this.selectedTags, {
           tagPrefix: '#',
           regularSeparator: ', ',
           lastSeparator: ' and '
@@ -1258,12 +1281,18 @@ window.require.register("views/task_list_view", function(exports, require, modul
     };
 
     TaskListView.prototype.createNewTask = function(options) {
-      var content, index, maxID, nextTask, previousModel, previousTask, task;
+      var content, index, maxID, nextTask, previousModel, previousTask, tagsList, task;
 
       if (options == null) {
         options = {};
       }
-      content = options.content || "";
+      tagsList = Utils.buildTagsList(this.selectedTags, {
+        tagPrefix: '#'
+      });
+      if (tagsList !== "") {
+        tagsList = "" + tagsList + " ";
+      }
+      content = options.content || tagsList;
       if (options.previous != null) {
         previousModel = this.views.findByModelCid(options.previous).model;
         index = this.baseCollection.indexOf(previousModel) + 1;
@@ -1382,6 +1411,15 @@ window.require.register("views/task_view", function(exports, require, module) {
 
     TaskView.prototype.onBlur = function() {
       return this.model.set('content', this.$('input').val());
+    };
+
+    TaskView.prototype.setFocus = function() {
+      var index, inputField;
+
+      inputField = this.$('input');
+      inputField.focus();
+      index = inputField.val().length;
+      return inputField[0].setSelectionRange(index, index);
     };
 
     return TaskView;
