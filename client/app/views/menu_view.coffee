@@ -17,10 +17,12 @@ module.exports = class MenuView extends BaseView
     subMenuHandler: null
 
     initialize: (options) ->
-        @currentTags = options.currentTags
-        @listenTo @collection, 'add', @onChange
-        @listenTo @collection, 'change', @onChange
-        @listenTo @collection, 'remove', @onChange
+
+        @listenTo @collection,
+            'add': @onChange
+            'change': @onChange
+            'remove': @onChange
+
         super()
 
     getRenderData: ->
@@ -31,6 +33,7 @@ module.exports = class MenuView extends BaseView
                             ).length
     beforeRender: ->
         # empty tag list
+        # TODO: use $el.detach() instead
         Object.keys(@views).forEach (item) => @views[item].destroy()
 
     afterRender: ->

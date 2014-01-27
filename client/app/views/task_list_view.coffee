@@ -11,15 +11,15 @@ module.exports = class TaskListView extends BaseView
     el: '.container'
     template: require './templates/task_list'
 
-    views: {}
+    views: null
     collectionEl: 'ul#task-list'
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
+        @views = new Backbone.ChildViewContainer()
         super options
 
     setTags: (tags) ->
-
         console.log "set tags"
 
         @tags = tags
@@ -41,6 +41,15 @@ module.exports = class TaskListView extends BaseView
 
     getRenderData: -> title: @getTitle()
 
+    beforeRender: ->
+        @views.forEach (taskView) =>
+            if @collection.indexOf(taskView.model) isnt -1
+                taskView.$el.detach()
+            else
+                @stopListening taskView
+                @views.remove taskView
+                taskView.destroy()
+
     afterRender: ->
         console.log "render"
         if @taskForm?
@@ -52,17 +61,23 @@ module.exports = class TaskListView extends BaseView
         @taskForm.render()
 
         @collection.forEach (task) =>
-            taskView = new TaskView
-                        model: task
-            @views[task.cid] = taskView
-            @listenTo @views[task.cid], 'new-task-submitted', @createNewTask
-            @listenTo @views[task.cid], 'focus-up', @onFocusUp
-            @listenTo @views[task.cid], 'focus-down', @onFocusDown
+            taskView = @views.findByModel task
+
+            unless taskView?
+                taskView = new TaskView
+                            model: task
+                @views.add taskView
+                @listenTo taskView, 'new-task-submitted', @createNewTask
+                @listenTo taskView, 'focus-up', @onFocusUp
+                @listenTo taskView, 'focus-down', @onFocusDown
+
             $(@collectionEl).append taskView.render().$el
+
+        #console.debug @views.pluck 'cid'
 
         # if an element has been created or removed, focus task accordingly
         if @taskModelCIDToFocus?
-            @views[@taskModelCIDToFocus].$el.find('input').focus()
+            @views.findByModelCid(@taskModelCIDToFocus).$el.find('input').focus()
             @taskModelCIDToFocus = null
         else
             @taskForm.$el.find('input').focus()
@@ -86,7 +101,8 @@ module.exports = class TaskListView extends BaseView
         content = options.content or ""
 
         if options.previous?
-            index = @baseCollection.indexOf(@views[options.previous].model) + 1
+            previousModel = @views.findByModelCid(options.previous).model
+            index = @baseCollection.indexOf(previousModel) + 1
         else
             index = 0
 
@@ -97,6 +113,7 @@ module.exports = class TaskListView extends BaseView
             previous: previousTask?.get('id') or previousTask?.cid
             next: nextTask?.get('id') or nextTask?.cid
 
+        # TODO: remove
         maxID = _.max(@baseCollection.pluck('id')) + 1
         task.id = maxID
         task.set 'id', maxID
@@ -110,23 +127,25 @@ module.exports = class TaskListView extends BaseView
 
         @baseCollection.add task, at: index
 
-    # broken because Object.key @views isn't stable
     onFocusUp: (cid) ->
-        cidViews = Object.keys @views
-        newIndex = cidViews.indexOf(cid) - 1
+        currentModel = @views.findByModelCid(cid).model
+        previousIndex = @collection.indexOf(currentModel) - 1
+        previousModel = @collection.at previousIndex
 
-        console.log "focus up", cidViews
-        if newIndex >= 0
-            @views[cidViews[newIndex]].$el.find('input').focus()
+        if previousIndex >= 0
+            @views.findByModel(previousModel).$el.find('input').focus()
         else
             @taskForm.$el.find('input').focus()
 
-    # broken
     onFocusDown: (cid) ->
-        cidViews = Object.keys @views
+        if cid?
+            currentModel = @views.findByModelCid(cid).model
+            nextIndex = @collection.indexOf(currentModel) + 1
+            nextModel = @collection.at nextIndex
+        else
+            nextIndex = 0
+            nextModel = @collection.at nextIndex
 
-        newIndex = if cid? then cidViews.indexOf(cid) + 1 else 0
-
-        if newIndex < cidViews.length
-            @views[cidViews[newIndex]].$el.find('input').focus()
+        if nextIndex < @views.length
+            @views.findByModel(nextModel).$el.find('input').focus()
 
