@@ -76,11 +76,11 @@ module.exports = class MenuView extends BaseView
             @$('ul.permanent li:nth-of-type(2)').addClass 'active'
             @handleSubmenu null
         else
-            # this can be improve
-            @views.forEach (view) =>
+            @views.some (view) =>
                 if view.model.get('tagName') is @activeTags[0]
                     view.$el.addClass 'active'
                     @handleSubmenu view.cid, @activeTags
+                    return true
 
     onClick: (event) ->
         # set active style on menu items

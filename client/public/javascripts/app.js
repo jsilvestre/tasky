@@ -864,10 +864,11 @@ window.require.register("views/menu_view", function(exports, require, module) {
         this.$('ul.permanent li:nth-of-type(2)').addClass('active');
         return this.handleSubmenu(null);
       } else {
-        return this.views.forEach(function(view) {
+        return this.views.some(function(view) {
           if (view.model.get('tagName') === _this.activeTags[0]) {
             view.$el.addClass('active');
-            return _this.handleSubmenu(view.cid, _this.activeTags);
+            _this.handleSubmenu(view.cid, _this.activeTags);
+            return true;
           }
         });
       }
