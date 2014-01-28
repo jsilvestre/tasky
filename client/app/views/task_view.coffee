@@ -10,10 +10,23 @@ module.exports = class TaskView extends BaseView
         'keydown  input': 'onKeydown'
         'keyup  input': 'onKeyup'
         'blur input': 'onBlur'
+        'click button': 'onClick'
+        'mouseenter button': 'onMouseEnter'
+        'mouseleave button': 'onMouseLeave'
 
     getRenderData: ->
         model: @model.toJSON()
         tabindex: @model.collection.indexOf(@model) + 2
+
+    afterRender: ->
+        if @model.get('isDone')
+            button =  @$ 'button'
+            button.addClass 'done'
+            button.html 'Done'
+
+    onClick: ->
+        @model.set 'isDone', not @model.get('isDone')
+        @render()
 
     onKeydown: (event) ->
         key = event.keyCode or event.charCode
@@ -46,4 +59,20 @@ module.exports = class TaskView extends BaseView
         inputField.focus()
         index = inputField.val().length
         inputField[0].setSelectionRange index, index
+
+    onMouseEnter: ->
+        button = @$ 'button'
+        if @model.get('isDone')
+            button.html 'Todo?'
+        else
+            button.html 'Done?'
+
+    onMouseLeave: ->
+        button = @$ 'button'
+        if @model.get('isDone')
+            button.html 'Done'
+        else
+            button.html 'Todo'
+
+
 

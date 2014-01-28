@@ -555,73 +555,85 @@ window.require.register("router", function(exports, require, module) {
         content: '2 #cozy #todos',
         id: 2,
         previous: 1,
-        next: 3
+        next: 3,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '5 #cozy #calendar #feature',
         id: 5,
         previous: 4,
-        next: 6
+        next: 6,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '6 #cozy #todos #bug',
         id: 6,
         previous: 5,
-        next: 7
+        next: 7,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '9 #cozy #mesinfos #feature',
         id: 9,
         previous: 8,
-        next: 10
+        next: 10,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '4 #cozy #todos #feature',
         id: 4,
         previous: 3,
-        next: 5
+        next: 5,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '7 #cozy #feature',
         id: 7,
         previous: 6,
-        next: 8
+        next: 8,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '8 #cozy #mesinfos',
         id: 8,
         previous: 7,
-        next: 9
+        next: 9,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '3 #cozy #todos',
         id: 3,
         previous: 2,
-        next: 4
+        next: 4,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '10 #cozy #mesinfos #bug',
         id: 10,
         previous: 9,
-        next: 11
+        next: 11,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '11',
         id: 11,
         previous: 10,
-        next: 12
+        next: 12,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '12',
         id: 12,
         previous: 11,
-        next: null
+        next: null,
+        isDone: false
       }));
       this.collection.add(new Task({
         content: '1 Call the doctor #personal',
         id: 1,
         previous: null,
-        next: 2
+        next: 2,
+        isDone: false
       }));
       this.mainView = new AppView();
       this.mainView.render();
@@ -1398,7 +1410,10 @@ window.require.register("views/task_view", function(exports, require, module) {
     TaskView.prototype.events = {
       'keydown  input': 'onKeydown',
       'keyup  input': 'onKeyup',
-      'blur input': 'onBlur'
+      'blur input': 'onBlur',
+      'click button': 'onClick',
+      'mouseenter button': 'onMouseEnter',
+      'mouseleave button': 'onMouseLeave'
     };
 
     TaskView.prototype.getRenderData = function() {
@@ -1406,6 +1421,21 @@ window.require.register("views/task_view", function(exports, require, module) {
         model: this.model.toJSON(),
         tabindex: this.model.collection.indexOf(this.model) + 2
       };
+    };
+
+    TaskView.prototype.afterRender = function() {
+      var button;
+
+      if (this.model.get('isDone')) {
+        button = this.$('button');
+        button.addClass('done');
+        return button.html('Done');
+      }
+    };
+
+    TaskView.prototype.onClick = function() {
+      this.model.set('isDone', !this.model.get('isDone'));
+      return this.render();
     };
 
     TaskView.prototype.onKeydown = function(event) {
@@ -1446,6 +1476,28 @@ window.require.register("views/task_view", function(exports, require, module) {
       inputField.focus();
       index = inputField.val().length;
       return inputField[0].setSelectionRange(index, index);
+    };
+
+    TaskView.prototype.onMouseEnter = function() {
+      var button;
+
+      button = this.$('button');
+      if (this.model.get('isDone')) {
+        return button.html('Todo?');
+      } else {
+        return button.html('Done?');
+      }
+    };
+
+    TaskView.prototype.onMouseLeave = function() {
+      var button;
+
+      button = this.$('button');
+      if (this.model.get('isDone')) {
+        return button.html('Done');
+      } else {
+        return button.html('Todo');
+      }
     };
 
     return TaskView;

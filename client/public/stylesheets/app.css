@@ -933,6 +933,9 @@ ul#task-list {
 .task .button.done {
   background: #5c5;
 }
+.task .button.done:hover {
+  background: #fe8800;
+}
 .task .button.disabled {
   -webkit-box-shadow: none;
   box-shadow: none;
