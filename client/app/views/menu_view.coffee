@@ -10,20 +10,18 @@ module.exports = class MenuView extends BaseView
 
     events: 'click li.first-level': 'onClick'
 
-    views: {}
+    views: null
     collectionEl: 'ul.tags'
 
     activeTags: null
     subMenuHandler: null
 
     constructor: (options) ->
-
         @baseCollection = options.baseCollection
-
+        @views = new Backbone.ChildViewContainer()
         super options
 
     initialize: (options) ->
-
         @listenTo @baseCollection,
             'add': @onChange
             'change': @onChange
@@ -38,18 +36,23 @@ module.exports = class MenuView extends BaseView
                                 task.get('tags').length is 0
                             ).length
     beforeRender: ->
-        # empty tag list
-        # TODO: use $el.detach() instead
-        Object.keys(@views).forEach (item) => @views[item].destroy()
-        @views = {}
+        tagsList = @baseCollection.getAllTags()
+        @views.forEach (taskView) =>
+            if tagsList.indexOf(taskView.model.get('tagName')) isnt -1
+                taskView.$el.detach()
+            else
+                @stopListening taskView
+                @views.remove taskView
+                taskView.destroy()
 
     afterRender: ->
         tags = @baseCollection.getAllTags()
         tags.forEach (tagInfo) =>
-            menuItem = new MenuItemView model: new Backbone.Model
-                                                tagName: tagInfo.get 'id'
-                                                count: tagInfo.get 'count'
-            @views[menuItem.cid] = menuItem
+            menuItem = new MenuItemView
+                            model: new Backbone.Model
+                                tagName: tagInfo.get 'id'
+                                count: tagInfo.get 'count'
+            @views.add menuItem
             $(@collectionEl).append menuItem.render().$el
 
         return @$el
@@ -74,10 +77,10 @@ module.exports = class MenuView extends BaseView
             @handleSubmenu null
         else
             # this can be improve
-            Object.keys(@views).forEach (view) =>
-                if @views[view].model.get('tagName') is @activeTags[0]
-                    @views[view].$el.addClass 'active'
-                    @handleSubmenu view, @activeTags
+            @views.forEach (view) =>
+                if view.model.get('tagName') is @activeTags[0]
+                    view.$el.addClass 'active'
+                    @handleSubmenu view.cid, @activeTags
 
     onClick: (event) ->
         # set active style on menu items
@@ -90,7 +93,8 @@ module.exports = class MenuView extends BaseView
         if menuItemId is @subMenuHandler
             @closeSubmenu()
         else if @subMenuHandler is null and menuItemId isnt undefined
-            @handleSubmenu menuItemId, [@views[menuItemId].model.get('tagName')]
+            rootTag = @views.findByCid(menuItemId).model.get 'tagName'
+            @handleSubmenu menuItemId, [rootTag]
 
     handleSubmenu: (menuItemId, selectedTags = []) ->
 
@@ -101,7 +105,7 @@ module.exports = class MenuView extends BaseView
         return if not menuItemId?
 
         # create new one
-        relatedView = @views[menuItemId]
+        relatedView = @views.findByCid menuItemId
         @submenu = new SubmenuView
                         baseCollection: @baseCollection
                         relatedView: relatedView

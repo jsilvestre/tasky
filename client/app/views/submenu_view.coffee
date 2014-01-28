@@ -8,12 +8,13 @@ module.exports = class SubmenuView extends BaseView
     tagName: 'ul'
     className: 'submenu'
 
-    views: {}
+    views: null
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @relatedView = options.relatedView
         @selectedTags = options.selectedTags or []
+        @views = new Backbone.ChildViewContainer()
         super options
 
     getRootTagName: -> return @relatedView.model.get 'tagName'
@@ -38,13 +39,18 @@ module.exports = class SubmenuView extends BaseView
                                 tagName: tagInfo.get('id')
                                 count: tagInfo.get('count')
                                 selectedTags: @selectedTags
-            @views[menuItem.cid] = menuItem
+            @views.add = menuItem
             @$el.append menuItem.render().$el
 
     # clean the current submenu
     reset: ->
-        @$el.empty()
-        @views = {}
+        @views.forEach (taskView) =>
+            if @tagsList.indexOf(taskView.model.get('tagName')) isnt -1
+                taskView.$el.detach()
+            else
+                @stopListening taskView
+                @views.remove taskView
+                taskView.destroy()
 
     destroy: ->
         @reset()

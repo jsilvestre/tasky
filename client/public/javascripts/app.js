@@ -775,7 +775,7 @@ window.require.register("views/menu_view", function(exports, require, module) {
       'click li.first-level': 'onClick'
     };
 
-    MenuView.prototype.views = {};
+    MenuView.prototype.views = null;
 
     MenuView.prototype.collectionEl = 'ul.tags';
 
@@ -785,6 +785,7 @@ window.require.register("views/menu_view", function(exports, require, module) {
 
     function MenuView(options) {
       this.baseCollection = options.baseCollection;
+      this.views = new Backbone.ChildViewContainer();
       MenuView.__super__.constructor.call(this, options);
     }
 
@@ -807,12 +808,19 @@ window.require.register("views/menu_view", function(exports, require, module) {
     };
 
     MenuView.prototype.beforeRender = function() {
-      var _this = this;
+      var tagsList,
+        _this = this;
 
-      Object.keys(this.views).forEach(function(item) {
-        return _this.views[item].destroy();
+      tagsList = this.baseCollection.getAllTags();
+      return this.views.forEach(function(taskView) {
+        if (tagsList.indexOf(taskView.model.get('tagName')) !== -1) {
+          return taskView.$el.detach();
+        } else {
+          _this.stopListening(taskView);
+          _this.views.remove(taskView);
+          return taskView.destroy();
+        }
       });
-      return this.views = {};
     };
 
     MenuView.prototype.afterRender = function() {
@@ -829,7 +837,7 @@ window.require.register("views/menu_view", function(exports, require, module) {
             count: tagInfo.get('count')
           })
         });
-        _this.views[menuItem.cid] = menuItem;
+        _this.views.add(menuItem);
         return $(_this.collectionEl).append(menuItem.render().$el);
       });
       return this.$el;
@@ -856,17 +864,17 @@ window.require.register("views/menu_view", function(exports, require, module) {
         this.$('ul.permanent li:nth-of-type(2)').addClass('active');
         return this.handleSubmenu(null);
       } else {
-        return Object.keys(this.views).forEach(function(view) {
-          if (_this.views[view].model.get('tagName') === _this.activeTags[0]) {
-            _this.views[view].$el.addClass('active');
-            return _this.handleSubmenu(view, _this.activeTags);
+        return this.views.forEach(function(view) {
+          if (view.model.get('tagName') === _this.activeTags[0]) {
+            view.$el.addClass('active');
+            return _this.handleSubmenu(view.cid, _this.activeTags);
           }
         });
       }
     };
 
     MenuView.prototype.onClick = function(event) {
-      var domElement, menuItemId;
+      var domElement, menuItemId, rootTag;
 
       this.$('li.active').removeClass('active');
       domElement = $(event.currentTarget);
@@ -875,7 +883,8 @@ window.require.register("views/menu_view", function(exports, require, module) {
       if (menuItemId === this.subMenuHandler) {
         return this.closeSubmenu();
       } else if (this.subMenuHandler === null && menuItemId !== void 0) {
-        return this.handleSubmenu(menuItemId, [this.views[menuItemId].model.get('tagName')]);
+        rootTag = this.views.findByCid(menuItemId).model.get('tagName');
+        return this.handleSubmenu(menuItemId, [rootTag]);
       }
     };
 
@@ -889,7 +898,7 @@ window.require.register("views/menu_view", function(exports, require, module) {
       if (menuItemId == null) {
         return;
       }
-      relatedView = this.views[menuItemId];
+      relatedView = this.views.findByCid(menuItemId);
       this.submenu = new SubmenuView({
         baseCollection: this.baseCollection,
         relatedView: relatedView,
@@ -1004,12 +1013,13 @@ window.require.register("views/submenu_view", function(exports, require, module)
 
     SubmenuView.prototype.className = 'submenu';
 
-    SubmenuView.prototype.views = {};
+    SubmenuView.prototype.views = null;
 
     function SubmenuView(options) {
       this.baseCollection = options.baseCollection;
       this.relatedView = options.relatedView;
       this.selectedTags = options.selectedTags || [];
+      this.views = new Backbone.ChildViewContainer();
       SubmenuView.__super__.constructor.call(this, options);
     }
 
@@ -1044,14 +1054,23 @@ window.require.register("views/submenu_view", function(exports, require, module)
             selectedTags: _this.selectedTags
           })
         });
-        _this.views[menuItem.cid] = menuItem;
+        _this.views.add = menuItem;
         return _this.$el.append(menuItem.render().$el);
       });
     };
 
     SubmenuView.prototype.reset = function() {
-      this.$el.empty();
-      return this.views = {};
+      var _this = this;
+
+      return this.views.forEach(function(taskView) {
+        if (_this.tagsList.indexOf(taskView.model.get('tagName')) !== -1) {
+          return taskView.$el.detach();
+        } else {
+          _this.stopListening(taskView);
+          _this.views.remove(taskView);
+          return taskView.destroy();
+        }
+      });
     };
 
     SubmenuView.prototype.destroy = function() {
