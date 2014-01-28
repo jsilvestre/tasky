@@ -21,8 +21,7 @@ module.exports = class SubmenuView extends BaseView
     # Get the tags from displayed tasks
     buildTagsList: ->
         delete @collection if @collection?
-        #@collection = @baseCollection.getByTags @selectedTags
-        @collection = @baseCollection
+        @collection = @baseCollection.getByTags @selectedTags
         @tagsList = TagsCollection.extractFromTasks @collection,
                                                     [@getRootTagName()],
                                                     @selectedTags

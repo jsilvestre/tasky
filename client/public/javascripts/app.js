@@ -1021,7 +1021,7 @@ window.require.register("views/submenu_view", function(exports, require, module)
       if (this.collection != null) {
         delete this.collection;
       }
-      this.collection = this.baseCollection;
+      this.collection = this.baseCollection.getByTags(this.selectedTags);
       return this.tagsList = TagsCollection.extractFromTasks(this.collection, [this.getRootTagName()], this.selectedTags);
     };
 

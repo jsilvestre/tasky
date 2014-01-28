@@ -93,6 +93,7 @@ module.exports = class MenuView extends BaseView
             @handleSubmenu menuItemId, [@views[menuItemId].model.get('tagName')]
 
     handleSubmenu: (menuItemId, selectedTags = []) ->
+
         # close previous one
         @closeSubmenu()
 
