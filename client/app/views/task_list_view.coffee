@@ -22,13 +22,13 @@ module.exports = class TaskListView extends BaseView
     setTags: (tags) ->
         @selectedTags = tags
 
-        if @collection? and @collection isnt @baseCollection
+        if @collection?
             @stopListening @collection
             delete @collection
 
         @collection = @baseCollection.getByTags @selectedTags
 
-        @listenTo @baseCollection, 'add', @render
+        @listenTo @collection, 'add', @render
         @listenTo @collection, 'remove', (task) =>
             # set the focus to the previous view
             previousVisibleTask = task.getPreviousWithTags @selectedTags
@@ -69,7 +69,11 @@ module.exports = class TaskListView extends BaseView
 
         # if an element has been created or removed, focus task accordingly
         if @taskModelCIDToFocus?
-            @views.findByModelCid(@taskModelCIDToFocus).setFocus()
+            view =  @views.findByModelCid(@taskModelCIDToFocus)
+            if view?
+                view.setFocus()
+            else
+                console.log "something went wrong trying to focus"
             @taskModelCIDToFocus = null
         else
             @taskForm.$el.find('input').focus()
@@ -108,16 +112,19 @@ module.exports = class TaskListView extends BaseView
             next: nextTask?.get('id') or nextTask?.cid
 
         # TODO: remove
+        ###
         maxID = _.max(@baseCollection.pluck('id')) + 1
+        maxID = 1 if maxID is -Infinity
         task.id = maxID
         task.set 'id', maxID
+        ###
 
         # TODO: use id when it's available
         previousTask?.set 'next', task.cid
         nextTask?.set 'previous', task.cid
 
         # set the focus on the new task during next render
-        @taskModelCIDToFocus = task.cid
+        @taskModelCIDToFocus = if options.previous? then task.cid else null
 
         @baseCollection.add task, at: index
 

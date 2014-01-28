@@ -38,12 +38,14 @@ module.exports = class TaskCollection extends Backbone.Collection
         super task, options
 
     remove: (task, options = {}) ->
-
         previousTask = @get task.get 'previous'
         nextTask = @get task.get 'next'
 
-        previousTask.set 'next', previousTask.get 'id' if previousTask?
-        nextTask.set 'previous', nextTask.get 'id' if nextTask?
+        previousTaskID = if previousTask? then previousTask.get 'id' else null
+        nextTaskID = if nextTask? then nextTask.get 'id' else null
+
+        previousTask.set 'next', nextTaskID if previousTask?
+        nextTask.set 'previous', previousTaskID if nextTask?
 
         super task, options
 

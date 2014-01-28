@@ -24,10 +24,11 @@ module.exports = class TaskListView extends BaseView
         tagsList =  "#{tagsList} " if tagsList isnt ""
 
         # neutral keys shouldn't add the tags list
-        # backspace, space, tab, enter
+        # backspace, space, tab, enter, top/bottom/left/right arrows
         neutralKeys = [
-            8, 32, 9, 13
+            8, 32, 9, 13, 38, 40, 37, 39
         ]
+
         if inputVal.length is 0 and key not in neutralKeys \
            and not (event.metaKey or event.ctrlKey or event.altKey)
             @$('input').val tagsList

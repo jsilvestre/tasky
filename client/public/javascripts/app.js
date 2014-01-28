@@ -228,18 +228,20 @@ window.require.register("collections/tasks", function(exports, require, module) 
     };
 
     TaskCollection.prototype.remove = function(task, options) {
-      var nextTask, previousTask;
+      var nextTask, nextTaskID, previousTask, previousTaskID;
 
       if (options == null) {
         options = {};
       }
       previousTask = this.get(task.get('previous'));
       nextTask = this.get(task.get('next'));
+      previousTaskID = previousTask != null ? previousTask.get('id') : null;
+      nextTaskID = nextTask != null ? nextTask.get('id') : null;
       if (previousTask != null) {
-        previousTask.set('next', previousTask.get('id'));
+        previousTask.set('next', nextTaskID);
       }
       if (nextTask != null) {
-        nextTask.set('previous', nextTask.get('id'));
+        nextTask.set('previous', previousTaskID);
       }
       return TaskCollection.__super__.remove.call(this, task, options);
     };
@@ -487,12 +489,19 @@ window.require.register("models/task", function(exports, require, module) {
       if (!(tags instanceof Array)) {
         tags = [tags];
       }
-      return _.every(tags, _.partial(_.contains, this.get('tags')));
+      if (tags.length === 0) {
+        return this.get('tags').length === 0;
+      } else {
+        return _.every(tags, _.partial(_.contains, this.get('tags')));
+      }
     };
 
     Task.prototype.getPreviousWithTags = function(tags) {
       var previousPosition, previousTask;
 
+      if (tags === null) {
+        return this.collection.get(this.get('previous'));
+      }
       previousTask = this.collection.get(this.get('previous'));
       previousPosition = this.collection.indexOf(previousTask);
       while (!((previousTask == null) || previousTask.containsTags(tags))) {
@@ -1000,7 +1009,7 @@ window.require.register("views/submenu_view", function(exports, require, module)
       if (this.collection != null) {
         delete this.collection;
       }
-      this.collection = this.baseCollection.getByTags(this.selectedTags);
+      this.collection = this.baseCollection;
       return this.tagsList = TagsCollection.extractFromTasks(this.collection, [this.getRootTagName()], this.selectedTags);
     };
 
@@ -1089,7 +1098,7 @@ window.require.register("views/task_form_view", function(exports, require, modul
       if (tagsList !== "") {
         tagsList = "" + tagsList + " ";
       }
-      neutralKeys = [8, 32, 9, 13];
+      neutralKeys = [8, 32, 9, 13, 38, 40, 37, 39];
       if (inputVal.length === 0 && __indexOf.call(neutralKeys, key) < 0 && !(event.metaKey || event.ctrlKey || event.altKey)) {
         this.$('input').val(tagsList);
         return inputVal = tagsList;
@@ -1189,12 +1198,12 @@ window.require.register("views/task_list_view", function(exports, require, modul
       var _this = this;
 
       this.selectedTags = tags;
-      if ((this.collection != null) && this.collection !== this.baseCollection) {
+      if (this.collection != null) {
         this.stopListening(this.collection);
         delete this.collection;
       }
       this.collection = this.baseCollection.getByTags(this.selectedTags);
-      this.listenTo(this.baseCollection, 'add', this.render);
+      this.listenTo(this.collection, 'add', this.render);
       return this.listenTo(this.collection, 'remove', function(task) {
         var previousVisibleTask;
 
@@ -1227,7 +1236,8 @@ window.require.register("views/task_list_view", function(exports, require, modul
     };
 
     TaskListView.prototype.afterRender = function() {
-      var _this = this;
+      var view,
+        _this = this;
 
       if (this.taskForm != null) {
         this.stopListening(this.taskForm);
@@ -1255,7 +1265,12 @@ window.require.register("views/task_list_view", function(exports, require, modul
         return $(_this.collectionEl).append(taskView.render().$el);
       });
       if (this.taskModelCIDToFocus != null) {
-        this.views.findByModelCid(this.taskModelCIDToFocus).setFocus();
+        view = this.views.findByModelCid(this.taskModelCIDToFocus);
+        if (view != null) {
+          view.setFocus();
+        } else {
+          console.log("something went wrong trying to focus");
+        }
         this.taskModelCIDToFocus = null;
       } else {
         this.taskForm.$el.find('input').focus();
@@ -1281,7 +1296,7 @@ window.require.register("views/task_list_view", function(exports, require, modul
     };
 
     TaskListView.prototype.createNewTask = function(options) {
-      var content, index, maxID, nextTask, previousModel, previousTask, tagsList, task;
+      var content, index, nextTask, previousModel, previousTask, tagsList, task;
 
       if (options == null) {
         options = {};
@@ -1306,16 +1321,20 @@ window.require.register("views/task_list_view", function(exports, require, modul
         previous: (previousTask != null ? previousTask.get('id') : void 0) || (previousTask != null ? previousTask.cid : void 0),
         next: (nextTask != null ? nextTask.get('id') : void 0) || (nextTask != null ? nextTask.cid : void 0)
       });
-      maxID = _.max(this.baseCollection.pluck('id')) + 1;
-      task.id = maxID;
-      task.set('id', maxID);
+      /*
+      maxID = _.max(@baseCollection.pluck('id')) + 1
+      maxID = 1 if maxID is -Infinity
+      task.id = maxID
+      task.set 'id', maxID
+      */
+
       if (previousTask != null) {
         previousTask.set('next', task.cid);
       }
       if (nextTask != null) {
         nextTask.set('previous', task.cid);
       }
-      this.taskModelCIDToFocus = task.cid;
+      this.taskModelCIDToFocus = options.previous != null ? task.cid : null;
       return this.baseCollection.add(task, {
         at: index
       });
@@ -1380,6 +1399,13 @@ window.require.register("views/task_view", function(exports, require, module) {
       'keydown  input': 'onKeydown',
       'keyup  input': 'onKeyup',
       'blur input': 'onBlur'
+    };
+
+    TaskView.prototype.getRenderData = function() {
+      return {
+        model: this.model.toJSON(),
+        tabindex: this.model.collection.indexOf(this.model) + 2
+      };
     };
 
     TaskView.prototype.onKeydown = function(event) {
@@ -1469,7 +1495,7 @@ window.require.register("views/templates/task", function(exports, require, modul
   with (locals || {}) {
   var interp;
   buf.push('<div class="task-container"><button class="toggle-state button">Todo</button><div class="todo-field"><input');
-  buf.push(attrs({ 'value':("" + (model.content) + "") }, {"value":true}));
+  buf.push(attrs({ 'value':("" + (model.content) + ""), 'tabindex':("" + (tabindex) + "") }, {"value":true,"tabindex":true}));
   buf.push('/></div></div>');
   }
   return buf.join("");

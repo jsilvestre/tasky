@@ -18,9 +18,15 @@ module.exports = class Task extends Backbone.Model
 
     containsTags: (tags) ->
         tags = [tags] unless tags instanceof Array
-        return _.every tags, _.partial(_.contains, @get('tags'))
+        if tags.length is 0
+            return @get('tags').length is 0
+        else
+            return _.every tags, _.partial(_.contains, @get('tags'))
 
     getPreviousWithTags: (tags) ->
+
+        if tags is null
+            return @collection.get @get 'previous'
 
         previousTask = @collection.get @get 'previous'
         previousPosition = @collection.indexOf previousTask

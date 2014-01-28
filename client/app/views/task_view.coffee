@@ -11,6 +11,10 @@ module.exports = class TaskView extends BaseView
         'keyup  input': 'onKeyup'
         'blur input': 'onBlur'
 
+    getRenderData: ->
+        model: @model.toJSON()
+        tabindex: @model.collection.indexOf(@model) + 2
+
     onKeydown: (event) ->
         key = event.keyCode or event.charCode
 
