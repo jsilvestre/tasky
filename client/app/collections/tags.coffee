@@ -20,16 +20,17 @@ module.exports = class TagsCollection extends Backbone.Collection
 
     @extractFromTasks: (taskCollection, excludes = [], selectedTags = []) ->
         tagsList = new TagsCollection()
+
         taskCollection.pluck('tags').forEach (tagsOfTask) ->
             tagsOfTask.forEach (tag) ->
                 tag = tag.toLowerCase()
                 unless _.contains excludes, tag
                     if not tagsList.get(tag)?
                         tagsList.add new Backbone.Model
-                                id: tag
-                                count: 0
-                                selectIndex: selectedTags.indexOf tag
-                    tagInfo = tagsList.get(tag)
+                            id: tag
+                            count: 0
+                            selectIndex: selectedTags.indexOf tag
+                    tagInfo = tagsList.get tag
                     tagInfo.set 'count', tagInfo.get('count') + 1
 
         tagsList.sort()

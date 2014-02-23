@@ -478,7 +478,7 @@
         var serverAttrs = model.parse(resp, options);
         if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
         if (_.isObject(serverAttrs) && !model.set(serverAttrs, options)) {
-          return false;
+          //return false;
         }
         if (success) success(model, resp, options);
         model.trigger('sync', model, resp, options);
@@ -745,7 +745,7 @@
         }
         if (sort || (order && order.length)) this.trigger('sort', this, options);
       }
-      
+
       // Return the added (or merged) model (or models).
       return singular ? models[0] : models;
     },

@@ -1,20 +1,11 @@
 module.exports = class Task extends Backbone.Model
 
-    initialize: (options) ->
-        @extractTags()
-        super options
-
     set: (attributes, options) ->
         super attributes, options
 
-        @extractTags() if attributes is "content"
-
-    extractTags:->
-        tags = @get('content').match /#([a-zA-Z0-9_]+)/g
-        tags = _.unique tags
-        tags = _.map tags, (tag) -> tag.replace '#', ''
-
-        @set 'tags', tags
+        if attributes is "description"
+            tags = Task.extractTags @get('description')
+            @set 'tags', tags
 
     containsTags: (tags) ->
         tags = [tags] unless tags instanceof Array
@@ -39,3 +30,14 @@ module.exports = class Task extends Backbone.Model
             return previousTask
         else
             return null
+
+    # helper function to extract tag from description
+    @extractTags: (desc) ->
+        # weird stuff are for accentated characters
+        # see http://stackoverflow.com/questions/1073412/javascript-validation-issue-with-international-characters
+        regex = /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g
+        tags = desc.match regex
+        tags = _.unique tags
+        tags = _.map tags, (tag) -> tag.replace '#', ''
+
+        return tags

@@ -1,8 +1,27 @@
 TagsCollection = require './tags'
+Task = require '../models/task'
 
 module.exports = class TaskCollection extends Backbone.Collection
 
     url: 'tasks'
+    model: Task
+
+    comparator: (a, b) ->
+        if a.get('order') < b.get('order')
+            return -1
+        else if a.get('order') is b.get('order')
+            return 0
+        else return 1
+
+    getNewOrder: (prev, next) ->
+        prevOrder = if prev? then prev.get 'order' else 0.0
+
+        if next?
+            nextOrder = next.get 'order'
+            # defined in server/controllers/index
+            return nextOrder - (nextOrder - prevOrder) / DIVISOR
+        else
+            return prevOrder + 1.0
 
     # Returns tags once
     getAllTags: -> return TagsCollection.extractFromTasks @
@@ -19,37 +38,4 @@ module.exports = class TaskCollection extends Backbone.Collection
 
         return new BackboneProjections.Filtered @,
                 filter: (task) -> task.containsTags tags
-
-    add: (task, options =  {}) ->
-
-        if task.get('previous') is null
-            options.at = 0
-        else if task.get('next') is null
-            options.at = @length
-        else
-            previousTask = @get task.get 'previous'
-            nextTask = @get task.get 'next'
-
-            if previousTask isnt undefined
-                options.at = @indexOf(previousTask) + 1
-            else if nextTask isnt undefined
-                options.at = @indexOf nextTask
-
-        super task, options
-
-    remove: (task, options = {}) ->
-        previousTask = @get task.get 'previous'
-        nextTask = @get task.get 'next'
-
-        previousTaskID = if previousTask? then previousTask.get 'id' else null
-        nextTaskID = if nextTask? then nextTask.get 'id' else null
-
-        previousTask.set 'next', nextTaskID if previousTask?
-        nextTask.set 'previous', previousTaskID if nextTask?
-
-        super task, options
-
-
-
-
 

@@ -3,13 +3,9 @@
 americano = require 'americano'
 
 module.exports =
-    template:
-        # shortcut for emit doc._id, doc
+    task:
         all: americano.defaultRequests.all
+        byState: (doc) -> emit  doc.state, doc
 
-        # create all the requests you want!
-        customRequest:
-            map: (doc) ->
-                # map function
-            reduce: (key, values, rereduce) ->
-                # non mandatory reduce function
+    cozy_instance:
+        all: americano.defaultRequests.all

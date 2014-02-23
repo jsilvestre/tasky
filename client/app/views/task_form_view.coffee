@@ -3,7 +3,7 @@ Utils = require '../lib/utils'
 
 TaskView = require './task_view'
 
-module.exports = class TaskListView extends BaseView
+module.exports = class TaskFormView extends BaseView
 
     el: '#new-task'
     template: require './templates/task_form'
@@ -29,8 +29,10 @@ module.exports = class TaskListView extends BaseView
             8, 32, 9, 13, 38, 40, 37, 39
         ]
 
+        sharpKey = 220
         if inputVal.length is 0 and key not in neutralKeys \
-           and not (event.metaKey or event.ctrlKey or event.altKey)
+        and (not (event.metaKey or event.ctrlKey or event.altKey) \
+        or key is sharpKey)
             @$('input').val tagsList
             inputVal = tagsList
 

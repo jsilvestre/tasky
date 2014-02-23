@@ -17,11 +17,11 @@ module.exports = class SubmenuItemView extends BaseView
         return params
 
     buildUrl: ->
-        tagsInUrl = _.clone @model.get('selectedTags')
-        if not _.contains tagsInUrl, @model.get('tagName')
-            tagsInUrl.push @model.get('tagName')
-        else if _.contains tagsInUrl, @model.get('tagName')
-            tagsInUrl = _.without tagsInUrl, @model.get('tagName')
+        tagsInUrl = _.clone @model.get 'selectedTags'
+        if not _.contains tagsInUrl, @model.get 'tagName'
+            tagsInUrl.push @model.get 'tagName'
+        else if _.contains tagsInUrl, @model.get 'tagName'
+            tagsInUrl = _.without tagsInUrl, @model.get 'tagName'
 
         url = "#byTags"
         tagsInUrl.forEach (item) =>
@@ -33,10 +33,10 @@ module.exports = class SubmenuItemView extends BaseView
         isActivated = @$el.hasClass 'selected'
 
         if isActivated
-            @trigger 'unselect', @model.get('tagName')
+            @trigger 'unselect', @model.get 'tagName'
             @$el.removeClass 'selected'
         else
-            @trigger 'select', @model.get('tagName')
+            @trigger 'select', @model.get 'tagName'
             @$el.addClass 'selected'
 
 

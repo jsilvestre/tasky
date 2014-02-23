@@ -14,6 +14,9 @@ module.exports = class TaskListView extends BaseView
     views: null
     collectionEl: 'ul#task-list'
 
+    queue: []
+    processing : false
+
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @views = new Backbone.ChildViewContainer()
@@ -34,6 +37,7 @@ module.exports = class TaskListView extends BaseView
             previousVisibleTask = task.getPreviousWithTags @selectedTags
             if previousVisibleTask?
                 @taskModelCIDToFocus = previousVisibleTask.cid
+
             @render()
 
     getRenderData: -> title: @getTitle()
@@ -64,6 +68,8 @@ module.exports = class TaskListView extends BaseView
                 @listenTo taskView, 'new-task-submitted', @createNewTask
                 @listenTo taskView, 'focus-up', @onFocusUp
                 @listenTo taskView, 'focus-down', @onFocusDown
+                @listenTo taskView, 'move-up', @onMoveUp
+                @listenTo taskView, 'move-down', @onMoveDown
 
             $(@collectionEl).append taskView.render().$el
 
@@ -99,34 +105,24 @@ module.exports = class TaskListView extends BaseView
         content = options.content or tagsList
 
         if options.previous?
-            previousModel = @views.findByModelCid(options.previous).model
-            index = @baseCollection.indexOf(previousModel) + 1
+            previous = @views.findByModelCid(options.previous).model
+            nextIndex = @baseCollection.indexOf(previous) + 1
+            newNext = @baseCollection.at nextIndex
+            order = @baseCollection.getNewOrder previous, newNext
+            index = nextIndex
         else
-            index = 0
+            newNext = @baseCollection.at 0
+            order = @baseCollection.getNewOrder null, newNext
 
-        previousTask = @baseCollection.at index - 1
-        nextTask = @baseCollection.at index
         task = new Task
-            content: content
-            previous: previousTask?.get('id') or previousTask?.cid
-            next: nextTask?.get('id') or nextTask?.cid
-
-        # TODO: remove
-        ###
-        maxID = _.max(@baseCollection.pluck('id')) + 1
-        maxID = 1 if maxID is -Infinity
-        task.id = maxID
-        task.set 'id', maxID
-        ###
-
-        # TODO: use id when it's available
-        previousTask?.set 'next', task.cid
-        nextTask?.set 'previous', task.cid
+            description: content
+            order: order
+            tags: Task.extractTags content
 
         # set the focus on the new task during next render
         @taskModelCIDToFocus = if options.previous? then task.cid else null
 
-        @baseCollection.add task, at: index
+        @baseCollection.create task, at: index
 
     onFocusUp: (cid) ->
         currentModel = @views.findByModelCid(cid).model
@@ -149,4 +145,35 @@ module.exports = class TaskListView extends BaseView
 
         if nextIndex < @views.length
             @views.findByModel(nextModel).$el.find('input').focus()
+
+    onMoveUp: (cid, toFocus = null) ->
+        currentModel = @views.findByModelCid(cid).model
+        previousIndex = @collection.indexOf(currentModel) - 1
+        previous = @collection.at previousIndex
+
+        if previousIndex >= 1
+            newOrder = null
+            newPrevious = @collection.at previousIndex - 1
+            newOrder = @baseCollection.getNewOrder newPrevious, previous
+        else if previousIndex is 0
+            newOrder = @baseCollection.getNewOrder null, previous
+
+        else newOrder = null
+
+        if newOrder?
+            currentModel.set 'order', newOrder
+            currentModel.save()
+            @baseCollection.sort()
+            @taskModelCIDToFocus = if toFocus? then toFocus else cid
+            @render()
+
+    onMoveDown: (cid) ->
+        currentModel = @views.findByModelCid(cid).model
+        nextIndex = @collection.indexOf(currentModel) + 1
+        nextModel = @collection.at nextIndex
+
+        # moving down is moving up the next element
+        if nextModel?
+            nextView = @views.findByModelCid(nextModel.cid)
+            @onMoveUp nextModel.cid, cid
 

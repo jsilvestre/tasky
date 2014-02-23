@@ -9,6 +9,7 @@ module.exports = class TaskView extends BaseView
     events:
         'keydown  input': 'onKeydown'
         'keyup  input': 'onKeyup'
+        'focus input': 'onFocus'
         'blur input': 'onBlur'
         'click button': 'onClick'
         'mouseenter button': 'onMouseEnter'
@@ -19,23 +20,29 @@ module.exports = class TaskView extends BaseView
         tabindex: @model.collection.indexOf(@model) + 2
 
     afterRender: ->
-        if @model.get('isDone')
+        if @model.get 'done'
             button =  @$ 'button'
             button.addClass 'done'
             button.html 'Done'
 
     onClick: ->
-        @model.set 'isDone', not @model.get('isDone')
+        @model.set 'done', not @model.get('done')
         @render()
 
     onKeydown: (event) ->
         key = event.keyCode or event.charCode
+        ctrlPressed = event.controlKey or event.metaKey
 
         # 'backspace' key
         if @$('input').val() is "" and key is 8
             @model.destroy()
             # prevent from going back into browser history
             event.preventDefault()
+
+        else if key is 38 and ctrlPressed
+            @trigger 'move-up', @model.cid
+        else if key is 40 and ctrlPressed
+            @trigger 'move-down', @model.cid
 
     onKeyup: (event) ->
         key = event.keyCode or event.charCode
@@ -51,8 +58,22 @@ module.exports = class TaskView extends BaseView
         else if key is 40 # bottom arrow
             @trigger 'focus-down', @model.cid
 
+    onFocus: ->
+        # save the description periodically
+        @focusInterval = setInterval () =>
+            @saveDescription()
+        , 2000
+
     onBlur: ->
-        @model.set 'content', @$('input').val()
+        clearInterval @focusInterval
+        @saveDescription()
+
+    saveDescription: ->
+        description = @$('input').val()
+        if description isnt @model.get 'description'
+            # triggers the extract tags process
+            @model.set 'description', description
+            @model.save()
 
     setFocus: ->
         inputField = @$ 'input'
@@ -62,17 +83,21 @@ module.exports = class TaskView extends BaseView
 
     onMouseEnter: ->
         button = @$ 'button'
-        if @model.get('isDone')
+        if @model.get 'done'
             button.html 'Todo?'
         else
             button.html 'Done?'
 
     onMouseLeave: ->
         button = @$ 'button'
-        if @model.get('isDone')
+        if @model.get 'done'
             button.html 'Done'
         else
             button.html 'Todo'
+
+    destroy: ->
+        clearTimeout @focusInterval
+        super()
 
 
 

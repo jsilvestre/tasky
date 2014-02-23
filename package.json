@@ -1,5 +1,5 @@
 {
-  "name": "task",
+  "name": "tasky",
   "version": "1.0.0",
   "engines": [
     "node = 0.8.x"
@@ -12,19 +12,25 @@
   },
   "main": "server.coffee",
   "dependencies": {
-    "americano": "0.2.10",
-    "americano-cozy": "0.1.4"
+    "americano": "0.3.0",
+    "americano-cozy": "0.2.1",
+    "async": "0.2.10",
+    "jade": "1.1.5"
   },
   "devDependencies": {
-    "should": "2.0.1",
-    "mocha": "1.13.0",
-    "request-json": "0.4.4",
-    "cozy-fixtures": "1.0.1",
-    "coffeelint": "0.6.1"
+    "should": "3.1.2",
+    "mocha": "1.17.1",
+    "request-json": "0.4.6",
+    "cozy-fixtures": "1.0.3",
+    "coffeelint": "1.0.7"
   },
   "scripts": {
     "start": "coffee server.coffee"
   },
-  "cozy-permissions": {},
+  "cozy-permissions": {
+    "Task": {
+      "description":  "Create, edit, organize all your tasks."
+    }
+  },
   "cozy-displayName": "Tasky"
 }
