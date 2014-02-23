@@ -30,6 +30,9 @@
   "cozy-permissions": {
     "Task": {
       "description":  "Create, edit, organize all your tasks."
+    },
+    "CozyInstance": {
+      "description": "This information is needed to localize the application in your language."
     }
   },
   "cozy-displayName": "Tasky"
