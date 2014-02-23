@@ -2,7 +2,7 @@
 
 americano = require 'americano'
 
-module.exports = Task = americano.getModel 'Task',
+module.exports = Task = americano.getModel 'Tasky',
     'done':
         type: Boolean, default: false
     'creationDate':

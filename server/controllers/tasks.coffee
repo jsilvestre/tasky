@@ -1,4 +1,4 @@
-Task = require '../models/task'
+Task = require '../models/tasky'
 
 module.exports.all = (req, res) ->
     Task.all (err, tasks) ->

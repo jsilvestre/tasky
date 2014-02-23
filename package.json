@@ -28,7 +28,7 @@
     "start": "coffee server.coffee"
   },
   "cozy-permissions": {
-    "Task": {
+    "Tasky": {
       "description":  "Create, edit, organize all your tasks."
     },
     "CozyInstance": {

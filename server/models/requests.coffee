@@ -3,7 +3,7 @@
 americano = require 'americano'
 
 module.exports =
-    task:
+    tasky:
         all: americano.defaultRequests.all
         byState: (doc) -> emit  doc.state, doc
 

@@ -1,5 +1,5 @@
 async = require 'async'
-Task = require '../models/task'
+Task = require '../models/tasky'
 CozyInstance = require '../models/cozy_instance'
 
 module.exports.main = (req, res) ->
