@@ -130,7 +130,7 @@ module.exports = class TaskListView extends BaseView
         previousModel = @collection.at previousIndex
 
         if previousIndex >= 0
-            @views.findByModel(previousModel).$el.find('input').focus()
+            @views.findByModel(previousModel).setFocus()
         else
             @taskForm.$el.find('input').focus()
 
@@ -144,16 +144,16 @@ module.exports = class TaskListView extends BaseView
             nextModel = @collection.at nextIndex
 
         if nextIndex < @views.length
-            @views.findByModel(nextModel).$el.find('input').focus()
+            @views.findByModel(nextModel).setFocus()
 
     onMoveUp: (cid, toFocus = null) ->
         currentModel = @views.findByModelCid(cid).model
-        previousIndex = @collection.indexOf(currentModel) - 1
-        previous = @collection.at previousIndex
+        previousIndex = @baseCollection.indexOf(currentModel) - 1
+        previous = @baseCollection.at previousIndex
 
         if previousIndex >= 1
             newOrder = null
-            newPrevious = @collection.at previousIndex - 1
+            newPrevious = @baseCollection.at previousIndex - 1
             newOrder = @baseCollection.getNewOrder newPrevious, previous
         else if previousIndex is 0
             newOrder = @baseCollection.getNewOrder null, previous
@@ -169,8 +169,8 @@ module.exports = class TaskListView extends BaseView
 
     onMoveDown: (cid) ->
         currentModel = @views.findByModelCid(cid).model
-        nextIndex = @collection.indexOf(currentModel) + 1
-        nextModel = @collection.at nextIndex
+        nextIndex = @baseCollection.indexOf(currentModel) + 1
+        nextModel = @baseCollection.at nextIndex
 
         # moving down is moving up the next element
         if nextModel?
