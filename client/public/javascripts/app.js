@@ -505,11 +505,12 @@ module.exports = Task = (function(_super) {
     }
   };
 
-  Task.extractTags = function(desc) {
-    var regex, tags;
+  Task.regex = /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g;
 
-    regex = /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g;
-    tags = desc.match(regex);
+  Task.extractTags = function(desc) {
+    var tags;
+
+    tags = desc.match(Task.regex);
     tags = _.unique(tags);
     tags = _.map(tags, function(tag) {
       return tag.replace('#', '');
@@ -1045,7 +1046,7 @@ module.exports = TaskFormView = (function(_super) {
   };
 
   TaskFormView.prototype.onKeydown = function(event) {
-    var inputVal, key, neutralKeys, sharpKey, tagsList;
+    var authorizedComboKeys, inputVal, key, neutralKeys, tagsList;
 
     key = event.keyCode || event.charCode;
     inputVal = this.$('input').val();
@@ -1056,8 +1057,8 @@ module.exports = TaskFormView = (function(_super) {
       tagsList = "" + tagsList + " ";
     }
     neutralKeys = [8, 32, 9, 13, 38, 40, 37, 39];
-    sharpKey = 220;
-    if (inputVal.length === 0 && __indexOf.call(neutralKeys, key) < 0 && (!(event.metaKey || event.ctrlKey || event.altKey) || key === sharpKey)) {
+    authorizedComboKeys = [220, 86];
+    if (inputVal.length === 0 && __indexOf.call(neutralKeys, key) < 0 && (!(event.metaKey || event.ctrlKey || event.altKey) || __indexOf.call(authorizedComboKeys, key) >= 0)) {
       this.$('input').val(tagsList);
       return inputVal = tagsList;
     }
@@ -1301,7 +1302,7 @@ module.exports = TaskListView = (function(_super) {
     previousIndex = this.collection.indexOf(currentModel) - 1;
     previousModel = this.collection.at(previousIndex);
     if (previousIndex >= 0) {
-      return this.views.findByModel(previousModel).$el.find('input').focus();
+      return this.views.findByModel(previousModel).setFocus();
     } else {
       return this.taskForm.$el.find('input').focus();
     }
@@ -1319,7 +1320,7 @@ module.exports = TaskListView = (function(_super) {
       nextModel = this.collection.at(nextIndex);
     }
     if (nextIndex < this.views.length) {
-      return this.views.findByModel(nextModel).$el.find('input').focus();
+      return this.views.findByModel(nextModel).setFocus();
     }
   };
 
@@ -1330,11 +1331,11 @@ module.exports = TaskListView = (function(_super) {
       toFocus = null;
     }
     currentModel = this.views.findByModelCid(cid).model;
-    previousIndex = this.collection.indexOf(currentModel) - 1;
-    previous = this.collection.at(previousIndex);
+    previousIndex = this.baseCollection.indexOf(currentModel) - 1;
+    previous = this.baseCollection.at(previousIndex);
     if (previousIndex >= 1) {
       newOrder = null;
-      newPrevious = this.collection.at(previousIndex - 1);
+      newPrevious = this.baseCollection.at(previousIndex - 1);
       newOrder = this.baseCollection.getNewOrder(newPrevious, previous);
     } else if (previousIndex === 0) {
       newOrder = this.baseCollection.getNewOrder(null, previous);
@@ -1354,8 +1355,8 @@ module.exports = TaskListView = (function(_super) {
     var currentModel, nextIndex, nextModel, nextView;
 
     currentModel = this.views.findByModelCid(cid).model;
-    nextIndex = this.collection.indexOf(currentModel) + 1;
-    nextModel = this.collection.at(nextIndex);
+    nextIndex = this.baseCollection.indexOf(currentModel) + 1;
+    nextModel = this.baseCollection.at(nextIndex);
     if (nextModel != null) {
       nextView = this.views.findByModelCid(nextModel.cid);
       return this.onMoveUp(nextModel.cid, cid);
