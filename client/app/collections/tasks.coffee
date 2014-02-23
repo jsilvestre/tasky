@@ -7,21 +7,21 @@ module.exports = class TaskCollection extends Backbone.Collection
     model: Task
 
     comparator: (a, b) ->
-        if a.get('order') < b.get('order')
+        if a.get('order') > b.get('order')
             return -1
         else if a.get('order') is b.get('order')
             return 0
         else return 1
 
     getNewOrder: (prev, next) ->
-        prevOrder = if prev? then prev.get 'order' else 0.0
+        nextOrder = if next? then next.get 'order' else 0.0
 
-        if next?
-            nextOrder = next.get 'order'
+        if prev?
+            prevOrder = prev.get 'order'
             # defined in server/controllers/index
-            return nextOrder - (nextOrder - prevOrder) / DIVISOR
+            return prevOrder - (prevOrder - nextOrder) / DIVISOR
         else
-            return prevOrder + 1.0
+            return nextOrder + 1.0
 
     # Returns tags once
     getAllTags: -> return TagsCollection.extractFromTasks @

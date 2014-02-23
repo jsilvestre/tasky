@@ -201,7 +201,7 @@ module.exports = TaskCollection = (function(_super) {
   TaskCollection.prototype.model = Task;
 
   TaskCollection.prototype.comparator = function(a, b) {
-    if (a.get('order') < b.get('order')) {
+    if (a.get('order') > b.get('order')) {
       return -1;
     } else if (a.get('order') === b.get('order')) {
       return 0;
@@ -213,12 +213,12 @@ module.exports = TaskCollection = (function(_super) {
   TaskCollection.prototype.getNewOrder = function(prev, next) {
     var nextOrder, prevOrder;
 
-    prevOrder = prev != null ? prev.get('order') : 0.0;
-    if (next != null) {
-      nextOrder = next.get('order');
-      return nextOrder - (nextOrder - prevOrder) / DIVISOR;
+    nextOrder = next != null ? next.get('order') : 0.0;
+    if (prev != null) {
+      prevOrder = prev.get('order');
+      return prevOrder - (prevOrder - nextOrder) / DIVISOR;
     } else {
-      return prevOrder + 1.0;
+      return nextOrder + 1.0;
     }
   };
 
