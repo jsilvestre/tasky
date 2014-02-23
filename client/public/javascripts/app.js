@@ -1419,6 +1419,7 @@ module.exports = TaskView = (function(_super) {
 
   TaskView.prototype.onClick = function() {
     this.model.set('done', !this.model.get('done'));
+    this.model.save();
     return this.render();
   };
 

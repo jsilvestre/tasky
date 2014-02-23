@@ -26,7 +26,8 @@ module.exports = class TaskView extends BaseView
             button.html 'Done'
 
     onClick: ->
-        @model.set 'done', not @model.get('done')
+        @model.set 'done', not @model.get 'done'
+        @model.save()
         @render()
 
     onKeydown: (event) ->
