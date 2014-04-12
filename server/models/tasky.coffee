@@ -12,9 +12,23 @@ module.exports = Task = americano.getModel 'Tasky',
     'description': String
     'order': Number
     'tags': type: JSON
+    'isArchived': type: Boolean, default: false
 
 Task.all = (callback) ->
     Task.request 'all', {}, (err, tasks) ->
+        err = err or tasks.error
+        callback err, tasks
+
+Task.allNotArchived = (callback) ->
+    # null for backward compatibility
+    params = keys: [false, null]
+    Task.request 'byArchiveState', params, (err, tasks) ->
+        err = err or tasks.error
+        callback err, tasks
+
+Task.allArchived = (callback) ->
+    params = key: true
+    Task.request 'byArchiveState', params, (err, tasks) ->
         err = err or tasks.error
         callback err, tasks
 

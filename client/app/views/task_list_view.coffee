@@ -14,8 +14,8 @@ module.exports = class TaskListView extends BaseView
     views: null
     collectionEl: 'ul#task-list'
 
-    queue: []
-    processing : false
+    events:
+        'click #archive-action': 'onArchiveClicked'
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
@@ -30,7 +30,6 @@ module.exports = class TaskListView extends BaseView
             delete @collection
 
         @collection = @baseCollection.getByTags @selectedTags
-
         @listenTo @collection, 'add', @render
         @listenTo @collection, 'remove', (task) =>
             # set the focus to the previous view
@@ -39,6 +38,8 @@ module.exports = class TaskListView extends BaseView
                 @taskModelCIDToFocus = previousVisibleTask.cid
 
             @render()
+
+        @listenTo @collection, 'change', (task) => @updateArchiveButtonState()
 
     getRenderData: -> title: @getTitle()
 
@@ -52,6 +53,9 @@ module.exports = class TaskListView extends BaseView
                 taskView.destroy()
 
     afterRender: ->
+
+        @updateArchiveButtonState()
+
         if @taskForm?
             @stopListening @taskForm
             @taskForm.destroy()
@@ -70,6 +74,8 @@ module.exports = class TaskListView extends BaseView
                 @listenTo taskView, 'focus-down', @onFocusDown
                 @listenTo taskView, 'move-up', @onMoveUp
                 @listenTo taskView, 'move-down', @onMoveDown
+            else
+                taskView.delegateEvents()
 
             $(@collectionEl).append taskView.render().$el
 
@@ -177,3 +183,39 @@ module.exports = class TaskListView extends BaseView
             nextView = @views.findByModelCid(nextModel.cid)
             @onMoveUp nextModel.cid, cid
 
+    updateArchiveButtonState: ->
+        if @collection.where(done: true).length > 0
+            @$('#archive-action').removeClass 'disable'
+        else
+            @$('#archive-action').addClass 'disable'
+
+    onArchiveClicked: ->
+        tasksToArchive = @collection.where done: true
+        counterToArchive = tasksToArchive.length
+        counterArchived = 0
+
+        if counterToArchive > 0
+            @$('#archive-action').html '&nbsp;'
+            @$('#archive-action').spin 'tiny', '#fff'
+
+        done = (task) =>
+            counterArchived++
+            taskView = @views.findByModel task
+            # when all requests are done
+            if counterArchived is counterToArchive
+                @stopListening taskView
+                @views.remove taskView
+                taskView.$el.fadeOut =>
+                    taskView.destroy()
+                    @$('#archive-action').html 'Archive all done tasks'
+                    @trigger 'archive-tasks', tasksToArchive
+            else
+                @stopListening taskView
+                @views.remove taskView
+                taskView.$el.fadeOut ->
+                    taskView.destroy()
+
+        tasksToArchive.forEach (task) ->
+            task.set 'isArchived', true
+            task.once 'sync', done
+            task.save()

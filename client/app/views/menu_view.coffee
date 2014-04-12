@@ -18,6 +18,7 @@ module.exports = class MenuView extends BaseView
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
+        @archivedCollection = options.archivedCollection
         @views = new Backbone.ChildViewContainer()
         super options
 
@@ -27,14 +28,26 @@ module.exports = class MenuView extends BaseView
             'change': @onChange
             'remove': @onChange
 
+        @listenTo @archivedCollection,
+            'add': @onChange
+            'change': @onChange
+            'remove': @onChange
+
         super options
 
     getRenderData: ->
+
+        if @archivedCollection.length > 1000 then archivedCount = 'Over 9000++'
+        else archivedCount = @archivedCollection.length
+
+        # return
         allCount: @baseCollection.length
         untaggedCount: @baseCollection
                             .filter((task) ->
                                 task.get('tags').length is 0
                             ).length
+        archivedCount: archivedCount
+
     beforeRender: ->
         tagsList = @baseCollection.getAllTags()
         @views.forEach (taskView) =>
@@ -63,17 +76,18 @@ module.exports = class MenuView extends BaseView
 
     setActive: (tags) ->
         @activeTags = tags
-        @handleTagSelection()
+        @handleTagSelection tags
 
-    handleTagSelection: ->
+    setHighlightedItem: (highlightedItem) ->
+        @highlightedItem = highlightedItem
+
+    handleTagSelection: (itemNumToSelect = null) ->
         # prevent buggy highlighting when browsing from task list
         @$('li.active').removeClass 'active'
 
-        if @activeTags is null
-            @$('ul.permanent li:first-of-type').addClass 'active'
+        if @highlightedItem?
+            @$("ul.permanent li:nth-of-type(#{@highlightedItem})").addClass 'active'
             @handleSubmenu null
-        else if @activeTags.length is 0
-            @$('ul.permanent li:nth-of-type(2)').addClass 'active'
             @handleSubmenu null
         else
             @views.some (view) =>

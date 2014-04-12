@@ -876,6 +876,9 @@ textarea:active {
 #menu ul li.active > a {
   background: #aedbff;
 }
+.spinner {
+  margin: auto;
+}
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -899,10 +902,29 @@ i.tag-icon {
 }
 h1 {
   border-bottom: 1px solid #ccc;
-  margin: 20px 20px;
+  margin: 20px;
   font-family: styled;
   font-weight: normal;
   font-size: 25px;
+}
+#actions {
+  font-family: styled;
+  margin: 0 20px;
+}
+#actions button.button {
+  padding: 8px;
+  font-size: 12px;
+  margin: 0 5px;
+}
+#actions button.button:focus {
+  outline: none;
+}
+#actions button.button.disable {
+  background: #aaa;
+}
+#actions button.button.disable:active {
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 #new-task {
   margin: 15px 20px;
@@ -913,7 +935,8 @@ h1 {
 #new-task .todo-field input {
   border: 1px solid #ccc;
 }
-ul#task-list {
+ul#task-list,
+ul#task-list-done {
   list-style-type: none;
   padding: 0;
   padding-bottom: 10px;
@@ -921,6 +944,15 @@ ul#task-list {
 .task {
   margin: 15px 20px;
   padding: 0;
+}
+.task.done button {
+  background: #5c5;
+}
+.task.done button:hover {
+  background: #fe8800;
+}
+.task.done:not(.archive) .todo-field input {
+  text-decoration: line-through;
 }
 .task .task-container {
   display: table;
@@ -930,15 +962,9 @@ ul#task-list {
   display: table-cell;
 }
 .task .button {
-  width: 60px;
+  width: 75px;
   padding: 8px;
   font-size: 13px;
-}
-.task .button.done {
-  background: #5c5;
-}
-.task .button.done:hover {
-  background: #fe8800;
 }
 .task .button.disabled {
   -webkit-box-shadow: none;
@@ -962,6 +988,9 @@ ul#task-list {
 .task .todo-field input:focus {
   border: 1px solid #34a6ff;
   outline: none;
+}
+.task .todo-completionDate {
+  font-size: 10px;
 }
 
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }

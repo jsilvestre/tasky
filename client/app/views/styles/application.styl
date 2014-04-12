@@ -5,6 +5,9 @@
 @import '_cozy'
 @import '_menu'
 
+.spinner
+    margin auto
+
 *
     box-sizing border-box
 
@@ -24,10 +27,25 @@ i.tag-icon
 
 h1
     border-bottom 1px solid #ccc
-    margin 20px 20px
+    margin 20px
     font-family styled
     font-weight normal
     font-size 25px
+
+#actions
+    font-family styled
+    margin 0 20px
+    button.button
+        padding 8px
+        font-size 12px
+        margin 0 5px
+        &:focus
+            outline none
+
+        &.disable
+            background grey
+            &:active
+                box-shadow none
 
 #new-task
     margin 15px 20px
@@ -39,6 +57,7 @@ h1
         border 1px solid #ccc
 
 ul#task-list
+ul#task-list-done
     list-style-type none
     padding 0
     padding-bottom 10px
@@ -46,6 +65,15 @@ ul#task-list
 .task
     margin 15px 20px
     padding 0
+
+    &.done button
+        background green
+        &:hover
+            background orange
+
+    &.done:not(.archive) .todo-field input
+        text-decoration line-through
+
 
     .task-container
         display table
@@ -55,14 +83,9 @@ ul#task-list
         display table-cell
 
     .button
-        width 60px
+        width 75px
         padding 8px
         font-size 13px
-
-        &.done
-            background green
-            &:hover
-                background orange
 
         &.disabled
             box-shadow none
@@ -84,3 +107,6 @@ ul#task-list
             &:focus
                 border 1px solid blue
                 outline none
+
+    .todo-completionDate
+        font-size 10px

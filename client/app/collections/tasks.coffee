@@ -38,4 +38,3 @@ module.exports = class TaskCollection extends Backbone.Collection
 
         return new BackboneProjections.Filtered @,
                 filter: (task) -> task.containsTags tags
-

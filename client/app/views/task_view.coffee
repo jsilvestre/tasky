@@ -21,12 +21,18 @@ module.exports = class TaskView extends BaseView
 
     afterRender: ->
         if @model.get 'done'
-            button =  @$ 'button'
-            button.addClass 'done'
-            button.html 'Done'
+            @$el.addClass 'done'
+            @$('button').html 'Done'
+        else
+            @$el.removeClass 'done'
 
     onClick: ->
         @model.set 'done', not @model.get 'done'
+        if @model.get 'done'
+            @model.set 'completionDate', Date.now()
+        else
+            @model.set 'completionDate', null
+        @afterRender()
         @model.save()
         @render()
 

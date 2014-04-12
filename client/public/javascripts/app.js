@@ -106,6 +106,37 @@ module.exports = {
 
 });
 
+;require.register("collections/archived_tasks", function(exports, require, module) {
+var ArchivedTaskCollection, TaskCollection, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+TaskCollection = require('./tasks');
+
+module.exports = ArchivedTaskCollection = (function(_super) {
+  __extends(ArchivedTaskCollection, _super);
+
+  function ArchivedTaskCollection() {
+    _ref = ArchivedTaskCollection.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  ArchivedTaskCollection.prototype.comparator = function(a, b) {
+    if (a.get('completionDate') > b.get('completionDate')) {
+      return -1;
+    } else if (a.get('completionDate') === b.get('completionDate')) {
+      return 0;
+    } else {
+      return 1;
+    }
+  };
+
+  return ArchivedTaskCollection;
+
+})(TaskCollection);
+
+});
+
 ;require.register("collections/tags", function(exports, require, module) {
 var TagsCollection, _ref,
   __hasProp = {}.hasOwnProperty,
@@ -256,6 +287,70 @@ var app;
 app = require('application');
 
 $(function() {
+  $.fn.spin = function(opts, color) {
+    var presets;
+
+    presets = {
+      tiny: {
+        lines: 8,
+        length: 2,
+        width: 2,
+        radius: 3
+      },
+      small: {
+        lines: 8,
+        length: 1,
+        width: 2,
+        radius: 4
+      },
+      medium: {
+        lines: 10,
+        length: 4,
+        width: 3,
+        radius: 6
+      },
+      large: {
+        lines: 10,
+        length: 8,
+        width: 4,
+        radius: 8
+      },
+      extralarge: {
+        lines: 8,
+        length: 3,
+        width: 10,
+        radius: 20,
+        top: 30,
+        left: 50
+      }
+    };
+    if (typeof Spinner !== "undefined" && Spinner !== null) {
+      return this.each(function() {
+        var $this, spinner;
+
+        $this = $(this);
+        spinner = $this.data("spinner");
+        if (spinner != null) {
+          spinner.stop();
+          return $this.data("spinner", null);
+        } else if (opts !== false) {
+          if (typeof opts === "string") {
+            if (opts in presets) {
+              opts = presets[opts];
+            } else {
+              opts = {};
+            }
+            if (color) {
+              opts.color = color;
+            }
+          }
+          spinner = new Spinner(opts);
+          spinner.spin(this);
+          return $this.data("spinner", spinner);
+        }
+      });
+    }
+  };
   return app.initialize();
 });
 
@@ -525,7 +620,7 @@ module.exports = Task = (function(_super) {
 });
 
 ;require.register("router", function(exports, require, module) {
-var AppView, MenuView, Router, Task, TaskCollection, TaskListView, _ref,
+var AppView, ArchivedTaskCollection, ArchivedTaskListView, MenuView, Router, Task, TaskCollection, TaskListView, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -535,7 +630,11 @@ MenuView = require('views/menu_view');
 
 TaskListView = require('views/task_list_view');
 
+ArchivedTaskListView = require('views/archive_list_view');
+
 TaskCollection = require('collections/tasks');
+
+ArchivedTaskCollection = require('collections/archived_tasks');
 
 Task = require('models/task');
 
@@ -550,19 +649,37 @@ module.exports = Router = (function(_super) {
   Router.prototype.routes = {
     '': 'main',
     'untagged': 'untagged',
+    'archived': 'archived',
     'byTags/*tags': 'byTags'
   };
 
   Router.prototype.initialize = function() {
+    var _this = this;
+
     this.collection = new TaskCollection(initTasks);
+    this.archivedCollection = new ArchivedTaskCollection(archivedTasks);
     this.mainView = new AppView();
     this.mainView.render();
     this.menu = new MenuView({
-      baseCollection: this.collection
+      baseCollection: this.collection,
+      archivedCollection: this.archivedCollection
     });
     this.menu.render();
-    return this.taskList = new TaskListView({
+    this.taskList = new TaskListView({
       baseCollection: this.collection
+    });
+    this.listenTo(this.taskList, 'archive-tasks', function(tasks) {
+      _this.collection.remove(tasks);
+      _this.archivedCollection.add(tasks);
+      return _this.taskList.render();
+    });
+    this.archivedTaskList = new ArchivedTaskListView({
+      baseCollection: this.archivedCollection
+    });
+    return this.listenTo(this.archivedTaskList, 'restore-task', function(task) {
+      _this.archivedCollection.remove(task);
+      _this.collection.add(task);
+      return _this.archivedTaskList.render();
     });
   };
 
@@ -572,6 +689,7 @@ module.exports = Router = (function(_super) {
     tags = null;
     this.taskList.setTags(tags);
     this.taskList.render();
+    this.menu.setHighlightedItem(1);
     return this.menu.setActive(tags);
   };
 
@@ -581,6 +699,17 @@ module.exports = Router = (function(_super) {
     tags = [];
     this.taskList.setTags(tags);
     this.taskList.render();
+    this.menu.setHighlightedItem(2);
+    return this.menu.setActive(tags);
+  };
+
+  Router.prototype.archived = function() {
+    var tags;
+
+    tags = void 0;
+    this.archivedTaskList.setTags(tags);
+    this.archivedTaskList.render();
+    this.menu.setHighlightedItem(3);
     return this.menu.setActive(tags);
   };
 
@@ -591,6 +720,7 @@ module.exports = Router = (function(_super) {
     }
     this.taskList.setTags(tags);
     this.taskList.render();
+    this.menu.setHighlightedItem(null);
     return this.menu.setActive(tags);
   };
 
@@ -626,6 +756,189 @@ module.exports = AppView = (function(_super) {
   return AppView;
 
 })(BaseView);
+
+});
+
+;require.register("views/archive_list_view", function(exports, require, module) {
+var ArchiveListView, ArchiveTaskView, BaseView, Task, TaskFormView, Utils,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+Utils = require('../lib/utils');
+
+Task = require('../models/task');
+
+ArchiveTaskView = require('./archive_task_view');
+
+TaskFormView = require('./task_form_view');
+
+module.exports = ArchiveListView = (function(_super) {
+  __extends(ArchiveListView, _super);
+
+  ArchiveListView.prototype.el = '.container';
+
+  ArchiveListView.prototype.template = require('./templates/task_list_archive');
+
+  ArchiveListView.prototype.views = null;
+
+  ArchiveListView.prototype.collectionEl = 'ul#task-list';
+
+  function ArchiveListView(options) {
+    this.baseCollection = options.baseCollection;
+    this.views = new Backbone.ChildViewContainer();
+    ArchiveListView.__super__.constructor.call(this, options);
+  }
+
+  ArchiveListView.prototype.setTags = function(tags) {
+    var _this = this;
+
+    this.selectedTags = tags;
+    if (this.collection != null) {
+      this.stopListening(this.collection);
+      delete this.collection;
+    }
+    this.collection = this.baseCollection.getByTags(this.selectedTags);
+    this.listenTo(this.collection, 'add', this.render);
+    this.listenTo(this.collection, 'remove', this.render);
+    return this.listenTo(this.collection, 'change', function(task) {
+      var taskView;
+
+      if (!(task != null ? task.get('isArchived') : void 0)) {
+        taskView = _this.views.findByModel(task);
+        return taskView.$el.fadeOut(function() {
+          _this.stopListening(taskView);
+          _this.views.remove(taskView);
+          taskView.destroy();
+          return _this.trigger('restore-task', task);
+        });
+      }
+    });
+  };
+
+  ArchiveListView.prototype.getRenderData = function() {
+    return {
+      title: this.getTitle()
+    };
+  };
+
+  ArchiveListView.prototype.beforeRender = function() {
+    var _this = this;
+
+    return this.views.forEach(function(taskView) {
+      if (_this.collection.indexOf(taskView.model) !== -1) {
+        return taskView.$el.detach();
+      } else {
+        _this.stopListening(taskView);
+        _this.views.remove(taskView);
+        return taskView.destroy();
+      }
+    });
+  };
+
+  ArchiveListView.prototype.afterRender = function() {
+    var _this = this;
+
+    this.collection.forEach(function(task) {
+      var taskView;
+
+      taskView = _this.views.findByModel(task);
+      if (taskView == null) {
+        taskView = new ArchiveTaskView({
+          model: task
+        });
+        _this.views.add(taskView);
+      } else {
+        taskView.delegateEvents();
+      }
+      return $(_this.collectionEl).append(taskView.render().$el);
+    });
+    return this.$el;
+  };
+
+  ArchiveListView.prototype.getTitle = function() {
+    var tagsList;
+
+    if (this.collection.length === this.baseCollection.length) {
+      return "All archived tasks";
+    } else {
+      tagsList = Utils.buildTagsList(this.selectedTags, {
+        tagPrefix: '#',
+        regularSeparator: ', ',
+        lastSeparator: ' and '
+      });
+      return "Archived tasks of " + tagsList;
+    }
+  };
+
+  return ArchiveListView;
+
+})(BaseView);
+
+});
+
+;require.register("views/archive_task_view", function(exports, require, module) {
+var ArchiveTaskView, TaskView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+TaskView = require('./task_view');
+
+module.exports = ArchiveTaskView = (function(_super) {
+  __extends(ArchiveTaskView, _super);
+
+  function ArchiveTaskView() {
+    _ref = ArchiveTaskView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  ArchiveTaskView.prototype.tagName = 'li';
+
+  ArchiveTaskView.prototype.className = 'task archive done';
+
+  ArchiveTaskView.prototype.template = require('./templates/task_archive');
+
+  ArchiveTaskView.prototype.getRenderData = function() {
+    var date;
+
+    date = Date.create(this.model.get('completionDate'));
+    return _.extend(ArchiveTaskView.__super__.getRenderData.call(this), {
+      competionDate: date.format("{dd}/{MM}/{yyyy} at {hh}:{mm}")
+    });
+  };
+
+  ArchiveTaskView.prototype.afterRender = function() {};
+
+  ArchiveTaskView.prototype.onClick = function() {
+    this.model.set('done', false);
+    this.model.set('completionDate', null);
+    this.model.set('isArchived', false);
+    this.model.save();
+    return this.render();
+  };
+
+  ArchiveTaskView.prototype.onMouseEnter = function() {
+    var button;
+
+    button = this.$('button');
+    if (this.model.get('done')) {
+      return button.html('Restore?');
+    }
+  };
+
+  ArchiveTaskView.prototype.onMouseLeave = function() {
+    var button;
+
+    button = this.$('button');
+    if (this.model.get('done')) {
+      return button.html('Done');
+    }
+  };
+
+  return ArchiveTaskView;
+
+})(TaskView);
 
 });
 
@@ -708,6 +1021,7 @@ module.exports = MenuView = (function(_super) {
 
   function MenuView(options) {
     this.baseCollection = options.baseCollection;
+    this.archivedCollection = options.archivedCollection;
     this.views = new Backbone.ChildViewContainer();
     MenuView.__super__.constructor.call(this, options);
   }
@@ -718,15 +1032,28 @@ module.exports = MenuView = (function(_super) {
       'change': this.onChange,
       'remove': this.onChange
     });
+    this.listenTo(this.archivedCollection, {
+      'add': this.onChange,
+      'change': this.onChange,
+      'remove': this.onChange
+    });
     return MenuView.__super__.initialize.call(this, options);
   };
 
   MenuView.prototype.getRenderData = function() {
+    var archivedCount;
+
+    if (this.archivedCollection.length > 1000) {
+      archivedCount = 'Over 9000++';
+    } else {
+      archivedCount = this.archivedCollection.length;
+    }
     return {
       allCount: this.baseCollection.length,
       untaggedCount: this.baseCollection.filter(function(task) {
         return task.get('tags').length === 0;
-      }).length
+      }).length,
+      archivedCount: archivedCount
     };
   };
 
@@ -773,18 +1100,23 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.setActive = function(tags) {
     this.activeTags = tags;
-    return this.handleTagSelection();
+    return this.handleTagSelection(tags);
   };
 
-  MenuView.prototype.handleTagSelection = function() {
+  MenuView.prototype.setHighlightedItem = function(highlightedItem) {
+    return this.highlightedItem = highlightedItem;
+  };
+
+  MenuView.prototype.handleTagSelection = function(itemNumToSelect) {
     var _this = this;
 
+    if (itemNumToSelect == null) {
+      itemNumToSelect = null;
+    }
     this.$('li.active').removeClass('active');
-    if (this.activeTags === null) {
-      this.$('ul.permanent li:first-of-type').addClass('active');
-      return this.handleSubmenu(null);
-    } else if (this.activeTags.length === 0) {
-      this.$('ul.permanent li:nth-of-type(2)').addClass('active');
+    if (this.highlightedItem != null) {
+      this.$("ul.permanent li:nth-of-type(" + this.highlightedItem + ")").addClass('active');
+      this.handleSubmenu(null);
       return this.handleSubmenu(null);
     } else {
       return this.views.some(function(view) {
@@ -1148,9 +1480,9 @@ module.exports = TaskListView = (function(_super) {
 
   TaskListView.prototype.collectionEl = 'ul#task-list';
 
-  TaskListView.prototype.queue = [];
-
-  TaskListView.prototype.processing = false;
+  TaskListView.prototype.events = {
+    'click #archive-action': 'onArchiveClicked'
+  };
 
   function TaskListView(options) {
     this.baseCollection = options.baseCollection;
@@ -1168,7 +1500,7 @@ module.exports = TaskListView = (function(_super) {
     }
     this.collection = this.baseCollection.getByTags(this.selectedTags);
     this.listenTo(this.collection, 'add', this.render);
-    return this.listenTo(this.collection, 'remove', function(task) {
+    this.listenTo(this.collection, 'remove', function(task) {
       var previousVisibleTask;
 
       previousVisibleTask = task.getPreviousWithTags(_this.selectedTags);
@@ -1176,6 +1508,9 @@ module.exports = TaskListView = (function(_super) {
         _this.taskModelCIDToFocus = previousVisibleTask.cid;
       }
       return _this.render();
+    });
+    return this.listenTo(this.collection, 'change', function(task) {
+      return _this.updateArchiveButtonState();
     });
   };
 
@@ -1203,6 +1538,7 @@ module.exports = TaskListView = (function(_super) {
     var view,
       _this = this;
 
+    this.updateArchiveButtonState();
     if (this.taskForm != null) {
       this.stopListening(this.taskForm);
       this.taskForm.destroy();
@@ -1227,6 +1563,8 @@ module.exports = TaskListView = (function(_super) {
         _this.listenTo(taskView, 'focus-down', _this.onFocusDown);
         _this.listenTo(taskView, 'move-up', _this.onMoveUp);
         _this.listenTo(taskView, 'move-down', _this.onMoveDown);
+      } else {
+        taskView.delegateEvents();
       }
       return $(_this.collectionEl).append(taskView.render().$el);
     });
@@ -1363,6 +1701,57 @@ module.exports = TaskListView = (function(_super) {
     }
   };
 
+  TaskListView.prototype.updateArchiveButtonState = function() {
+    if (this.collection.where({
+      done: true
+    }).length > 0) {
+      return this.$('#archive-action').removeClass('disable');
+    } else {
+      return this.$('#archive-action').addClass('disable');
+    }
+  };
+
+  TaskListView.prototype.onArchiveClicked = function() {
+    var counterArchived, counterToArchive, done, tasksToArchive,
+      _this = this;
+
+    tasksToArchive = this.collection.where({
+      done: true
+    });
+    counterToArchive = tasksToArchive.length;
+    counterArchived = 0;
+    if (counterToArchive > 0) {
+      this.$('#archive-action').html('&nbsp;');
+      this.$('#archive-action').spin('tiny', '#fff');
+    }
+    done = function(task) {
+      var taskView;
+
+      counterArchived++;
+      taskView = _this.views.findByModel(task);
+      if (counterArchived === counterToArchive) {
+        _this.stopListening(taskView);
+        _this.views.remove(taskView);
+        return taskView.$el.fadeOut(function() {
+          taskView.destroy();
+          _this.$('#archive-action').html('Archive all done tasks');
+          return _this.trigger('archive-tasks', tasksToArchive);
+        });
+      } else {
+        _this.stopListening(taskView);
+        _this.views.remove(taskView);
+        return taskView.$el.fadeOut(function() {
+          return taskView.destroy();
+        });
+      }
+    };
+    return tasksToArchive.forEach(function(task) {
+      task.set('isArchived', true);
+      task.once('sync', done);
+      return task.save();
+    });
+  };
+
   return TaskListView;
 
 })(BaseView);
@@ -1408,17 +1797,22 @@ module.exports = TaskView = (function(_super) {
   };
 
   TaskView.prototype.afterRender = function() {
-    var button;
-
     if (this.model.get('done')) {
-      button = this.$('button');
-      button.addClass('done');
-      return button.html('Done');
+      this.$el.addClass('done');
+      return this.$('button').html('Done');
+    } else {
+      return this.$el.removeClass('done');
     }
   };
 
   TaskView.prototype.onClick = function() {
     this.model.set('done', !this.model.get('done'));
+    if (this.model.get('done')) {
+      this.model.set('completionDate', Date.now());
+    } else {
+      this.model.set('completionDate', null);
+    }
+    this.afterRender();
     this.model.save();
     return this.render();
   };
@@ -1538,7 +1932,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<ul class="permanent"><li class="first-level"><a href="#">All (' + escape((interp = allCount) == null ? '' : interp) + ')</a></li><li class="first-level"><a href="#untagged">Untagged (' + escape((interp = untaggedCount) == null ? '' : interp) + ')</a></li></ul><ul class="tags"></ul>');
+buf.push('<ul class="permanent"><li class="first-level"><a href="#">All (' + escape((interp = allCount) == null ? '' : interp) + ')</a></li><li class="first-level"><a href="#untagged">Untagged (' + escape((interp = untaggedCount) == null ? '' : interp) + ')</a></li><li class="first-level"><a href="#archived">Archived (' + escape((interp = archivedCount) == null ? '' : interp) + ')</a></li></ul><ul class="tags"></ul>');
 }
 return buf.join("");
 };
@@ -1572,6 +1966,20 @@ return buf.join("");
 };
 });
 
+;require.register("views/templates/task_archive", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<div class="task-container"><button class="toggle-state button">Done</button><div class="todo-field"><input');
+buf.push(attrs({ 'value':("" + (model.description) + ""), 'tabindex':("" + (tabindex) + "") }, {"value":true,"tabindex":true}));
+buf.push('/></div></div><div class="todo-completionDate"><p>Completed on ' + escape((interp = competionDate) == null ? '' : interp) + '</p></div>');
+}
+return buf.join("");
+};
+});
+
 ;require.register("views/templates/task_form", function(exports, require, module) {
 module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
 attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
@@ -1592,7 +2000,19 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>' + escape((interp = title) == null ? '' : interp) + '</h1><div id="new-task" class="task"></div><ul id="task-list"></ul>');
+buf.push('<h1>' + escape((interp = title) == null ? '' : interp) + '</h1><p id="actions">Actions:<button id="archive-action" class="button disable">Archive all done tasks</button></p><div id="new-task" class="task"></div><ul id="task-list"></ul>');
+}
+return buf.join("");
+};
+});
+
+;require.register("views/templates/task_list_archive", function(exports, require, module) {
+module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+var buf = [];
+with (locals || {}) {
+var interp;
+buf.push('<h1>' + escape((interp = title) == null ? '' : interp) + '</h1><ul id="task-list"></ul>');
 }
 return buf.join("");
 };
