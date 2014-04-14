@@ -154,18 +154,12 @@ module.exports = TagsCollection = (function(_super) {
     if (a.get('count') > b.get('count')) {
       return -1;
     } else if (a.get('count') === b.get('count')) {
-      if (a.get('selectIndex') === -1 && b.get('selectIndex') === -1) {
-        return 0;
-      } else if (a.get('selectIndex') > -1 && b.get('selectIndex') === -1) {
+      if (a.get('id') < b.get('id')) {
         return -1;
-      } else if (a.get('selectIndex') === -1 && b.get('selectIndex') > -1) {
+      } else if (a.get('id') > b.get('id')) {
         return 1;
       } else {
-        if (a.get('selectIndex') < b.get('selectIndex')) {
-          return -1;
-        } else {
-          return 1;
-        }
+        return 0;
       }
     } else {
       return 1;
