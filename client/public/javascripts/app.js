@@ -943,27 +943,38 @@ module.exports = ArchiveTaskView = (function(_super) {
 });
 
 ;require.register("views/menu_item_view", function(exports, require, module) {
-var BaseView, MenuItemView, SubmenuItemView, _ref,
+var BaseView, MenuItemView, TagsCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
-SubmenuItemView = require('./submenu_item_view');
+TagsCollection = require('../collections/tags');
 
 module.exports = MenuItemView = (function(_super) {
   __extends(MenuItemView, _super);
 
-  function MenuItemView() {
-    _ref = MenuItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
   MenuItemView.prototype.tagName = 'li';
 
-  MenuItemView.prototype.className = 'first-level';
+  MenuItemView.prototype.className = 'menu-tag';
 
   MenuItemView.prototype.template = require('./templates/menu_item');
+
+  MenuItemView.prototype.collectionEl = 'ul.submenu';
+
+  MenuItemView.prototype.views = null;
+
+  MenuItemView.prototype.events = {
+    'click': 'onClick'
+  };
+
+  function MenuItemView(options) {
+    this.baseCollection = options.baseCollection;
+    this.selectedTags = options.selectedTags;
+    this.depth = options.depth;
+    this.views = new Backbone.ChildViewContainer();
+    MenuItemView.__super__.constructor.call(this, options);
+  }
 
   MenuItemView.prototype.getRenderData = function() {
     var params;
@@ -975,12 +986,78 @@ module.exports = MenuItemView = (function(_super) {
     return params;
   };
 
-  MenuItemView.prototype.afterRender = function() {
-    return this.$el.data('menu-item', this.cid);
+  MenuItemView.prototype.buildUrl = function() {
+    var currentIndex, tagsInUrl, url, _ref;
+
+    tagsInUrl = _.clone(this.selectedTags);
+    if (this.depth === 0) {
+      if (_.contains(tagsInUrl, this.model.get('tagName'))) {
+        url = "#";
+      } else {
+        url = "#byTags/" + (this.model.get('tagName'));
+      }
+    } else {
+      tagsInUrl = this.selectedTags.slice(0, this.depth);
+      currentIndex = (_ref = this.selectedTags) != null ? _ref.indexOf(this.model.get('tagName')) : void 0;
+      if (!_.contains(tagsInUrl, this.model.get('tagName')) && currentIndex !== this.depth) {
+        tagsInUrl.push(this.model.get('tagName'));
+      } else if (_.contains(tagsInUrl, this.model.get('tagName'))) {
+        tagsInUrl = _.without(tagsInUrl, this.model.get('tagName'));
+      }
+      url = "#";
+      if (tagsInUrl.length > 0) {
+        url = "" + url + "byTags";
+        tagsInUrl.forEach(function(item) {
+          return url = "" + url + "/" + item;
+        });
+      }
+    }
+    return url;
   };
 
-  MenuItemView.prototype.buildUrl = function() {
-    return "#byTags/" + (this.model.get('tagName'));
+  MenuItemView.prototype.afterRender = function() {
+    var currentIndex, padding, tags, _ref,
+      _this = this;
+
+    currentIndex = (_ref = this.selectedTags) != null ? _ref.indexOf(this.model.get('tagName')) : void 0;
+    if (currentIndex === this.depth) {
+      this.$el.addClass('selected');
+    }
+    padding = (this.depth + 1) * 25;
+    this.$('a').css('padding-left', padding);
+    if ((this.selectedTags != null) && this.selectedTags[this.depth] === this.model.get('tagName')) {
+      tags = this.buildTagsList();
+      return tags.forEach(function(tagInfo) {
+        var menuItem;
+
+        menuItem = new MenuItemView({
+          model: new Backbone.Model({
+            tagName: tagInfo.get('id'),
+            count: tagInfo.get('count')
+          }),
+          selectedTags: _this.selectedTags,
+          depth: _this.depth + 1,
+          baseCollection: _this.baseCollection
+        });
+        _this.views.add(menuItem);
+        return _this.$el.children(_this.collectionEl).append(menuItem.render().$el);
+      });
+    }
+  };
+
+  MenuItemView.prototype.buildTagsList = function() {
+    var excludedItems, includedTags, tagsList;
+
+    excludedItems = this.selectedTags || [];
+    excludedItems = excludedItems.slice(0, this.depth + 1);
+    includedTags = this.selectedTags || [];
+    includedTags = includedTags.slice(0, this.depth + 1);
+    if (this.collection != null) {
+      delete this.collection;
+    }
+    this.collection = this.baseCollection.getByTags(includedTags);
+    tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags);
+    return tagsList;
   };
 
   return MenuItemView;
@@ -990,15 +1067,13 @@ module.exports = MenuItemView = (function(_super) {
 });
 
 ;require.register("views/menu_view", function(exports, require, module) {
-var BaseView, MenuItemView, MenuView, SubmenuView,
+var BaseView, MenuItemView, MenuView,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 BaseView = require('../lib/base_view');
 
 MenuItemView = require('./menu_item_view');
-
-SubmenuView = require('./submenu_view');
 
 module.exports = MenuView = (function(_super) {
   __extends(MenuView, _super);
@@ -1085,7 +1160,10 @@ module.exports = MenuView = (function(_super) {
         model: new Backbone.Model({
           tagName: tagInfo.get('id'),
           count: tagInfo.get('count')
-        })
+        }),
+        selectedTags: _this.activeTags,
+        depth: 0,
+        baseCollection: _this.baseCollection
       });
       _this.views.add(menuItem);
       return $(_this.collectionEl).append(menuItem.render().$el);
@@ -1094,249 +1172,19 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.onChange = function() {
-    this.render();
-    return this.handleTagSelection();
+    return this.render();
   };
 
   MenuView.prototype.setActive = function(tags) {
     this.activeTags = tags;
-    return this.handleTagSelection(tags);
+    return this.render();
   };
 
   MenuView.prototype.setHighlightedItem = function(highlightedItem) {
     return this.highlightedItem = highlightedItem;
   };
 
-  MenuView.prototype.handleTagSelection = function(itemNumToSelect) {
-    var _this = this;
-
-    if (itemNumToSelect == null) {
-      itemNumToSelect = null;
-    }
-    this.$('li.active').removeClass('active');
-    if (this.highlightedItem != null) {
-      this.$("ul.permanent li:nth-of-type(" + this.highlightedItem + ")").addClass('active');
-      this.handleSubmenu(null);
-      return this.handleSubmenu(null);
-    } else {
-      return this.views.some(function(view) {
-        if (view.model.get('tagName') === _this.activeTags[0]) {
-          view.$el.addClass('active');
-          _this.handleSubmenu(view.cid, _this.activeTags);
-          return true;
-        }
-      });
-    }
-  };
-
-  MenuView.prototype.onClick = function(event) {
-    var domElement, menuItemId, rootTag;
-
-    this.$('li.active').removeClass('active');
-    domElement = $(event.currentTarget);
-    domElement.addClass('active');
-    menuItemId = domElement.data('menu-item');
-    if (menuItemId === this.subMenuHandler) {
-      return this.closeSubmenu();
-    } else if (this.subMenuHandler === null && menuItemId !== void 0) {
-      rootTag = this.views.findByCid(menuItemId).model.get('tagName');
-      return this.handleSubmenu(menuItemId, [rootTag]);
-    }
-  };
-
-  MenuView.prototype.handleSubmenu = function(menuItemId, selectedTags) {
-    var relatedView;
-
-    if (selectedTags == null) {
-      selectedTags = [];
-    }
-    this.closeSubmenu();
-    if (menuItemId == null) {
-      return;
-    }
-    relatedView = this.views.findByCid(menuItemId);
-    this.submenu = new SubmenuView({
-      baseCollection: this.baseCollection,
-      relatedView: relatedView,
-      selectedTags: selectedTags
-    });
-    this.submenu.render();
-    return this.subMenuHandler = menuItemId;
-  };
-
-  MenuView.prototype.closeSubmenu = function() {
-    if (this.submenu != null) {
-      this.submenu.destroy();
-    }
-    this.subMenuHandler = null;
-    return delete this.submenu;
-  };
-
   return MenuView;
-
-})(BaseView);
-
-});
-
-;require.register("views/submenu_item_view", function(exports, require, module) {
-var BaseView, SubmenuItemView, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-module.exports = SubmenuItemView = (function(_super) {
-  __extends(SubmenuItemView, _super);
-
-  function SubmenuItemView() {
-    _ref = SubmenuItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  SubmenuItemView.prototype.tagName = 'li';
-
-  SubmenuItemView.prototype.template = require('./templates/menu_item');
-
-  SubmenuItemView.prototype.events = {
-    'click': 'onClick'
-  };
-
-  SubmenuItemView.prototype.afterRender = function() {
-    if (_.contains(this.model.get('selectedTags'), this.model.get('tagName'))) {
-      return this.$el.addClass('selected');
-    }
-  };
-
-  SubmenuItemView.prototype.getRenderData = function() {
-    var params;
-
-    params = SubmenuItemView.__super__.getRenderData.call(this);
-    _.extend(params, {
-      url: this.buildUrl()
-    });
-    return params;
-  };
-
-  SubmenuItemView.prototype.buildUrl = function() {
-    var tagsInUrl, url,
-      _this = this;
-
-    tagsInUrl = _.clone(this.model.get('selectedTags'));
-    if (!_.contains(tagsInUrl, this.model.get('tagName'))) {
-      tagsInUrl.push(this.model.get('tagName'));
-    } else if (_.contains(tagsInUrl, this.model.get('tagName'))) {
-      tagsInUrl = _.without(tagsInUrl, this.model.get('tagName'));
-    }
-    url = "#byTags";
-    tagsInUrl.forEach(function(item) {
-      return url = "" + url + "/" + item;
-    });
-    return url;
-  };
-
-  SubmenuItemView.prototype.onClick = function() {
-    var isActivated;
-
-    isActivated = this.$el.hasClass('selected');
-    if (isActivated) {
-      this.trigger('unselect', this.model.get('tagName'));
-      return this.$el.removeClass('selected');
-    } else {
-      this.trigger('select', this.model.get('tagName'));
-      return this.$el.addClass('selected');
-    }
-  };
-
-  return SubmenuItemView;
-
-})(BaseView);
-
-});
-
-;require.register("views/submenu_view", function(exports, require, module) {
-var BaseView, SubmenuItemView, SubmenuView, TagsCollection,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BaseView = require('../lib/base_view');
-
-SubmenuItemView = require('./submenu_item_view');
-
-TagsCollection = require('../collections/tags');
-
-module.exports = SubmenuView = (function(_super) {
-  __extends(SubmenuView, _super);
-
-  SubmenuView.prototype.tagName = 'ul';
-
-  SubmenuView.prototype.className = 'submenu';
-
-  SubmenuView.prototype.views = null;
-
-  function SubmenuView(options) {
-    this.baseCollection = options.baseCollection;
-    this.relatedView = options.relatedView;
-    this.selectedTags = options.selectedTags || [];
-    this.views = new Backbone.ChildViewContainer();
-    SubmenuView.__super__.constructor.call(this, options);
-  }
-
-  SubmenuView.prototype.getRootTagName = function() {
-    return this.relatedView.model.get('tagName');
-  };
-
-  SubmenuView.prototype.buildTagsList = function() {
-    if (this.collection != null) {
-      delete this.collection;
-    }
-    this.collection = this.baseCollection.getByTags(this.selectedTags);
-    return this.tagsList = TagsCollection.extractFromTasks(this.collection, [this.getRootTagName()], this.selectedTags);
-  };
-
-  SubmenuView.prototype.beforeRender = function() {
-    this.buildTagsList();
-    return this.reset();
-  };
-
-  SubmenuView.prototype.afterRender = function() {
-    var _this = this;
-
-    this.relatedView.$el.append(this.$el);
-    return this.tagsList.forEach(function(tagInfo) {
-      var menuItem;
-
-      menuItem = new SubmenuItemView({
-        model: new Backbone.Model({
-          tagName: tagInfo.get('id'),
-          count: tagInfo.get('count'),
-          selectedTags: _this.selectedTags
-        })
-      });
-      _this.views.add = menuItem;
-      return _this.$el.append(menuItem.render().$el);
-    });
-  };
-
-  SubmenuView.prototype.reset = function() {
-    var _this = this;
-
-    return this.views.forEach(function(taskView) {
-      if (_this.tagsList.indexOf(taskView.model.get('tagName')) !== -1) {
-        return taskView.$el.detach();
-      } else {
-        _this.stopListening(taskView);
-        _this.views.remove(taskView);
-        return taskView.destroy();
-      }
-    });
-  };
-
-  SubmenuView.prototype.destroy = function() {
-    this.reset();
-    return SubmenuView.__super__.destroy.call(this);
-  };
-
-  return SubmenuView;
 
 })(BaseView);
 
@@ -1945,8 +1793,8 @@ var buf = [];
 with (locals || {}) {
 var interp;
 buf.push('<a');
-buf.push(attrs({ 'href':("" + (url) + "") }, {"href":true}));
-buf.push('><i class="tag-icon"></i><span>' + escape((interp = model.tagName) == null ? '' : interp) + ' (' + escape((interp = model.count) == null ? '' : interp) + ')</span></a>');
+buf.push(attrs({ 'href':("" + (url) + ""), 'title':("" + (model.tagName) + "") }, {"href":true,"title":true}));
+buf.push('><i class="tag-icon"></i><span>' + escape((interp = model.tagName) == null ? '' : interp) + ' (' + escape((interp = model.count) == null ? '' : interp) + ')</span></a><ul class="submenu"></ul>');
 }
 return buf.join("");
 };

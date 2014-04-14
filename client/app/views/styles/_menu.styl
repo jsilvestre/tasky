@@ -31,18 +31,16 @@
         color #333
         padding 10px
 
+        text-overflow ellipsis
+        white-space nowrap
+        overflow hidden
 
       .submenu
-        border-bottom 1px solid #ddd
+        margin-top -5.1px // dirty hack...
+      .submenu > li a
+        padding-left 25px
 
-        li
-          &.selected
-            background #cfcfcf
-
-          a
-            padding-left 25px
-
-      &.active > a
-        background #aedbff
+      &.selected > a
+          background #aedbff
 
 

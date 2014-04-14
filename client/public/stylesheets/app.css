@@ -860,20 +860,21 @@ textarea:active {
   text-decoration: none;
   color: #333;
   padding: 10px;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 #menu ul li a:hover {
   background: #ffc47f;
 }
 #menu ul li .submenu {
-  border-bottom: 1px solid #ddd;
+  margin-top: -5.1px;
 }
-#menu ul li .submenu li.selected {
-  background: #cfcfcf;
-}
-#menu ul li .submenu li a {
+#menu ul li .submenu > li a {
   padding-left: 25px;
 }
-#menu ul li.active > a {
+#menu ul li.selected > a {
   background: #aedbff;
 }
 .spinner {
