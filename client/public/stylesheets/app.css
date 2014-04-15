@@ -849,6 +849,9 @@ textarea:active {
 #menu ul.permanent {
   border-bottom: 1px solid #ddd;
 }
+#menu ul.permanent a {
+  margin-bottom: -5.1px;
+}
 #menu ul.tags {
   margin-bottom: 20px;
 }
