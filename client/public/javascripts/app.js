@@ -981,7 +981,7 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.buildUrl = function() {
-    var currentIndex, tagsInUrl, url, _ref;
+    var tagsInUrl, url, _ref;
 
     tagsInUrl = _.clone(this.selectedTags);
     if (this.depth === 0) {
@@ -992,8 +992,7 @@ module.exports = MenuItemView = (function(_super) {
       }
     } else {
       tagsInUrl = this.selectedTags.slice(0, this.depth);
-      currentIndex = (_ref = this.selectedTags) != null ? _ref.indexOf(this.model.get('tagName')) : void 0;
-      if (!_.contains(tagsInUrl, this.model.get('tagName')) && currentIndex !== this.depth) {
+      if (!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref = this.selectedTags) != null ? _ref.length : void 0) > this.depth + 1) {
         tagsInUrl.push(this.model.get('tagName'));
       } else if (_.contains(tagsInUrl, this.model.get('tagName'))) {
         tagsInUrl = _.without(tagsInUrl, this.model.get('tagName'));
@@ -1010,15 +1009,15 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.afterRender = function() {
-    var currentIndex, padding, tags, _ref,
+    var currentIndex, leftPadding, tags, _ref,
       _this = this;
 
     currentIndex = (_ref = this.selectedTags) != null ? _ref.indexOf(this.model.get('tagName')) : void 0;
     if (currentIndex === this.depth) {
       this.$el.addClass('selected');
     }
-    padding = (this.depth + 1) * 25;
-    this.$('a').css('padding-left', padding);
+    leftPadding = (this.depth + 1) * 25;
+    this.$('a').css('padding-left', leftPadding);
     if ((this.selectedTags != null) && this.selectedTags[this.depth] === this.model.get('tagName')) {
       tags = this.buildTagsList();
       return tags.forEach(function(tagInfo) {

@@ -33,9 +33,9 @@ module.exports = class MenuItemView extends BaseView
                 url = "#byTags/#{@model.get('tagName')}"
         else
             tagsInUrl = @selectedTags.slice 0, @depth
-            currentIndex = @selectedTags?.indexOf @model.get 'tagName'
+
             if not _.contains(tagsInUrl, @model.get 'tagName') \
-            and currentIndex isnt @depth
+            or @selectedTags?.length > @depth + 1
                 tagsInUrl.push @model.get 'tagName'
             else if _.contains tagsInUrl, @model.get 'tagName'
                 tagsInUrl = _.without tagsInUrl, @model.get 'tagName'
@@ -50,11 +50,10 @@ module.exports = class MenuItemView extends BaseView
 
     afterRender: ->
         currentIndex = @selectedTags?.indexOf @model.get 'tagName'
-        if  currentIndex is @depth
-            @$el.addClass 'selected'
+        if  currentIndex is @depth then @$el.addClass 'selected'
 
-        padding = (@depth + 1)* 25
-        @$('a').css 'padding-left', padding
+        leftPadding = (@depth + 1) * 25
+        @$('a').css 'padding-left', leftPadding
 
         if @selectedTags? and @selectedTags[@depth] is @model.get('tagName')
             tags = @buildTagsList()
