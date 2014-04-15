@@ -658,7 +658,6 @@ module.exports = Router = (function(_super) {
       baseCollection: this.collection,
       archivedCollection: this.archivedCollection
     });
-    this.menu.render();
     this.taskList = new TaskListView({
       baseCollection: this.collection
     });

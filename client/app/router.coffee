@@ -26,7 +26,6 @@ module.exports = class Router extends Backbone.Router
         @menu = new MenuView
             baseCollection: @collection
             archivedCollection: @archivedCollection
-        @menu.render()
 
         @taskList = new TaskListView baseCollection: @collection
         @listenTo @taskList, 'archive-tasks', (tasks) =>
