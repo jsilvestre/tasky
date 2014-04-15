@@ -24,29 +24,22 @@ module.exports = class MenuItemView extends BaseView
         return params
 
     buildUrl: ->
-        tagsInUrl = _.clone @selectedTags
+        tagsInUrl = @selectedTags?.slice(0, @depth) or []
+        currentIndex = @selectedTags?.indexOf @model.get 'tagName'
 
-        if @depth is 0 # root
-            if _.contains tagsInUrl, @model.get 'tagName'
-                url = "#"
-            else
-                url = "#byTags/#{@model.get('tagName')}"
-        else
-            tagsInUrl = @selectedTags.slice 0, @depth
+        # adding if (not in the list or parent of last selected tags)
+        # and not the last selected tag
+        if ((not _.contains(tagsInUrl, @model.get 'tagName') \
+        or @selectedTags?.length > @depth + 1)) \
+        and not (currentIndex + 1 is @selectedTags?.length)
+            tagsInUrl.push @model.get 'tagName'
 
-            if not _.contains(tagsInUrl, @model.get 'tagName') \
-            or @selectedTags?.length > @depth + 1
-                tagsInUrl.push @model.get 'tagName'
-            else if _.contains tagsInUrl, @model.get 'tagName'
-                tagsInUrl = _.without tagsInUrl, @model.get 'tagName'
-
-            url = "#"
-            if tagsInUrl.length > 0
-                url = "#{url}byTags"
-                tagsInUrl.forEach (item) -> url = "#{url}/#{item}"
+        url = "#"
+        if tagsInUrl.length > 0
+            url = "#{url}byTags"
+            tagsInUrl.forEach (item) -> url = "#{url}/#{item}"
 
         return url
-
 
     afterRender: ->
         currentIndex = @selectedTags?.indexOf @model.get 'tagName'

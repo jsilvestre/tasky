@@ -981,29 +981,19 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.buildUrl = function() {
-    var tagsInUrl, url, _ref;
+    var currentIndex, tagsInUrl, url, _ref, _ref1, _ref2, _ref3;
 
-    tagsInUrl = _.clone(this.selectedTags);
-    if (this.depth === 0) {
-      if (_.contains(tagsInUrl, this.model.get('tagName'))) {
-        url = "#";
-      } else {
-        url = "#byTags/" + (this.model.get('tagName'));
-      }
-    } else {
-      tagsInUrl = this.selectedTags.slice(0, this.depth);
-      if (!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref = this.selectedTags) != null ? _ref.length : void 0) > this.depth + 1) {
-        tagsInUrl.push(this.model.get('tagName'));
-      } else if (_.contains(tagsInUrl, this.model.get('tagName'))) {
-        tagsInUrl = _.without(tagsInUrl, this.model.get('tagName'));
-      }
-      url = "#";
-      if (tagsInUrl.length > 0) {
-        url = "" + url + "byTags";
-        tagsInUrl.forEach(function(item) {
-          return url = "" + url + "/" + item;
-        });
-      }
+    tagsInUrl = ((_ref = this.selectedTags) != null ? _ref.slice(0, this.depth) : void 0) || [];
+    currentIndex = (_ref1 = this.selectedTags) != null ? _ref1.indexOf(this.model.get('tagName')) : void 0;
+    if ((!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref2 = this.selectedTags) != null ? _ref2.length : void 0) > this.depth + 1) && !(currentIndex + 1 === ((_ref3 = this.selectedTags) != null ? _ref3.length : void 0))) {
+      tagsInUrl.push(this.model.get('tagName'));
+    }
+    url = "#";
+    if (tagsInUrl.length > 0) {
+      url = "" + url + "byTags";
+      tagsInUrl.forEach(function(item) {
+        return url = "" + url + "/" + item;
+      });
     }
     return url;
   };
