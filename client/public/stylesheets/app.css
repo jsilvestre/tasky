@@ -839,6 +839,7 @@ textarea:active {
   background: #f2f2f2;
   height: 100%;
   position: fixed;
+  overflow: auto;
 }
 #menu ul {
   margin: 0;
@@ -847,6 +848,9 @@ textarea:active {
 }
 #menu ul.permanent {
   border-bottom: 1px solid #ddd;
+}
+#menu ul.tags {
+  margin-bottom: 20px;
 }
 #menu ul li {
   display: block;
