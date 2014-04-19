@@ -1003,7 +1003,10 @@ module.exports = MenuItemView = (function(_super) {
 
     currentIndex = (_ref = this.selectedTags) != null ? _ref.indexOf(this.model.get('tagName')) : void 0;
     if (currentIndex === this.depth) {
-      this.$el.addClass('selected');
+      this.$el.addClass('active');
+      if (this.depth + 1 === this.selectedTags.length) {
+        this.$el.addClass('selected');
+      }
     }
     leftPadding = (this.depth + 1) * 25;
     this.$('a').css('padding-left', leftPadding);

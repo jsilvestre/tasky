@@ -45,7 +45,9 @@ module.exports = class MenuItemView extends BaseView
 
     afterRender: ->
         currentIndex = @selectedTags?.indexOf @model.get 'tagName'
-        if  currentIndex is @depth then @$el.addClass 'selected'
+        if  currentIndex is @depth
+            @$el.addClass 'active'
+            if @depth + 1 is @selectedTags.length then @$el.addClass 'selected'
 
         leftPadding = (@depth + 1) * 25
         @$('a').css 'padding-left', leftPadding
