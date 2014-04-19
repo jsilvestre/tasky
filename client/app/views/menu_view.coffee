@@ -70,6 +70,9 @@ module.exports = class MenuView extends BaseView
             @views.add menuItem
             $(@collectionEl).append menuItem.render().$el
 
+        if @highlightedItem?
+            selector = ".permanent li:nth-of-type(#{@highlightedItem})"
+            @$el.find(selector).addClass 'selected'
         return @$el
 
     onChange: ->
@@ -81,6 +84,4 @@ module.exports = class MenuView extends BaseView
 
     setHighlightedItem: (highlightedItem) ->
         @highlightedItem = highlightedItem
-
-
 

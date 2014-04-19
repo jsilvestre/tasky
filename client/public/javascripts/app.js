@@ -1130,7 +1130,7 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.afterRender = function() {
-    var tags,
+    var selector, tags,
       _this = this;
 
     tags = this.baseCollection.getAllTags();
@@ -1149,6 +1149,10 @@ module.exports = MenuView = (function(_super) {
       _this.views.add(menuItem);
       return $(_this.collectionEl).append(menuItem.render().$el);
     });
+    if (this.highlightedItem != null) {
+      selector = ".permanent li:nth-of-type(" + this.highlightedItem + ")";
+      this.$el.find(selector).addClass('selected');
+    }
     return this.$el;
   };
 
