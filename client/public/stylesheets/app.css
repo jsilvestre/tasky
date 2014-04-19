@@ -844,12 +844,8 @@ textarea:active {
 #menu ul {
   margin: 0;
   padding: 0;
-  list-style-type: none;
 }
-#menu ul.permanent {
-  border-bottom: 1px solid #ddd;
-}
-#menu ul.permanent a {
+#menu ul list-style-type none a {
   margin-bottom: -5.1px;
 }
 #menu ul.tags {
@@ -881,6 +877,11 @@ textarea:active {
 #menu ul li .submenu > li a {
   padding-left: 25px;
 }
+#menu ul li.first-level > a {
+  opacity: 0.4;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  filter: alpha(opacity=40);
+}
 #menu ul li.selected > a {
   background: #aedbff;
 }
@@ -888,6 +889,14 @@ textarea:active {
   opacity: 0.8;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   filter: alpha(opacity=80);
+}
+#menu ul li.active.first-level > a {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+#menu ul li.magic a {
+  color: #0079d7;
 }
 .spinner {
   margin: auto;

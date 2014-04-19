@@ -7,8 +7,6 @@ module.exports = class MenuView extends BaseView
     el: '#menu'
     template: require './templates/menu'
 
-    events: 'click li.first-level': 'onClick'
-
     views: null
     collectionEl: 'ul.tags'
 
@@ -58,30 +56,51 @@ module.exports = class MenuView extends BaseView
                 taskView.destroy()
 
     afterRender: ->
-        tags = @baseCollection.getAllTags()
+        typeViewEl = @$ "#{@viewType}"
+        submenuEl = @$ "#{@viewType} > .submenu"
+
+        if @viewType is "#tobedone" then @collection = @baseCollection
+        else @collection = @archivedCollection
+
+        # Rendering the "magic" tag: untagged
+        # Must be re-thought if more magic tags are added
+        untaggedNum = @collection
+            .filter((task) ->
+                task.get('tags').length is 0
+            ).length
+        if untaggedNum > 0
+            template = require './templates/menu_item'
+            if @viewType is "#tobedone" then prefix = 'todoByTags'
+            else prefix = 'archivedByTags'
+            isActive = if @activeTags?.length is 0 then " active selected" else ""
+            untaggedView = $ '<li class="menu-tag magic' + isActive + '"></li>'
+            untaggedViewContent = template
+                url: "##{prefix}/"
+                model:
+                    tagName: 'untagged'
+                    count: untaggedNum
+            untaggedView.append untaggedViewContent
+            submenuEl.append untaggedView
+
+        tags = @collection.getAllTags()
         tags.forEach (tagInfo) =>
             menuItem = new MenuItemView
                             model: new Backbone.Model
                                 tagName: tagInfo.get 'id'
                                 count: tagInfo.get 'count'
+                                isMagic: tagInfo.get 'isMagic'
                             selectedTags: @activeTags
                             depth: 0
+                            viewType: @viewType
                             baseCollection: @baseCollection
+                            archivedCollection: @archivedCollection
             @views.add menuItem
-            $(@collectionEl).append menuItem.render().$el
+            submenuEl.append menuItem.render().$el
 
-        if @highlightedItem?
-            selector = ".permanent li:nth-of-type(#{@highlightedItem})"
-            @$el.find(selector).addClass 'selected'
+        typeViewEl.addClass 'active'
+        typeViewEl.addClass 'selected' unless @activeTags?
         return @$el
 
-    onChange: ->
-        @render()
-
-    setActive: (tags) ->
-        @activeTags = tags
-        @render()
-
-    setHighlightedItem: (highlightedItem) ->
-        @highlightedItem = highlightedItem
-
+    onChange: -> @render()
+    setActive: (tags) -> @activeTags = tags
+    setViewType: (viewType) -> @viewType = viewType

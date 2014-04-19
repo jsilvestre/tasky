@@ -11,9 +11,6 @@
     padding 0
     list-style-type none
 
-    &.permanent
-      border-bottom 1px solid #ddd
-
       a
         margin-bottom -5.1px // dirty hack because of overflow blank space...
 
@@ -47,9 +44,19 @@
       .submenu > li a
         padding-left 25px
 
+      &.first-level > a
+        opacity 0.4
+
       &.selected > a
         background #aedbff
       &.active > a i.tag-icon
         opacity 0.8
+      &.active.first-level > a
+        opacity 1
+
+      &.magic a
+        color blue - 30%
+
+
 
 

@@ -14,7 +14,8 @@ module.exports = class Router extends Backbone.Router
         '': 'main'
         'untagged': 'untagged'
         'archived': 'archived'
-        'byTags/*tags': 'byTags'
+        'todoByTags/*tags': 'todoByTags'
+        'archivedByTags/*tags': 'archivedByTags'
 
     initialize: ->
         @collection = new TaskCollection initTasks
@@ -39,35 +40,42 @@ module.exports = class Router extends Backbone.Router
             @archivedTaskList.render()
 
     main: ->
-        tags = null
-        @taskList.setTags tags
+        @taskList.setTags null
         @taskList.render()
-        @menu.setHighlightedItem 1
-        @menu.setActive tags
+        @menu.setViewType '#tobedone'
+        @menu.setActive null
+        @menu.render()
 
     untagged: ->
-        tags = []
-        @taskList.setTags tags
+        @taskList.setTags []
         @taskList.render()
-        @menu.setHighlightedItem 2
-        @menu.setActive tags
+        @menu.setActive []
+        @menu.render()
 
     archived: ->
-        tags =  undefined
-        @archivedTaskList.setTags tags
+        @archivedTaskList.setTags null
         @archivedTaskList.render()
-        @menu.setHighlightedItem 3
+        @menu.setViewType '#archived'
+        @menu.setActive null
+        @menu.render()
+
+    byTags: (viewType, listView, tags) ->
+
+        if tags?
+            tags = tags.split '/'
+
+            # if the last char is '/', there is an empty element
+            delete tags[tags.length - 1] if tags[tags.length - 1].length is 0
+        else
+            tags = []
+
+        listView.setTags tags
+        listView.render()
+        @menu.setViewType viewType
         @menu.setActive tags
+        @menu.render()
 
-    byTags: (tags) ->
-        tags = tags.split '/'
-
-        # if the last char is '/', there is an empty element
-        delete tags[tags.length - 1] if tags[tags.length - 1] is ""
-
-        @taskList.setTags tags
-        @taskList.render()
-        @menu.setHighlightedItem null
-        @menu.setActive tags
+    todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags
+    archivedByTags: (tags) -> @byTags '#archived', @archivedTaskList, tags
 
 

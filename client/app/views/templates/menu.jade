@@ -1,9 +1,7 @@
-ul.permanent
-    li.first-level
-        a(href="#") All (#{allCount})
-    li.first-level
-        a(href="#untagged") Untagged (#{untaggedCount})
-    li.first-level
+ul
+    li#tobedone.first-level
+        a(href="#") To-do (#{allCount})
+        ul.submenu
+    li#archived.first-level
         a(href="#archived") Archived (#{archivedCount})
-
-ul.tags
+        ul.submenu

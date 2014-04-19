@@ -13,8 +13,10 @@ module.exports = class MenuItemView extends BaseView
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
+        @archivedCollection = options.archivedCollection
         @selectedTags = options.selectedTags
         @depth = options.depth
+        @viewType = options.viewType
         @views = new Backbone.ChildViewContainer()
         super options
 
@@ -36,12 +38,19 @@ module.exports = class MenuItemView extends BaseView
         and @depth is currentIndex))
             tagsInUrl.push @model.get 'tagName'
 
-        url = "#"
+        if @viewType is "#tobedone"
+            url = "#"
+            prefix = 'todoByTags'
+        else
+            url = "#archived"
+            prefix = 'archivedByTags'
         if tagsInUrl.length > 0
-            url = "#{url}byTags"
+            url = "##{prefix}"
             tagsInUrl.forEach (item) -> url = "#{url}/#{item}"
 
         return url
+
+    beforeRender: -> @$el.addClass 'magic' if @model.get 'isMagic'
 
     afterRender: ->
         currentIndex = @selectedTags?.indexOf @model.get 'tagName'
@@ -61,10 +70,11 @@ module.exports = class MenuItemView extends BaseView
                                     count: tagInfo.get 'count'
                                 selectedTags: @selectedTags
                                 depth: @depth + 1
+                                viewType: @viewType
                                 baseCollection: @baseCollection
+                                archivedCollection: @archivedCollection
                 @views.add menuItem
                 @$el.children(@collectionEl).append menuItem.render().$el
-
 
     buildTagsList: ->
         excludedItems = @selectedTags or []
@@ -73,10 +83,14 @@ module.exports = class MenuItemView extends BaseView
         includedTags = @selectedTags or []
         includedTags = includedTags.slice 0, @depth + 1
 
+
         delete @collection if @collection?
-        @collection = @baseCollection.getByTags includedTags
+
+        if @viewType is "#tobedone" then collection = @baseCollection
+        else collection = @archivedCollection
+
+        @collection = collection.getByTags includedTags
         tagsList = TagsCollection.extractFromTasks @collection,
                                                     excludedItems,
                                                     @selectedTags
-
         return tagsList

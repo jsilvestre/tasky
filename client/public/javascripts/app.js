@@ -640,7 +640,8 @@ module.exports = Router = (function(_super) {
     '': 'main',
     'untagged': 'untagged',
     'archived': 'archived',
-    'byTags/*tags': 'byTags'
+    'todoByTags/*tags': 'todoByTags',
+    'archivedByTags/*tags': 'archivedByTags'
   };
 
   Router.prototype.initialize = function() {
@@ -673,44 +674,50 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.main = function() {
-    var tags;
-
-    tags = null;
-    this.taskList.setTags(tags);
+    this.taskList.setTags(null);
     this.taskList.render();
-    this.menu.setHighlightedItem(1);
-    return this.menu.setActive(tags);
+    this.menu.setViewType('#tobedone');
+    this.menu.setActive(null);
+    return this.menu.render();
   };
 
   Router.prototype.untagged = function() {
-    var tags;
-
-    tags = [];
-    this.taskList.setTags(tags);
+    this.taskList.setTags([]);
     this.taskList.render();
-    this.menu.setHighlightedItem(2);
-    return this.menu.setActive(tags);
+    this.menu.setActive([]);
+    return this.menu.render();
   };
 
   Router.prototype.archived = function() {
-    var tags;
-
-    tags = void 0;
-    this.archivedTaskList.setTags(tags);
+    this.archivedTaskList.setTags(null);
     this.archivedTaskList.render();
-    this.menu.setHighlightedItem(3);
-    return this.menu.setActive(tags);
+    this.menu.setViewType('#archived');
+    this.menu.setActive(null);
+    return this.menu.render();
   };
 
-  Router.prototype.byTags = function(tags) {
-    tags = tags.split('/');
-    if (tags[tags.length - 1] === "") {
-      delete tags[tags.length - 1];
+  Router.prototype.byTags = function(viewType, listView, tags) {
+    if (tags != null) {
+      tags = tags.split('/');
+      if (tags[tags.length - 1].length === 0) {
+        delete tags[tags.length - 1];
+      }
+    } else {
+      tags = [];
     }
-    this.taskList.setTags(tags);
-    this.taskList.render();
-    this.menu.setHighlightedItem(null);
-    return this.menu.setActive(tags);
+    listView.setTags(tags);
+    listView.render();
+    this.menu.setViewType(viewType);
+    this.menu.setActive(tags);
+    return this.menu.render();
+  };
+
+  Router.prototype.todoByTags = function(tags) {
+    return this.byTags('#tobedone', this.taskList, tags);
+  };
+
+  Router.prototype.archivedByTags = function(tags) {
+    return this.byTags('#archived', this.archivedTaskList, tags);
   };
 
   return Router;
@@ -959,8 +966,10 @@ module.exports = MenuItemView = (function(_super) {
 
   function MenuItemView(options) {
     this.baseCollection = options.baseCollection;
+    this.archivedCollection = options.archivedCollection;
     this.selectedTags = options.selectedTags;
     this.depth = options.depth;
+    this.viewType = options.viewType;
     this.views = new Backbone.ChildViewContainer();
     MenuItemView.__super__.constructor.call(this, options);
   }
@@ -976,21 +985,33 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.buildUrl = function() {
-    var currentIndex, tagsInUrl, url, _ref, _ref1, _ref2, _ref3;
+    var currentIndex, prefix, tagsInUrl, url, _ref, _ref1, _ref2, _ref3;
 
     tagsInUrl = ((_ref = this.selectedTags) != null ? _ref.slice(0, this.depth) : void 0) || [];
     currentIndex = (_ref1 = this.selectedTags) != null ? _ref1.indexOf(this.model.get('tagName')) : void 0;
     if ((!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref2 = this.selectedTags) != null ? _ref2.length : void 0) > this.depth + 1) && (!(currentIndex + 1 === ((_ref3 = this.selectedTags) != null ? _ref3.length : void 0) && this.depth === currentIndex))) {
       tagsInUrl.push(this.model.get('tagName'));
     }
-    url = "#";
+    if (this.viewType === "#tobedone") {
+      url = "#";
+      prefix = 'todoByTags';
+    } else {
+      url = "#archived";
+      prefix = 'archivedByTags';
+    }
     if (tagsInUrl.length > 0) {
-      url = "" + url + "byTags";
+      url = "#" + prefix;
       tagsInUrl.forEach(function(item) {
         return url = "" + url + "/" + item;
       });
     }
     return url;
+  };
+
+  MenuItemView.prototype.beforeRender = function() {
+    if (this.model.get('isMagic')) {
+      return this.$el.addClass('magic');
+    }
   };
 
   MenuItemView.prototype.afterRender = function() {
@@ -1018,7 +1039,9 @@ module.exports = MenuItemView = (function(_super) {
           }),
           selectedTags: _this.selectedTags,
           depth: _this.depth + 1,
-          baseCollection: _this.baseCollection
+          viewType: _this.viewType,
+          baseCollection: _this.baseCollection,
+          archivedCollection: _this.archivedCollection
         });
         _this.views.add(menuItem);
         return _this.$el.children(_this.collectionEl).append(menuItem.render().$el);
@@ -1027,7 +1050,7 @@ module.exports = MenuItemView = (function(_super) {
   };
 
   MenuItemView.prototype.buildTagsList = function() {
-    var excludedItems, includedTags, tagsList;
+    var collection, excludedItems, includedTags, tagsList;
 
     excludedItems = this.selectedTags || [];
     excludedItems = excludedItems.slice(0, this.depth + 1);
@@ -1036,7 +1059,12 @@ module.exports = MenuItemView = (function(_super) {
     if (this.collection != null) {
       delete this.collection;
     }
-    this.collection = this.baseCollection.getByTags(includedTags);
+    if (this.viewType === "#tobedone") {
+      collection = this.baseCollection;
+    } else {
+      collection = this.archivedCollection;
+    }
+    this.collection = collection.getByTags(includedTags);
     tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags);
     return tagsList;
   };
@@ -1062,10 +1090,6 @@ module.exports = MenuView = (function(_super) {
   MenuView.prototype.el = '#menu';
 
   MenuView.prototype.template = require('./templates/menu');
-
-  MenuView.prototype.events = {
-    'click li.first-level': 'onClick'
-  };
 
   MenuView.prototype.views = null;
 
@@ -1130,28 +1154,60 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.afterRender = function() {
-    var selector, tags,
+    var isActive, prefix, submenuEl, tags, template, typeViewEl, untaggedNum, untaggedView, untaggedViewContent, _ref,
       _this = this;
 
-    tags = this.baseCollection.getAllTags();
+    typeViewEl = this.$("" + this.viewType);
+    submenuEl = this.$("" + this.viewType + " > .submenu");
+    if (this.viewType === "#tobedone") {
+      this.collection = this.baseCollection;
+    } else {
+      this.collection = this.archivedCollection;
+    }
+    untaggedNum = this.collection.filter(function(task) {
+      return task.get('tags').length === 0;
+    }).length;
+    if (untaggedNum > 0) {
+      template = require('./templates/menu_item');
+      if (this.viewType === "#tobedone") {
+        prefix = 'todoByTags';
+      } else {
+        prefix = 'archivedByTags';
+      }
+      isActive = ((_ref = this.activeTags) != null ? _ref.length : void 0) === 0 ? " active selected" : "";
+      untaggedView = $('<li class="menu-tag magic' + isActive + '"></li>');
+      untaggedViewContent = template({
+        url: "#" + prefix + "/",
+        model: {
+          tagName: 'untagged',
+          count: untaggedNum
+        }
+      });
+      untaggedView.append(untaggedViewContent);
+      submenuEl.append(untaggedView);
+    }
+    tags = this.collection.getAllTags();
     tags.forEach(function(tagInfo) {
       var menuItem;
 
       menuItem = new MenuItemView({
         model: new Backbone.Model({
           tagName: tagInfo.get('id'),
-          count: tagInfo.get('count')
+          count: tagInfo.get('count'),
+          isMagic: tagInfo.get('isMagic')
         }),
         selectedTags: _this.activeTags,
         depth: 0,
-        baseCollection: _this.baseCollection
+        viewType: _this.viewType,
+        baseCollection: _this.baseCollection,
+        archivedCollection: _this.archivedCollection
       });
       _this.views.add(menuItem);
-      return $(_this.collectionEl).append(menuItem.render().$el);
+      return submenuEl.append(menuItem.render().$el);
     });
-    if (this.highlightedItem != null) {
-      selector = ".permanent li:nth-of-type(" + this.highlightedItem + ")";
-      this.$el.find(selector).addClass('selected');
+    typeViewEl.addClass('active');
+    if (this.activeTags == null) {
+      typeViewEl.addClass('selected');
     }
     return this.$el;
   };
@@ -1161,12 +1217,11 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.setActive = function(tags) {
-    this.activeTags = tags;
-    return this.render();
+    return this.activeTags = tags;
   };
 
-  MenuView.prototype.setHighlightedItem = function(highlightedItem) {
-    return this.highlightedItem = highlightedItem;
+  MenuView.prototype.setViewType = function(viewType) {
+    return this.viewType = viewType;
   };
 
   return MenuView;
@@ -1766,7 +1821,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<ul class="permanent"><li class="first-level"><a href="#">All (' + escape((interp = allCount) == null ? '' : interp) + ')</a></li><li class="first-level"><a href="#untagged">Untagged (' + escape((interp = untaggedCount) == null ? '' : interp) + ')</a></li><li class="first-level"><a href="#archived">Archived (' + escape((interp = archivedCount) == null ? '' : interp) + ')</a></li></ul><ul class="tags"></ul>');
+buf.push('<ul><li id="tobedone" class="first-level"><a href="#">To-do (' + escape((interp = allCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li><li id="archived" class="first-level"><a href="#archived">Archived (' + escape((interp = archivedCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li></ul>');
 }
 return buf.join("");
 };
