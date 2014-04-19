@@ -1202,6 +1202,7 @@ module.exports = TaskFormView = (function(_super) {
   TaskFormView.prototype.events = {
     'keydown input': 'onKeydown',
     'keyup input': 'onKeyup',
+    'blur input': 'onSubmit',
     'click button': 'onSubmit'
   };
 

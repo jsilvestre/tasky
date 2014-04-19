@@ -11,6 +11,7 @@ module.exports = class TaskFormView extends BaseView
     events:
         'keydown input': 'onKeydown'
         'keyup input': 'onKeyup'
+        'blur input': 'onSubmit'
         'click button': 'onSubmit'
 
     initialize: (options) ->
