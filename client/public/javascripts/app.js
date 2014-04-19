@@ -576,21 +576,17 @@ module.exports = Task = (function(_super) {
   };
 
   Task.prototype.getPreviousWithTags = function(tags) {
-    var previousPosition, previousTask;
+    var nextIndex, nextTask, order;
 
-    if (tags === null) {
-      return this.collection.get(this.get('previous'));
-    }
-    previousTask = this.collection.get(this.get('previous'));
-    previousPosition = this.collection.indexOf(previousTask);
-    while (!((previousTask == null) || previousTask.containsTags(tags))) {
-      previousTask = this.collection.get(previousTask.get('previous'));
-      previousPosition = this.collection.indexOf(previousTask);
-    }
-    if ((previousTask != null) && previousTask.containsTags(tags)) {
-      return previousTask;
+    order = this.get('order');
+    nextTask = this.collection.find(function(task) {
+      return ((tags != null) && task.get('order') < order && task.containsTags(tags)) || ((tags == null) && task.get('order') < order);
+    });
+    nextIndex = this.collection.indexOf(nextTask);
+    if (nextIndex === -1) {
+      return _.last(this.collection.toArray());
     } else {
-      return null;
+      return this.collection.at(nextIndex - 1);
     }
   };
 

@@ -15,21 +15,17 @@ module.exports = class Task extends Backbone.Model
             return _.every tags, _.partial(_.contains, @get('tags'))
 
     getPreviousWithTags: (tags) ->
+        order = @get 'order'
+        nextTask = @collection.find (task) ->
+            return \
+            (tags? and task.get('order') < order and task.containsTags(tags)) \
+            or (not tags? and task.get('order') < order)
 
-        if tags is null
-            return @collection.get @get 'previous'
-
-        previousTask = @collection.get @get 'previous'
-        previousPosition = @collection.indexOf previousTask
-
-        until not previousTask? or previousTask.containsTags tags
-            previousTask = @collection.get previousTask.get 'previous'
-            previousPosition = @collection.indexOf previousTask
-
-        if previousTask? and previousTask.containsTags tags
-            return previousTask
+        nextIndex = @collection.indexOf nextTask
+        if nextIndex is -1
+            return _.last @collection.toArray()
         else
-            return null
+            return @collection.at nextIndex - 1
 
     @regex: /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g
     # helper function to extract tag from description
