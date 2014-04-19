@@ -984,7 +984,7 @@ module.exports = MenuItemView = (function(_super) {
 
     tagsInUrl = ((_ref = this.selectedTags) != null ? _ref.slice(0, this.depth) : void 0) || [];
     currentIndex = (_ref1 = this.selectedTags) != null ? _ref1.indexOf(this.model.get('tagName')) : void 0;
-    if ((!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref2 = this.selectedTags) != null ? _ref2.length : void 0) > this.depth + 1) && !(currentIndex + 1 === ((_ref3 = this.selectedTags) != null ? _ref3.length : void 0))) {
+    if ((!_.contains(tagsInUrl, this.model.get('tagName')) || ((_ref2 = this.selectedTags) != null ? _ref2.length : void 0) > this.depth + 1) && (!(currentIndex + 1 === ((_ref3 = this.selectedTags) != null ? _ref3.length : void 0) && this.depth === currentIndex))) {
       tagsInUrl.push(this.model.get('tagName'));
     }
     url = "#";

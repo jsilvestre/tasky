@@ -31,7 +31,9 @@ module.exports = class MenuItemView extends BaseView
         # and not the last selected tag
         if ((not _.contains(tagsInUrl, @model.get 'tagName') \
         or @selectedTags?.length > @depth + 1)) \
-        and not (currentIndex + 1 is @selectedTags?.length)
+        and  \
+        (not (currentIndex + 1 is @selectedTags?.length \
+        and @depth is currentIndex))
             tagsInUrl.push @model.get 'tagName'
 
         url = "#"
