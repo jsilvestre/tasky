@@ -897,7 +897,7 @@ module.exports = ArchiveTaskView = (function(_super) {
 
     date = Date.create(this.model.get('completionDate'));
     return _.extend(ArchiveTaskView.__super__.getRenderData.call(this), {
-      competionDate: date.format("{dd}/{MM}/{yyyy} at {hh}:{mm}")
+      competionDate: date.format("{dd}/{MM}/{yyyy} at {HH}:{mm}")
     });
   };
 

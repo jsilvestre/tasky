@@ -9,7 +9,7 @@ module.exports = class ArchiveTaskView extends TaskView
     getRenderData: ->
         date = Date.create @model.get 'completionDate'
         return _.extend super(),
-            competionDate: date.format "{dd}/{MM}/{yyyy} at {hh}:{mm}"
+            competionDate: date.format "{dd}/{MM}/{yyyy} at {HH}:{mm}"
 
     afterRender: -> # noop
 
