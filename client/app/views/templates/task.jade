@@ -1,4 +1,4 @@
 .task-container
-    button.toggle-state.button= t('todo button')
+    button(title="t('todo button')").toggle-state.button= t('todo button')
     .todo-field
         input(value="#{model.description}", tabindex="#{tabindex}")

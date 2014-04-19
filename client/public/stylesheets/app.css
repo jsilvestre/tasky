@@ -987,6 +987,10 @@ ul#task-list-done {
   width: 75px;
   padding: 8px;
   font-size: 13px;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .task .button.disabled {
   -webkit-box-shadow: none;

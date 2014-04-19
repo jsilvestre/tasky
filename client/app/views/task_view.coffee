@@ -91,8 +91,10 @@ module.exports = class TaskView extends BaseView
     onMouseEnter: ->
         button = @$ 'button'
         if @model.get 'done'
+            button.attr 'title', t 'todo button?'
             button.html t 'todo button?'
         else
+            button.attr 'title', t 'done button?'
             button.html t 'done button?'
 
     onMouseLeave: ->

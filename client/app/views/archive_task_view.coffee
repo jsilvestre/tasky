@@ -23,11 +23,14 @@ module.exports = class ArchiveTaskView extends TaskView
 
     onMouseEnter: ->
         button = @$ 'button'
-        if @model.get 'done' then button.html t 'restore button?'
+        if @model.get 'done'
+            button.prop 'title', t 'restore button?'
+            button.html t 'restore button?'
 
     onMouseLeave: ->
         button = @$ 'button'
-        if @model.get 'done' then button.html t 'done button'
+        if @model.get 'done'
+            button.html t 'done button'
 
 
 

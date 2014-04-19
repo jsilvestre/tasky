@@ -984,6 +984,7 @@ module.exports = ArchiveTaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
+      button.prop('title', t('restore button?'));
       return button.html(t('restore button?'));
     }
   };
@@ -1850,8 +1851,10 @@ module.exports = TaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
+      button.attr('title', t('todo button?'));
       return button.html(t('todo button?'));
     } else {
+      button.attr('title', t('done button?'));
       return button.html(t('done button?'));
     }
   };
@@ -1922,7 +1925,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="task-container"><button class="toggle-state button">');
+buf.push('<div class="task-container"><button title="t(\'todo button\')" class="toggle-state button">');
 var __val__ = t('todo button')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</button><div class="todo-field"><input');
@@ -1939,7 +1942,9 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="task-container"><button class="toggle-state button">');
+buf.push('<div class="task-container"><button');
+buf.push(attrs({ 'title':("" + (t('done button')) + ""), "class": ('toggle-state') + ' ' + ('button') }, {"title":true}));
+buf.push('>');
 var __val__ = t('done button')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</button><div class="todo-field"><input');
