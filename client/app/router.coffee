@@ -12,7 +12,6 @@ module.exports = class Router extends Backbone.Router
 
     routes:
         '': 'main'
-        'untagged': 'untagged'
         'archived': 'archived'
         'todoByTags/*tags': 'todoByTags'
         'archivedByTags/*tags': 'archivedByTags'
@@ -44,12 +43,6 @@ module.exports = class Router extends Backbone.Router
         @taskList.render()
         @menu.setViewType '#tobedone'
         @menu.setActive null
-        @menu.render()
-
-    untagged: ->
-        @taskList.setTags []
-        @taskList.render()
-        @menu.setActive []
         @menu.render()
 
     archived: ->

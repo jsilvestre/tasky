@@ -81,11 +81,12 @@ module.exports = class TaskListView extends BaseView
 
         # if an element has been created or removed, focus task accordingly
         if @taskModelCIDToFocus?
-            view =  @views.findByModelCid(@taskModelCIDToFocus)
+            view =  @views.findByModelCid @taskModelCIDToFocus
             if view?
                 view.setFocus()
             else
                 console.log "something went wrong trying to focus"
+                @taskForm.$el.find('input').focus()
             @taskModelCIDToFocus = null
         else
             @taskForm.$el.find('input').focus()

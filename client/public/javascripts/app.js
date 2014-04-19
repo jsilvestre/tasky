@@ -576,17 +576,18 @@ module.exports = Task = (function(_super) {
   };
 
   Task.prototype.getPreviousWithTags = function(tags) {
-    var nextIndex, nextTask, order;
+    var nextIndex, nextTask, order, subCollection;
 
     order = this.get('order');
-    nextTask = this.collection.find(function(task) {
+    subCollection = this.collection.getByTags(tags);
+    nextTask = subCollection.find(function(task) {
       return ((tags != null) && task.get('order') < order && task.containsTags(tags)) || ((tags == null) && task.get('order') < order);
     });
-    nextIndex = this.collection.indexOf(nextTask);
+    nextIndex = subCollection.indexOf(nextTask);
     if (nextIndex === -1) {
-      return _.last(this.collection.toArray());
+      return _.last(subCollection.toArray());
     } else {
-      return this.collection.at(nextIndex - 1);
+      return subCollection.at(nextIndex - 1);
     }
   };
 
@@ -638,7 +639,6 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.routes = {
     '': 'main',
-    'untagged': 'untagged',
     'archived': 'archived',
     'todoByTags/*tags': 'todoByTags',
     'archivedByTags/*tags': 'archivedByTags'
@@ -678,13 +678,6 @@ module.exports = Router = (function(_super) {
     this.taskList.render();
     this.menu.setViewType('#tobedone');
     this.menu.setActive(null);
-    return this.menu.render();
-  };
-
-  Router.prototype.untagged = function() {
-    this.taskList.setTags([]);
-    this.taskList.render();
-    this.menu.setActive([]);
     return this.menu.render();
   };
 
@@ -1467,6 +1460,7 @@ module.exports = TaskListView = (function(_super) {
         view.setFocus();
       } else {
         console.log("something went wrong trying to focus");
+        this.taskForm.$el.find('input').focus();
       }
       this.taskModelCIDToFocus = null;
     } else {
