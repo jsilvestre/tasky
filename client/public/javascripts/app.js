@@ -93,8 +93,21 @@
 require.register("application", function(exports, require, module) {
 module.exports = {
   initialize: function() {
-    var Router;
+    var Router, e, locales;
 
+    this.locale = window.locale;
+    delete window.locale;
+    this.polyglot = new Polyglot({
+      locale: this.locale
+    });
+    try {
+      locales = require('locales/' + this.locale);
+    } catch (_error) {
+      e = _error;
+      locales = require('locales/en');
+    }
+    this.polyglot.extend(locales);
+    window.t = this.polyglot.t.bind(this.polyglot);
     Router = require('router');
     this.router = new Router();
     Backbone.history.start();
@@ -541,6 +554,62 @@ module.exports = ViewCollection = (function(_super) {
 
 });
 
+;require.register("locales/en", function(exports, require, module) {
+module.exports = {
+  "todo": "To-do",
+  "archived": "Archived",
+  "untagged": "untagged",
+  "all tasks": "All tasks",
+  "all archived tasks": "All archived tasks",
+  "untagged tasks": "Untagged tasks",
+  "tasks of": "Tasks related to %{tagsList}",
+  "archived tasks of": "Archived tasks related to %{tagsList}",
+  "and": "and",
+  "archived date format": "{yyyy}/{MM}{dd} at {HH}:{mm}",
+  "actions headline": "Actions",
+  "completed headline": "Completed on",
+  "restore button": "Restore",
+  "restore button?": "Restore?",
+  "done button": "Done",
+  "done button?": "Done?",
+  "todo button": "Todo",
+  "todo button?": "Todo?",
+  "new button": "New",
+  "archive button": "Archive all done tasks",
+  "form headline tags": "What's next about %{tagsList}?",
+  "form headline": "What's next?"
+};
+
+});
+
+;require.register("locales/fr", function(exports, require, module) {
+module.exports = {
+  "todo": "A faire",
+  "archived": "Archivées",
+  "untagged": "non taguées",
+  "all tasks": "Toutes les tâches",
+  "all archived tasks": "Toutes les tâches archivées",
+  "untagged tasks": "Tâches non taguées",
+  "tasks of": "Tâches correspondant au tag %{tagsList} |||| Tâches correspondant aux tags %{tagsList}",
+  "archived tasks of": "Tâches archivées correspondant au tag %{tagsList} |||| Tâches archivées correspondant aux tags %{tagsList}",
+  "and": "et",
+  "archived date format": "{dd}/{MM}/{yyyy} à {HH}h{mm}",
+  "actions headline": "Actions",
+  "completed headline": "Complétée le",
+  "restore button": "Restaurer",
+  "restore button?": "Restaurer ?",
+  "done button": "Fait",
+  "done button?": "Fait ?",
+  "todo button": "A faire",
+  "todo button?": "A faire ?",
+  "new button": "Ajouter",
+  "archive button": "Archiver toutes les tâches faites",
+  "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?",
+  "form headline": "Que devez-vous faire ?"
+};
+
+});
+
 ;require.register("models/task", function(exports, require, module) {
 var Task, _ref,
   __hasProp = {}.hasOwnProperty,
@@ -850,14 +919,17 @@ module.exports = ArchiveListView = (function(_super) {
     var tagsList;
 
     if (this.collection.length === this.baseCollection.length) {
-      return "All archived tasks";
+      return t('all archived tasks');
     } else {
       tagsList = Utils.buildTagsList(this.selectedTags, {
         tagPrefix: '#',
         regularSeparator: ', ',
-        lastSeparator: ' and '
+        lastSeparator: " " + (t('and')) + " "
       });
-      return "Archived tasks of " + tagsList;
+      return t('archived tasks of', {
+        tagsList: tagsList,
+        smart_count: this.selectedTags.length
+      });
     }
   };
 
@@ -893,7 +965,7 @@ module.exports = ArchiveTaskView = (function(_super) {
 
     date = Date.create(this.model.get('completionDate'));
     return _.extend(ArchiveTaskView.__super__.getRenderData.call(this), {
-      competionDate: date.format("{dd}/{MM}/{yyyy} at {HH}:{mm}")
+      competionDate: date.format(t('archived date format'))
     });
   };
 
@@ -912,7 +984,7 @@ module.exports = ArchiveTaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
-      return button.html('Restore?');
+      return button.html(t('restore button?'));
     }
   };
 
@@ -921,7 +993,7 @@ module.exports = ArchiveTaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
-      return button.html('Done');
+      return button.html(t('done button'));
     }
   };
 
@@ -1172,7 +1244,7 @@ module.exports = MenuView = (function(_super) {
       untaggedViewContent = template({
         url: "#" + prefix + "/",
         model: {
-          tagName: 'untagged',
+          tagName: t('untagged'),
           count: untaggedNum
         }
       });
@@ -1289,10 +1361,10 @@ module.exports = TaskFormView = (function(_super) {
     inputVal = this.$('input').val();
     if (inputVal.length === 0) {
       this.$('button').addClass('disabled');
-      this.$('button').html("New");
+      this.$('button').html(t('new'));
     } else {
       this.$('button').removeClass('disabled');
-      this.$('button').html("Add");
+      this.$('button').html(t('add'));
     }
     if (key === 13) {
       this.onSubmit();
@@ -1325,12 +1397,14 @@ module.exports = TaskFormView = (function(_super) {
     tagsList = Utils.buildTagsList(this.tags, {
       tagPrefix: '#',
       regularSeparator: ', ',
-      lastSeparator: ' and '
+      lastSeparator: " " + (t('and')) + " "
     });
     if (tagsList.length > 0) {
-      return "What's next with " + tagsList + "?";
+      return t('form headline tags', {
+        tagsList: tagsList
+      });
     } else {
-      return "What's next?";
+      return t('form headline');
     }
   };
 
@@ -1473,16 +1547,19 @@ module.exports = TaskListView = (function(_super) {
     var tagsList;
 
     if (this.collection.length === this.baseCollection.length) {
-      return "All tasks";
+      return t('all tasks');
     } else if ((this.selectedTags != null) && this.selectedTags.length === 0) {
-      return "Untagged tasks";
+      return t('untagged tasks');
     } else {
       tagsList = Utils.buildTagsList(this.selectedTags, {
         tagPrefix: '#',
         regularSeparator: ', ',
         lastSeparator: ' and '
       });
-      return "Tasks of " + tagsList;
+      return t('tasks of', {
+        tagsList: tagsList,
+        smart_count: this.selectedTags.length
+      });
     }
   };
 
@@ -1621,7 +1698,7 @@ module.exports = TaskListView = (function(_super) {
         _this.views.remove(taskView);
         return taskView.$el.fadeOut(function() {
           taskView.destroy();
-          _this.$('#archive-action').html('Archive all done tasks');
+          _this.$('#archive-action').html(t('archive button'));
           return _this.trigger('archive-tasks', tasksToArchive);
         });
       } else {
@@ -1686,7 +1763,7 @@ module.exports = TaskView = (function(_super) {
   TaskView.prototype.afterRender = function() {
     if (this.model.get('done')) {
       this.$el.addClass('done');
-      return this.$('button').html('Done');
+      return this.$('button').html(t('done button'));
     } else {
       return this.$el.removeClass('done');
     }
@@ -1773,9 +1850,9 @@ module.exports = TaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
-      return button.html('Todo?');
+      return button.html(t('todo button?'));
     } else {
-      return button.html('Done?');
+      return button.html(t('done button?'));
     }
   };
 
@@ -1784,9 +1861,9 @@ module.exports = TaskView = (function(_super) {
 
     button = this.$('button');
     if (this.model.get('done')) {
-      return button.html('Done');
+      return button.html(t('done button'));
     } else {
-      return button.html('Todo');
+      return button.html(t('todo button'));
     }
   };
 
@@ -1819,7 +1896,7 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<ul><li id="tobedone" class="first-level"><a href="#">To-do (' + escape((interp = allCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li><li id="archived" class="first-level"><a href="#archived">Archived (' + escape((interp = archivedCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li></ul>');
+buf.push('<ul><li id="tobedone" class="first-level"><a href="#">' + escape((interp = t('todo')) == null ? '' : interp) + ' (' + escape((interp = allCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li><li id="archived" class="first-level"><a href="#archived">' + escape((interp = t('archived')) == null ? '' : interp) + ' (' + escape((interp = archivedCount) == null ? '' : interp) + ')</a><ul class="submenu"></ul></li></ul>');
 }
 return buf.join("");
 };
@@ -1845,7 +1922,10 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="task-container"><button class="toggle-state button">Todo</button><div class="todo-field"><input');
+buf.push('<div class="task-container"><button class="toggle-state button">');
+var __val__ = t('todo button')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</button><div class="todo-field"><input');
 buf.push(attrs({ 'value':("" + (model.description) + ""), 'tabindex':("" + (tabindex) + "") }, {"value":true,"tabindex":true}));
 buf.push('/></div></div>');
 }
@@ -1859,9 +1939,12 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="task-container"><button class="toggle-state button">Done</button><div class="todo-field"><input');
+buf.push('<div class="task-container"><button class="toggle-state button">');
+var __val__ = t('done button')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</button><div class="todo-field"><input');
 buf.push(attrs({ 'value':("" + (model.description) + ""), 'tabindex':("" + (tabindex) + "") }, {"value":true,"tabindex":true}));
-buf.push('/></div></div><div class="todo-completionDate"><p>Completed on ' + escape((interp = competionDate) == null ? '' : interp) + '</p></div>');
+buf.push('/></div></div><div class="todo-completionDate"><p>' + escape((interp = t('completed headline')) == null ? '' : interp) + ' ' + escape((interp = competionDate) == null ? '' : interp) + '</p></div>');
 }
 return buf.join("");
 };
@@ -1873,7 +1956,10 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div class="task-container"><button class="toggle-state button disabled">New</button><div class="todo-field"><input');
+buf.push('<div class="task-container"><button class="toggle-state button disabled">');
+var __val__ = t('new button')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</button><div class="todo-field"><input');
 buf.push(attrs({ 'tabindex':("1"), 'placeholder':("" + (formPlaceholder) + "") }, {"tabindex":true,"placeholder":true}));
 buf.push('/></div></div>');
 }
@@ -1887,7 +1973,10 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<h1>' + escape((interp = title) == null ? '' : interp) + '</h1><p id="actions">Actions:<button id="archive-action" class="button disable">Archive all done tasks</button></p><div id="new-task" class="task"></div><ul id="task-list"></ul>');
+buf.push('<h1>' + escape((interp = title) == null ? '' : interp) + '</h1><p id="actions">' + escape((interp = t('actions headline')) == null ? '' : interp) + ':<button id="archive-action" class="button disable">');
+var __val__ = t('archive button')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</button></p><div id="new-task" class="task"></div><ul id="task-list"></ul>');
 }
 return buf.join("");
 };

@@ -68,12 +68,14 @@ module.exports = class ArchiveListView extends BaseView
     # Override
     getTitle: ->
         if @collection.length is @baseCollection.length
-            return "All archived tasks"
+            return t 'all archived tasks'
         else
             tagsList = Utils.buildTagsList @selectedTags,
                             tagPrefix: '#'
                             regularSeparator: ', '
-                            lastSeparator: ' and '
+                            lastSeparator: " #{t('and')} "
 
-            return "Archived tasks of #{tagsList}"
+            return t 'archived tasks of',
+                tagsList: tagsList
+                smart_count: @selectedTags.length
 

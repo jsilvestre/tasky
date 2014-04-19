@@ -45,10 +45,10 @@ module.exports = class TaskFormView extends BaseView
         # change the submit button state
         if inputVal.length is 0
             @$('button').addClass 'disabled'
-            @$('button').html "New"
+            @$('button').html t 'new'
         else
             @$('button').removeClass 'disabled'
-            @$('button').html "Add"
+            @$('button').html t 'add'
 
         # 'enter' submit the form
         @onSubmit() if key is 13
@@ -67,9 +67,9 @@ module.exports = class TaskFormView extends BaseView
         tagsList = Utils.buildTagsList @tags,
                             tagPrefix: '#'
                             regularSeparator: ', '
-                            lastSeparator: ' and '
+                            lastSeparator: " #{t('and')} "
 
         if tagsList.length > 0
-            return "What's next with #{tagsList}?"
+            return t 'form headline tags', tagsList: tagsList
         else
-            return "What's next?"
+            return t 'form headline'

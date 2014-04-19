@@ -77,7 +77,7 @@ module.exports = class MenuView extends BaseView
             untaggedViewContent = template
                 url: "##{prefix}/"
                 model:
-                    tagName: 'untagged'
+                    tagName: t 'untagged'
                     count: untaggedNum
             untaggedView.append untaggedViewContent
             submenuEl.append untaggedView

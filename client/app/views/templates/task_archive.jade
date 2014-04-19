@@ -1,6 +1,6 @@
 .task-container
-    button.toggle-state.button Done
+    button.toggle-state.button= t('done button')
     .todo-field
         input(value="#{model.description}", tabindex="#{tabindex}")
 .todo-completionDate
-    p Completed on #{competionDate}
+    p #{t('completed headline')} #{competionDate}

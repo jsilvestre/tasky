@@ -22,7 +22,7 @@ module.exports = class TaskView extends BaseView
     afterRender: ->
         if @model.get 'done'
             @$el.addClass 'done'
-            @$('button').html 'Done'
+            @$('button').html t 'done button'
         else
             @$el.removeClass 'done'
 
@@ -91,16 +91,16 @@ module.exports = class TaskView extends BaseView
     onMouseEnter: ->
         button = @$ 'button'
         if @model.get 'done'
-            button.html 'Todo?'
+            button.html t 'todo button?'
         else
-            button.html 'Done?'
+            button.html t 'done button?'
 
     onMouseLeave: ->
         button = @$ 'button'
         if @model.get 'done'
-            button.html 'Done'
+            button.html t 'done button'
         else
-            button.html 'Todo'
+            button.html t 'todo button'
 
     destroy: ->
         clearTimeout @focusInterval

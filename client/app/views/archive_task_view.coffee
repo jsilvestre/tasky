@@ -9,7 +9,7 @@ module.exports = class ArchiveTaskView extends TaskView
     getRenderData: ->
         date = Date.create @model.get 'completionDate'
         return _.extend super(),
-            competionDate: date.format "{dd}/{MM}/{yyyy} at {HH}:{mm}"
+            competionDate: date.format t 'archived date format'
 
     afterRender: -> # noop
 
@@ -23,11 +23,11 @@ module.exports = class ArchiveTaskView extends TaskView
 
     onMouseEnter: ->
         button = @$ 'button'
-        if @model.get 'done' then button.html 'Restore?'
+        if @model.get 'done' then button.html t 'restore button?'
 
     onMouseLeave: ->
         button = @$ 'button'
-        if @model.get 'done' then button.html 'Done'
+        if @model.get 'done' then button.html t 'done button'
 
 
 

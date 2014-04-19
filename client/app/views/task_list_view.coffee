@@ -95,16 +95,18 @@ module.exports = class TaskListView extends BaseView
 
     getTitle: ->
         if @collection.length is @baseCollection.length
-            return "All tasks"
+            return t 'all tasks'
         else if @selectedTags? and @selectedTags.length is 0
-            return "Untagged tasks"
+            return t 'untagged tasks'
         else
             tagsList = Utils.buildTagsList @selectedTags,
                             tagPrefix: '#'
                             regularSeparator: ', '
                             lastSeparator: ' and '
 
-            return "Tasks of #{tagsList}"
+            return t 'tasks of',
+                tagsList: tagsList
+                smart_count: @selectedTags.length
 
     createNewTask: (options = {}) ->
         tagsList = Utils.buildTagsList @selectedTags, tagPrefix: '#'
@@ -208,7 +210,7 @@ module.exports = class TaskListView extends BaseView
                 @views.remove taskView
                 taskView.$el.fadeOut =>
                     taskView.destroy()
-                    @$('#archive-action').html 'Archive all done tasks'
+                    @$('#archive-action').html t 'archive button'
                     @trigger 'archive-tasks', tasksToArchive
             else
                 @stopListening taskView
