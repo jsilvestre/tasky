@@ -82,6 +82,10 @@ module.exports = class MenuView extends BaseView
             untaggedView.append untaggedViewContent
             submenuEl.append untaggedView
 
+        if @viewType is "#tobedone"
+            archivedListEl = @$ '#archived'
+            @$('ul:first-child').prepend archivedListEl
+
         tags = @collection.getAllTags()
         tags.forEach (tagInfo) =>
             menuItem = new MenuItemView

@@ -1154,7 +1154,7 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.afterRender = function() {
-    var isActive, prefix, submenuEl, tags, template, typeViewEl, untaggedNum, untaggedView, untaggedViewContent, _ref,
+    var archivedListEl, isActive, prefix, submenuEl, tags, template, typeViewEl, untaggedNum, untaggedView, untaggedViewContent, _ref,
       _this = this;
 
     typeViewEl = this.$("" + this.viewType);
@@ -1185,6 +1185,10 @@ module.exports = MenuView = (function(_super) {
       });
       untaggedView.append(untaggedViewContent);
       submenuEl.append(untaggedView);
+    }
+    if (this.viewType === "#tobedone") {
+      archivedListEl = this.$('#archived');
+      this.$('ul:first-child').prepend(archivedListEl);
     }
     tags = this.collection.getAllTags();
     tags.forEach(function(tagInfo) {
