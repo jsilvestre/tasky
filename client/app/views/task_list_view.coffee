@@ -102,7 +102,7 @@ module.exports = class TaskListView extends BaseView
             tagsList = Utils.buildTagsList @selectedTags,
                             tagPrefix: '#'
                             regularSeparator: ', '
-                            lastSeparator: ' and '
+                            lastSeparator: " #{t('and')} "
 
             return t 'tasks of',
                 tagsList: tagsList

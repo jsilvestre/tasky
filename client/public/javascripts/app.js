@@ -1555,7 +1555,7 @@ module.exports = TaskListView = (function(_super) {
       tagsList = Utils.buildTagsList(this.selectedTags, {
         tagPrefix: '#',
         regularSeparator: ', ',
-        lastSeparator: ' and '
+        lastSeparator: " " + (t('and')) + " "
       });
       return t('tasks of', {
         tagsList: tagsList,
