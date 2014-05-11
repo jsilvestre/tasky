@@ -45,10 +45,8 @@ module.exports = class TaskFormView extends BaseView
         # change the submit button state
         if inputVal.length is 0
             @$('button').addClass 'disabled'
-            @$('button').html t 'new'
         else
             @$('button').removeClass 'disabled'
-            @$('button').html t 'add'
 
         # 'enter' submit the form
         @onSubmit() if key is 13
