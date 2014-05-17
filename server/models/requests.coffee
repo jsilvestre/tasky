@@ -7,7 +7,9 @@ module.exports =
         all: americano.defaultRequests.all
         byState: (doc) -> emit doc.state, doc
         byArchiveState: (doc) -> emit doc.isArchived, doc
-        byOrder: (doc) -> emit doc.order, doc
+        byOrder: (doc) ->
+            unless doc.isArchived
+                emit doc.order, doc
 
     cozy_instance:
         all: americano.defaultRequests.all
