@@ -9,11 +9,13 @@ module.exports =
 
     'tasks':
         get: tasks.all
-        post: tasks.create
+        post: [tasks.reindexationMiddleware, tasks.create]
 
     'taskID':
         param : tasks.fetch
     'tasks/:taskID':
-        put: tasks.update
+        put: [tasks.reindexationMiddleware, tasks.update]
         del: tasks.delete
+
+    'tasks/reindex': post: tasks.reindex
 

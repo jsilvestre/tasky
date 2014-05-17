@@ -1,4 +1,11 @@
 Task = require '../models/tasky'
+reindexer = require '../lib/reindexer'
+
+module.exports.reindexationMiddleware = (req, res, next) ->
+    if reindexer.isReindexing()
+        res.send 400, error: "reindexation is occuring, retry later"
+    else
+        next()
 
 module.exports.all = (req, res) ->
     Task.all (err, tasks) ->
@@ -32,3 +39,10 @@ module.exports.delete = (req, res) ->
             res.send 500, "An error occured while deleting a task -- #{err}"
         else
             res.send 204, success: true
+
+module.exports.reindex = (req, res) ->
+    reindexer.reindex (err, tasks) ->
+        if err?
+            res.send 500, error: error
+        else
+            res.send 200, tasks

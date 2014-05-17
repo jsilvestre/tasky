@@ -7,21 +7,21 @@ module.exports = class TaskCollection extends Backbone.Collection
     model: Task
 
     comparator: (a, b) ->
-        if a.get('order') > b.get('order')
+        if a.get('order') < b.get('order')
             return -1
         else if a.get('order') is b.get('order')
             return 0
         else return 1
 
     getNewOrder: (prev, next) ->
-        nextOrder = if next? then next.get 'order' else 0.0
 
-        if prev?
-            prevOrder = prev.get 'order'
-            # defined in server/controllers/index
-            return prevOrder - (prevOrder - nextOrder) / DIVISOR
-        else
-            return nextOrder + 1.0
+        topBoundary = if next? then next.get 'order' else Number.MAX_VALUE
+        lowBoundary = if prev? then prev.get 'order' else 0.0
+
+        step = (topBoundary - lowBoundary) / 2
+        order = lowBoundary + step
+
+        return {order, step}
 
     # Returns tags once
     getAllTags: -> return TagsCollection.extractFromTasks @
@@ -38,3 +38,13 @@ module.exports = class TaskCollection extends Backbone.Collection
 
         return new BackboneProjections.Filtered @,
                 filter: (task) -> task.containsTags tags
+
+    reindex: ->
+        @trigger 'reindexing'
+        $.ajax 'tasks/reindex',
+            method: 'POST'
+            success: (data) =>
+                data.forEach (task) => @get(task.id).set 'order', task.order
+                @trigger 'reindexed'
+            error: (data) ->
+                @trigger 'reindexed', data

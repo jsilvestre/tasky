@@ -21,3 +21,4 @@ module.exports =
     "archive button": "Archiver toutes les tâches faites"
     "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?"
     "form headline": "Que devez-vous faire ?"
+    "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter..."

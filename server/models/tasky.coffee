@@ -19,6 +19,11 @@ Task.all = (callback) ->
         err = err or tasks.error
         callback err, tasks
 
+Task.allInInterval = (options, callback) ->
+    Task.request 'byOrder', options, (err, tasks) ->
+        err = err or tasks.error
+        callback err, tasks
+
 Task.allNotArchived = (callback) ->
     # null for backward compatibility
     params = keys: [false, null]

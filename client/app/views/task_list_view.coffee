@@ -14,13 +14,31 @@ module.exports = class TaskListView extends BaseView
     views: null
     collectionEl: 'ul#task-list'
 
+    isReindexing: false
+
     events:
         'click #archive-action': 'onArchiveClicked'
+        'click h1': 'reindex'
+
+    reindex: ->
+        @baseCollection.reindex()
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @views = new Backbone.ChildViewContainer()
         super options
+
+    initialize: ->
+        @listenTo @baseCollection, 'reindexing', ->
+            @isReindexing = true
+            $('#block').show()
+            $('#modal').show()
+
+        @listenTo @baseCollection, 'reindexed', (error) ->
+            @isReindexing = false
+            $('#block').hide()
+            $('#modal').hide()
+            console.log error if error?
 
     setTags: (tags) ->
         @selectedTags = tags
@@ -109,6 +127,8 @@ module.exports = class TaskListView extends BaseView
                 smart_count: @selectedTags.length
 
     createNewTask: (options = {}) ->
+        return if @isReindexing
+
         tagsList = Utils.buildTagsList @selectedTags, tagPrefix: '#'
         tagsList =  "#{tagsList} " if tagsList isnt ""
         content = options.content or tagsList
@@ -121,7 +141,8 @@ module.exports = class TaskListView extends BaseView
             index = nextIndex
         else
             newNext = @baseCollection.at 0
-            order = @baseCollection.getNewOrder null, newNext
+            {order, step} = @baseCollection.getNewOrder null, newNext
+            index = 0
 
         task = new Task
             description: content
@@ -132,6 +153,8 @@ module.exports = class TaskListView extends BaseView
         @taskModelCIDToFocus = if options.previous? then task.cid else null
 
         @baseCollection.create task, at: index
+
+        @checkIfReindexationIsNeeded step
 
     onFocusUp: (cid) ->
         currentModel = @views.findByModelCid(cid).model
@@ -156,35 +179,43 @@ module.exports = class TaskListView extends BaseView
             @views.findByModel(nextModel).setFocus()
 
     onMoveUp: (cid, toFocus = null) ->
+        return if @isReindexing
+
         currentModel = @views.findByModelCid(cid).model
         previousIndex = @baseCollection.indexOf(currentModel) - 1
         previous = @baseCollection.at previousIndex
+        previousOfPrevious = @baseCollection.at(previousIndex - 1) or null
 
-        if previousIndex >= 1
-            newOrder = null
-            newPrevious = @baseCollection.at previousIndex - 1
-            newOrder = @baseCollection.getNewOrder newPrevious, previous
-        else if previousIndex is 0
-            newOrder = @baseCollection.getNewOrder null, previous
-
-        else newOrder = null
-
-        if newOrder?
-            currentModel.set 'order', newOrder
-            currentModel.save()
+        if previousIndex >= 0
+            newOrder = @baseCollection.getNewOrder previousOfPrevious, previous
+            {order, step} = newOrder
+            task.set 'order', order
+            task.save()
             @baseCollection.sort()
             @taskModelCIDToFocus = if toFocus? then toFocus else cid
             @render()
 
+            @checkIfReindexationIsNeeded step
+
     onMoveDown: (cid) ->
+        return if @isReindexing
+
         currentModel = @views.findByModelCid(cid).model
         nextIndex = @baseCollection.indexOf(currentModel) + 1
         nextModel = @baseCollection.at nextIndex
+        nextOfNextModel = @baseCollection.at(nextIndex + 1) or null
 
-        # moving down is moving up the next element
-        if nextModel?
-            nextView = @views.findByModelCid(nextModel.cid)
-            @onMoveUp nextModel.cid, cid
+        # if not last item of the collection
+        if nextIndex isnt @baseCollection.length
+            newOrder = @baseCollection.getNewOrder nextModel, nextOfNextModel
+            {order, step} = newOrder
+            task.set 'order', order
+            task.save()
+            @baseCollection.sort()
+            @taskModelCIDToFocus = if toFocus? then toFocus else cid
+            @render()
+
+            @checkIfReindexationIsNeeded step
 
     updateArchiveButtonState: ->
         if @collection.where(done: true).length > 0
@@ -193,6 +224,8 @@ module.exports = class TaskListView extends BaseView
             @$('#archive-action').addClass 'disable'
 
     onArchiveClicked: ->
+        return if @isReindexing
+
         tasksToArchive = @collection.where done: true
         counterToArchive = tasksToArchive.length
         counterArchived = 0
@@ -222,3 +255,12 @@ module.exports = class TaskListView extends BaseView
             task.set 'isArchived', true
             task.once 'sync', done
             task.save()
+
+    checkIfReindexationIsNeeded: (step) ->
+
+        threshold = Math.pow 10, 8
+        maxThreshold = Number.MAX_VALUE / (@baseCollection.length + 1)
+        threshold = maxThreshold if maxThreshold < threshold
+
+        @baseCollection.reindex() if step <= threshold
+

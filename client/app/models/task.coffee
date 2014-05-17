@@ -19,8 +19,8 @@ module.exports = class Task extends Backbone.Model
         subCollection = @collection.getByTags tags
         nextTask = subCollection.find (task) ->
             return \
-            (tags? and task.get('order') < order and task.containsTags(tags)) \
-            or (not tags? and task.get('order') < order)
+            (tags? and task.get('order') > order and task.containsTags(tags)) \
+            or (not tags? and task.get('order') > order)
 
         nextIndex = subCollection.indexOf nextTask
         if nextIndex is -1
