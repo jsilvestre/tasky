@@ -1018,6 +1018,34 @@ ul#task-list-done {
 .task .todo-completionDate {
   font-size: 10px;
 }
+#block {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #333;
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
+}
+#modal {
+  display: none;
+  position: absolute;
+  width: 50%;
+  height: 110px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  padding: 20px;
+  border: 10px solid #34a6ff;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  background: #fff;
+  text-align: center;
+  overflow: auto;
+}
 
 .chromeframe { margin: 0.2em 0; background: #ccc; color: #000; padding: 0.2em 0; }
 .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }

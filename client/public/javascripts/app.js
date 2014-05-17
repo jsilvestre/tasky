@@ -239,7 +239,7 @@ module.exports = TaskCollection = (function(_super) {
   TaskCollection.prototype.model = Task;
 
   TaskCollection.prototype.comparator = function(a, b) {
-    if (a.get('order') > b.get('order')) {
+    if (a.get('order') < b.get('order')) {
       return -1;
     } else if (a.get('order') === b.get('order')) {
       return 0;
@@ -249,15 +249,16 @@ module.exports = TaskCollection = (function(_super) {
   };
 
   TaskCollection.prototype.getNewOrder = function(prev, next) {
-    var nextOrder, prevOrder;
+    var lowBoundary, order, step, topBoundary;
 
-    nextOrder = next != null ? next.get('order') : 0.0;
-    if (prev != null) {
-      prevOrder = prev.get('order');
-      return prevOrder - (prevOrder - nextOrder) / DIVISOR;
-    } else {
-      return nextOrder + 1.0;
-    }
+    topBoundary = next != null ? next.get('order') : Number.MAX_VALUE;
+    lowBoundary = prev != null ? prev.get('order') : 0.0;
+    step = (topBoundary - lowBoundary) / 2;
+    order = lowBoundary + step;
+    return {
+      order: order,
+      step: step
+    };
   };
 
   TaskCollection.prototype.getAllTags = function() {
@@ -278,6 +279,24 @@ module.exports = TaskCollection = (function(_super) {
     return new BackboneProjections.Filtered(this, {
       filter: function(task) {
         return task.containsTags(tags);
+      }
+    });
+  };
+
+  TaskCollection.prototype.reindex = function() {
+    var _this = this;
+
+    this.trigger('reindexing');
+    return $.ajax('tasks/reindex', {
+      method: 'POST',
+      success: function(data) {
+        data.forEach(function(task) {
+          return _this.get(task.id).set('order', task.order);
+        });
+        return _this.trigger('reindexed');
+      },
+      error: function(data) {
+        return this.trigger('reindexed', data);
       }
     });
   };
@@ -577,7 +596,8 @@ module.exports = {
   "new button": "New",
   "archive button": "Archive all done tasks",
   "form headline tags": "What's next about %{tagsList}?",
-  "form headline": "What's next?"
+  "form headline": "What's next?",
+  "reindexing message": "Server is reindexing all the tasks, please wait a little..."
 };
 
 });
@@ -586,12 +606,12 @@ module.exports = {
 module.exports = {
   "todo": "A faire",
   "archived": "Archivées",
-  "untagged": "non taguées",
+  "untagged": "sans étiquette",
   "all tasks": "Toutes les tâches",
   "all archived tasks": "Toutes les tâches archivées",
-  "untagged tasks": "Tâches non taguées",
-  "tasks of": "Tâches correspondant au tag %{tagsList} |||| Tâches correspondant aux tags %{tagsList}",
-  "archived tasks of": "Tâches archivées correspondant au tag %{tagsList} |||| Tâches archivées correspondant aux tags %{tagsList}",
+  "untagged tasks": "Tâches sans étiquettes",
+  "tasks of": "Tâches correspondant à l'étiquette %{tagsList} |||| Tâches correspondant aux étiquettes %{tagsList}",
+  "archived tasks of": "Tâches archivées correspondant à l'étiquette %{tagsList} |||| Tâches archivées correspondant aux étiquettes %{tagsList}",
   "and": "et",
   "archived date format": "{dd}/{MM}/{yyyy} à {HH}h{mm}",
   "actions headline": "Actions",
@@ -605,7 +625,8 @@ module.exports = {
   "new button": "Ajouter",
   "archive button": "Archiver toutes les tâches faites",
   "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?",
-  "form headline": "Que devez-vous faire ?"
+  "form headline": "Que devez-vous faire ?",
+  "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter..."
 };
 
 });
@@ -650,7 +671,7 @@ module.exports = Task = (function(_super) {
     order = this.get('order');
     subCollection = this.collection.getByTags(tags);
     nextTask = subCollection.find(function(task) {
-      return ((tags != null) && task.get('order') < order && task.containsTags(tags)) || ((tags == null) && task.get('order') < order);
+      return ((tags != null) && task.get('order') > order && task.containsTags(tags)) || ((tags == null) && task.get('order') > order);
     });
     nextIndex = subCollection.indexOf(nextTask);
     if (nextIndex === -1) {
@@ -1362,10 +1383,8 @@ module.exports = TaskFormView = (function(_super) {
     inputVal = this.$('input').val();
     if (inputVal.length === 0) {
       this.$('button').addClass('disabled');
-      this.$('button').html(t('new'));
     } else {
       this.$('button').removeClass('disabled');
-      this.$('button').html(t('add'));
     }
     if (key === 13) {
       this.onSubmit();
@@ -1441,8 +1460,15 @@ module.exports = TaskListView = (function(_super) {
 
   TaskListView.prototype.collectionEl = 'ul#task-list';
 
+  TaskListView.prototype.isReindexing = false;
+
   TaskListView.prototype.events = {
-    'click #archive-action': 'onArchiveClicked'
+    'click #archive-action': 'onArchiveClicked',
+    'click h1': 'reindex'
+  };
+
+  TaskListView.prototype.reindex = function() {
+    return this.baseCollection.reindex();
   };
 
   function TaskListView(options) {
@@ -1450,6 +1476,22 @@ module.exports = TaskListView = (function(_super) {
     this.views = new Backbone.ChildViewContainer();
     TaskListView.__super__.constructor.call(this, options);
   }
+
+  TaskListView.prototype.initialize = function() {
+    this.listenTo(this.baseCollection, 'reindexing', function() {
+      this.isReindexing = true;
+      $('#block').show();
+      return $('#modal').show();
+    });
+    return this.listenTo(this.baseCollection, 'reindexed', function(error) {
+      this.isReindexing = false;
+      $('#block').hide();
+      $('#modal').hide();
+      if (error != null) {
+        return console.log(error);
+      }
+    });
+  };
 
   TaskListView.prototype.setTags = function(tags) {
     var _this = this;
@@ -1565,10 +1607,13 @@ module.exports = TaskListView = (function(_super) {
   };
 
   TaskListView.prototype.createNewTask = function(options) {
-    var content, index, newNext, nextIndex, order, previous, tagsList, task;
+    var content, index, newNext, nextIndex, order, previous, step, tagsList, task, _ref;
 
     if (options == null) {
       options = {};
+    }
+    if (this.isReindexing) {
+      return;
     }
     tagsList = Utils.buildTagsList(this.selectedTags, {
       tagPrefix: '#'
@@ -1585,7 +1630,8 @@ module.exports = TaskListView = (function(_super) {
       index = nextIndex;
     } else {
       newNext = this.baseCollection.at(0);
-      order = this.baseCollection.getNewOrder(null, newNext);
+      _ref = this.baseCollection.getNewOrder(null, newNext), order = _ref.order, step = _ref.step;
+      index = 0;
     }
     task = new Task({
       description: content,
@@ -1593,9 +1639,10 @@ module.exports = TaskListView = (function(_super) {
       tags: Task.extractTags(content)
     });
     this.taskModelCIDToFocus = options.previous != null ? task.cid : null;
-    return this.baseCollection.create(task, {
+    this.baseCollection.create(task, {
       at: index
     });
+    return this.checkIfReindexationIsNeeded(step);
   };
 
   TaskListView.prototype.onFocusUp = function(cid) {
@@ -1628,41 +1675,49 @@ module.exports = TaskListView = (function(_super) {
   };
 
   TaskListView.prototype.onMoveUp = function(cid, toFocus) {
-    var currentModel, newOrder, newPrevious, previous, previousIndex;
+    var currentModel, newOrder, order, previous, previousIndex, previousOfPrevious, step;
 
     if (toFocus == null) {
       toFocus = null;
     }
+    if (this.isReindexing) {
+      return;
+    }
     currentModel = this.views.findByModelCid(cid).model;
     previousIndex = this.baseCollection.indexOf(currentModel) - 1;
     previous = this.baseCollection.at(previousIndex);
-    if (previousIndex >= 1) {
-      newOrder = null;
-      newPrevious = this.baseCollection.at(previousIndex - 1);
-      newOrder = this.baseCollection.getNewOrder(newPrevious, previous);
-    } else if (previousIndex === 0) {
-      newOrder = this.baseCollection.getNewOrder(null, previous);
-    } else {
-      newOrder = null;
-    }
-    if (newOrder != null) {
-      currentModel.set('order', newOrder);
-      currentModel.save();
+    previousOfPrevious = this.baseCollection.at(previousIndex - 1) || null;
+    if (previousIndex >= 0) {
+      newOrder = this.baseCollection.getNewOrder(previousOfPrevious, previous);
+      order = newOrder.order, step = newOrder.step;
+      task.set('order', order);
+      task.save();
       this.baseCollection.sort();
       this.taskModelCIDToFocus = toFocus != null ? toFocus : cid;
-      return this.render();
+      this.render();
+      return this.checkIfReindexationIsNeeded(step);
     }
   };
 
   TaskListView.prototype.onMoveDown = function(cid) {
-    var currentModel, nextIndex, nextModel, nextView;
+    var currentModel, newOrder, nextIndex, nextModel, nextOfNextModel, order, step;
 
+    if (this.isReindexing) {
+      return;
+    }
     currentModel = this.views.findByModelCid(cid).model;
     nextIndex = this.baseCollection.indexOf(currentModel) + 1;
     nextModel = this.baseCollection.at(nextIndex);
-    if (nextModel != null) {
-      nextView = this.views.findByModelCid(nextModel.cid);
-      return this.onMoveUp(nextModel.cid, cid);
+    nextOfNextModel = this.baseCollection.at(nextIndex + 1) || null;
+    if (nextIndex !== this.baseCollection.length) {
+      newOrder = this.baseCollection.getNewOrder(nextModel, nextOfNextModel);
+      order = newOrder.order, step = newOrder.step;
+      task.set('order', order);
+      task.save();
+      this.baseCollection.sort();
+      this.taskModelCIDToFocus = typeof toFocus !== "undefined" && toFocus !== null ? toFocus : cid;
+      this.render();
+      return this.checkIfReindexationIsNeeded(step);
     }
   };
 
@@ -1680,6 +1735,9 @@ module.exports = TaskListView = (function(_super) {
     var counterArchived, counterToArchive, done, tasksToArchive,
       _this = this;
 
+    if (this.isReindexing) {
+      return;
+    }
     tasksToArchive = this.collection.where({
       done: true
     });
@@ -1715,6 +1773,19 @@ module.exports = TaskListView = (function(_super) {
       task.once('sync', done);
       return task.save();
     });
+  };
+
+  TaskListView.prototype.checkIfReindexationIsNeeded = function(step) {
+    var maxThreshold, threshold;
+
+    threshold = Math.pow(10, 8);
+    maxThreshold = Number.MAX_VALUE / (this.baseCollection.length + 1);
+    if (maxThreshold < threshold) {
+      threshold = maxThreshold;
+    }
+    if (step <= threshold) {
+      return this.baseCollection.reindex();
+    }
   };
 
   return TaskListView;
@@ -1887,7 +1958,10 @@ attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow |
 var buf = [];
 with (locals || {}) {
 var interp;
-buf.push('<div id="menu"></div><div class="container"></div>');
+buf.push('<div id="menu"></div><div class="container"></div><div id="block"></div><div id="modal"><p>');
+var __val__ = t('reindexing message')
+buf.push(escape(null == __val__ ? "" : __val__));
+buf.push('</p></div>');
 }
 return buf.join("");
 };
