@@ -1690,8 +1690,8 @@ module.exports = TaskListView = (function(_super) {
     if (previousIndex >= 0) {
       newOrder = this.baseCollection.getNewOrder(previousOfPrevious, previous);
       order = newOrder.order, step = newOrder.step;
-      task.set('order', order);
-      task.save();
+      currentModel.set('order', order);
+      currentModel.save();
       this.baseCollection.sort();
       this.taskModelCIDToFocus = toFocus != null ? toFocus : cid;
       this.render();
@@ -1712,8 +1712,8 @@ module.exports = TaskListView = (function(_super) {
     if (nextIndex !== this.baseCollection.length) {
       newOrder = this.baseCollection.getNewOrder(nextModel, nextOfNextModel);
       order = newOrder.order, step = newOrder.step;
-      task.set('order', order);
-      task.save();
+      currentModel.set('order', order);
+      currentModel.save();
       this.baseCollection.sort();
       this.taskModelCIDToFocus = typeof toFocus !== "undefined" && toFocus !== null ? toFocus : cid;
       this.render();

@@ -189,8 +189,8 @@ module.exports = class TaskListView extends BaseView
         if previousIndex >= 0
             newOrder = @baseCollection.getNewOrder previousOfPrevious, previous
             {order, step} = newOrder
-            task.set 'order', order
-            task.save()
+            currentModel.set 'order', order
+            currentModel.save()
             @baseCollection.sort()
             @taskModelCIDToFocus = if toFocus? then toFocus else cid
             @render()
@@ -209,8 +209,8 @@ module.exports = class TaskListView extends BaseView
         if nextIndex isnt @baseCollection.length
             newOrder = @baseCollection.getNewOrder nextModel, nextOfNextModel
             {order, step} = newOrder
-            task.set 'order', order
-            task.save()
+            currentModel.set 'order', order
+            currentModel.save()
             @baseCollection.sort()
             @taskModelCIDToFocus = if toFocus? then toFocus else cid
             @render()
