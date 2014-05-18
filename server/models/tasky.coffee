@@ -37,8 +37,3 @@ Task.allArchived = (callback) ->
         err = err or tasks.error
         callback err, tasks
 
-Task.allByState = (isDone, callback) ->
-    Task.request 'byState', key: isDone, (err, tasks) ->
-        err = err or tasks.error
-        callback err, tasks
-
