@@ -1,11 +1,4 @@
-exports.config =
-    # See docs at http://brunch.readthedocs.org/en/latest/config.html.
-    #coffeelint:
-        #pattern: /^app\/.*\.coffee$/
-        #options:
-            #indentation:
-                #value: 4
-                #level: "error"
+module.exports.config =
 
     files:
         javascripts:
@@ -32,3 +25,28 @@ exports.config =
         templates:
             defaultExtension: 'jade'
             joinTo: 'javascripts/app.js'
+
+    plugins:
+        jade:
+            globals: ['t']
+
+        coffeelint:
+            pattern: /^app\/.*\.coffee_disable$/
+            options:
+                indentation:
+                    value: 4
+                    level: "error"
+        uglify:
+            mangle: true
+            compress:
+                global_defs:
+                    DEBUG: false
+
+        cleancss:
+            keepSpecialComments: 0
+            removeEmpty: true
+
+    overrides:
+          production:
+            optimize: true
+            sourceMaps: true
