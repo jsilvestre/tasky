@@ -57,6 +57,7 @@ module.exports = class TaskFormView extends BaseView
     onSubmit: ->
         inputVal = @$('input').val()
         @trigger 'new-task-submitted', content: inputVal if inputVal.length > 0
+        @$('input').val ''
 
     getRenderData: ->
         formPlaceholder: @getFormPlaceholder()
