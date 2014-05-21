@@ -46,5 +46,5 @@ module.exports = class TaskCollection extends Backbone.Collection
             success: (data) =>
                 data.forEach (task) => @get(task.id).set 'order', task.order
                 @trigger 'reindexed'
-            error: (data) ->
+            error: (data) =>
                 @trigger 'reindexed', data
