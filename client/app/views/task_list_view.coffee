@@ -137,7 +137,7 @@ module.exports = class TaskListView extends BaseView
             previous = @views.findByModelCid(options.previous).model
             nextIndex = @baseCollection.indexOf(previous) + 1
             newNext = @baseCollection.at nextIndex
-            order = @baseCollection.getNewOrder previous, newNext
+            {order, step} = @baseCollection.getNewOrder previous, newNext
             index = nextIndex
         else
             newNext = @baseCollection.at 0
