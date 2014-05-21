@@ -181,9 +181,12 @@ module.exports = class TaskListView extends BaseView
     onMoveUp: (cid, toFocus = null) ->
         return if @isReindexing
 
+        # we want to move up to the previous model in the base collection
+        # so we need to know where is it then make get the new order
         currentModel = @views.findByModelCid(cid).model
-        previousIndex = @baseCollection.indexOf(currentModel) - 1
-        previous = @baseCollection.at previousIndex
+        previousIndexInSubCollection = @collection.indexOf(currentModel) - 1
+        previous = @collection.at previousIndexInSubCollection
+        previousIndex = @baseCollection.indexOf previous
         previousOfPrevious = @baseCollection.at(previousIndex - 1) or null
 
         if previousIndex >= 0
@@ -200,14 +203,17 @@ module.exports = class TaskListView extends BaseView
     onMoveDown: (cid) ->
         return if @isReindexing
 
+        # we want to move up to the next model in the base collection
+        # so we need to know where is it then make get the new order
         currentModel = @views.findByModelCid(cid).model
-        nextIndex = @baseCollection.indexOf(currentModel) + 1
-        nextModel = @baseCollection.at nextIndex
+        nextIndexInSubCollection = @collection.indexOf(currentModel) + 1
+        next = @collection.at nextIndexInSubCollection
+        nextIndex = @baseCollection.indexOf next
         nextOfNextModel = @baseCollection.at(nextIndex + 1) or null
 
         # if not last item of the collection
         if nextIndex isnt @baseCollection.length
-            newOrder = @baseCollection.getNewOrder nextModel, nextOfNextModel
+            newOrder = @baseCollection.getNewOrder next, nextOfNextModel
             {order, step} = newOrder
             currentModel.set 'order', order
             currentModel.save()
