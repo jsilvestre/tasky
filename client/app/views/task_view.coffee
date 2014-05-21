@@ -77,7 +77,7 @@ module.exports = class TaskView extends BaseView
 
     startPeriodicSave: ->
         @focusInterval = setInterval () =>
-            @saveDescription()
+            @saveDescription() if @$('input').val() isnt ""
         , 2000
 
     stopPerdiodicSave: ->
