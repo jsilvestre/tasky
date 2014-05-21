@@ -51,6 +51,9 @@ module.exports = class TaskView extends BaseView
         else if key is 40 and ctrlPressed
             @trigger 'move-down', @model.cid
 
+        @stopPerdiodicSave()
+        @startPeriodicSave()
+
     onKeyup: (event) ->
         key = event.keyCode or event.charCode
 
@@ -66,14 +69,19 @@ module.exports = class TaskView extends BaseView
             @trigger 'focus-down', @model.cid
 
     onFocus: ->
-        # save the description periodically
+        @startPeriodicSave()
+
+    onBlur: ->
+        @stopPerdiodicSave()
+        @saveDescription()
+
+    startPeriodicSave: ->
         @focusInterval = setInterval () =>
             @saveDescription()
         , 2000
 
-    onBlur: ->
+    stopPerdiodicSave: ->
         clearInterval @focusInterval
-        @saveDescription()
 
     saveDescription: ->
         description = @$('input').val()
