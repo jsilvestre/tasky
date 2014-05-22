@@ -26,7 +26,7 @@
     "coffeelint": "1.1.0"
   },
   "scripts": {
-    "start": "coffee server.coffee"
+    "start": "node build/server.js"
   },
   "cozy-permissions": {
     "Tasky": {

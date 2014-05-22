@@ -1,4 +1,6 @@
+path = require 'path'
 americano = require 'americano'
+
 config =
     common:
         use: [
@@ -7,11 +9,11 @@ config =
             americano.errorHandler
                 dumpExceptions: true
                 showStack: true
-            americano.static __dirname + '/../client/public',
+            americano.static path.resolve(__dirname, '../client/public'),
                 maxAge: 86400000
         ]
         set:
-            views: './client'
+            views: path.resolve __dirname, '../client'
 
     development: [
         americano.logger 'dev'
