@@ -1,3 +1,4 @@
+path = require 'path'
 module.exports.config =
 
     files:
@@ -46,7 +47,13 @@ module.exports.config =
             keepSpecialComments: 0
             removeEmpty: true
 
+        digest:
+            referenceFiles: /\.jade$/
+
     overrides:
-          production:
+        production:
             optimize: true
             sourceMaps: true
+            paths:
+                public: path.resolve __dirname, '../build/client/public'
+

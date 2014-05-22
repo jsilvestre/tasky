@@ -6,6 +6,7 @@
     "stylus-brunch": "1.8.0",
     "jade-brunch": "1.8.1",
     "uglify-js-brunch": "1.7.7",
+    "digest-brunch": "1.2.2",
     "clean-css-brunch": "1.7.1",
     "coffeelint-brunch": "1.7.0"
   },
