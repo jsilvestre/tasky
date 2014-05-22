@@ -5,7 +5,7 @@
     "coffee-script-brunch": "1.8.0",
     "stylus-brunch": "1.8.0",
     "jade-brunch": "1.8.1",
-    "uglify-js-brunch": "1.7.7",
+    "uglify-js-brunch": "git://github.com/jsilvestre/uglify-js-brunch.git#master",
     "digest-brunch": "1.2.2",
     "clean-css-brunch": "1.7.1",
     "coffeelint-brunch": "1.7.0"
