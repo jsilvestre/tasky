@@ -212,7 +212,8 @@ module.exports = class TaskListView extends BaseView
         nextOfNextModel = @baseCollection.at(nextIndex + 1) or null
 
         # if not last item of the collection
-        if nextIndex isnt @baseCollection.length
+        if nextIndex isnt @baseCollection.length and \
+           nextIndexInSubCollection isnt @collection.length
             newOrder = @baseCollection.getNewOrder next, nextOfNextModel
             {order, step} = newOrder
             currentModel.set 'order', order
