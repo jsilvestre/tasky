@@ -50,7 +50,6 @@ task 'tests', "Run tests #{taskDetails}", (opts) ->
     command += "--compilers coffee:coffee-script/register"
     exec command, (err, stdout, stderr) ->
         console.log stdout if stdout? and stdout.length > 0
-        #console.log stderr if stderr? and stderr.length > 0
         if err?
             err = err
             console.log "Running mocha caught exception:\n" + err
@@ -65,7 +64,7 @@ task 'build', 'Build CoffeeScript to Javascript', ->
     command = "coffee -cb --output build/server server " + \
               "&& coffee -cb --output build/ server.coffee " + \
               "&& rm -rf build/client && mkdir build/client " + \
-              # prepare to "digst" the index.jade
+              # prepare to "digest" the index.jade
               "&& cp client/index_build.jade client/app/assets/index.jade " + \
               "&& cd client/ && brunch build --production && cd .." + \
               "&& rm client/app/assets/index.jade " + \

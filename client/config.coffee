@@ -31,18 +31,6 @@ module.exports.config =
         jade:
             globals: ['t']
 
-        coffeelint:
-            pattern: /^app\/.*\.coffee_disable$/
-            options:
-                indentation:
-                    value: 4
-                    level: "error"
-        uglify:
-            mangle: true
-            compress:
-                global_defs:
-                    DEBUG: false
-
         cleancss:
             keepSpecialComments: 0
             removeEmpty: true
@@ -52,8 +40,9 @@ module.exports.config =
 
     overrides:
         production:
-            optimize: true
+            # re-enable when uglifyjs will handle properly in source maps
+            # with sourcesContent attribute
+            #optimize: true
             sourceMaps: true
             paths:
                 public: path.resolve __dirname, '../build/client/public'
-
