@@ -31,7 +31,29 @@ h1
     font-family styled
     font-weight normal
     font-size 25px
+    padding-bottom 10px
 
+    input
+        width 150px
+        padding 0 5px
+        margin 0 2px
+        font-size 25px
+        border 1px solid transparent
+        &:empty
+            font-size 20px
+        &:hover
+            border 1px solid orange
+        &:focus
+            border 1px solid blue
+            outline none
+        &:last-of-type
+            width 175px
+            border 1px solid lightgrey
+        &:first-of-type.add-tag
+            margin-left 20px
+
+        &.error
+            border 1px solid red
 #actions
     font-family styled
     margin 0 20px

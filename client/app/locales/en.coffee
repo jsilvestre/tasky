@@ -5,7 +5,7 @@ module.exports =
     "all tasks": "All tasks"
     "all archived tasks": "All archived tasks"
     "untagged tasks": "Untagged tasks"
-    "tasks of": "Tasks related to %{tagsList}"
+    "tasks of": "Tasks related to"
     "archived tasks of": "Archived tasks related to %{tagsList}"
     "and": "and"
     "archived date format": "{yyyy}/{MM}{dd} at {HH}:{mm}"
@@ -22,3 +22,4 @@ module.exports =
     "form headline tags": "What's next about %{tagsList}?"
     "form headline": "What's next?"
     "reindexing message": "Server is reindexing all the tasks, please wait a little..."
+    "search tag input": "search a tag..."

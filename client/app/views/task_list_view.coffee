@@ -5,6 +5,7 @@ Task = require '../models/task'
 
 TaskView = require './task_view'
 TaskFormView = require './task_form_view'
+BreadcrumbView = require './breadcrumb_view'
 
 module.exports = class TaskListView extends BaseView
 
@@ -18,7 +19,8 @@ module.exports = class TaskListView extends BaseView
 
     events:
         'click #archive-action': 'onArchiveClicked'
-        'click h1': 'reindex'
+        #'click h1': 'reindex'
+        'onkeydown h1 input': 'onKeyDownMenuInput'
 
     reindex: ->
         @baseCollection.reindex()
@@ -97,6 +99,8 @@ module.exports = class TaskListView extends BaseView
 
             $(@collectionEl).append taskView.render().$el
 
+        @renderFormTitle()
+
         # if an element has been created or removed, focus task accordingly
         if @taskModelCIDToFocus?
             view =  @views.findByModelCid @taskModelCIDToFocus
@@ -111,6 +115,41 @@ module.exports = class TaskListView extends BaseView
 
         return @$el
 
+    renderFormTitle: ->
+
+        breadcrumbView = new BreadcrumbView
+                            selectedTags: @selectedTags
+                            collectionLength: @collection.length
+                            baseCollection: @baseCollection
+        breadcrumbView.render()
+
+
+        #tagInput.keydown (evt) => @adjustInputSize evt, false
+        #setTimeout =>
+        #    @adjustInputSize currentTarget: tagInput, true
+        #, 100
+
+
+    adjustInputSize: (evt, direct) ->
+        inputEl = $ evt.currentTarget
+        tmp = $ '<span class="tmp-element"/>'
+        body = $ 'h1'
+
+        key = evt.keyCode
+
+        # characters that will take space into the input: alpha numeric, sharp
+        writtenChars = (48 <= key <= 57 or 65 <= key <= 90) or \
+                     key is 220
+        suffix = if direct or not writtenChars then '' else 'a'
+        tmp.html _.escape inputEl.val() + suffix
+        body.append tmp
+        theWidth = tmp.width()
+        #console.log suffix, theWidth
+        tmp.remove()
+
+        widthToSet = theWidth + 4
+        inputEl.width widthToSet
+
     getTitle: ->
         if @collection.length is @baseCollection.length
             return t 'all tasks'
@@ -122,6 +161,7 @@ module.exports = class TaskListView extends BaseView
                             regularSeparator: ', '
                             lastSeparator: " #{t('and')} "
 
+            tagsList = ''
             return t 'tasks of',
                 tagsList: tagsList
                 smart_count: @selectedTags.length

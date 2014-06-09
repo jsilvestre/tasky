@@ -5,7 +5,7 @@ module.exports =
     "all tasks": "Toutes les tâches"
     "all archived tasks": "Toutes les tâches archivées"
     "untagged tasks": "Tâches sans étiquettes"
-    "tasks of": "Tâches correspondant à l'étiquette %{tagsList} |||| Tâches correspondant aux étiquettes %{tagsList}"
+    "tasks of": "Tâches correspondant à l'étiquette|||| Tâches correspondant aux étiquettes"
     "archived tasks of": "Tâches archivées correspondant à l'étiquette %{tagsList} |||| Tâches archivées correspondant aux étiquettes %{tagsList}"
     "and": "et"
     "archived date format": "{dd}/{MM}/{yyyy} à {HH}h{mm}"
@@ -22,3 +22,4 @@ module.exports =
     "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?"
     "form headline": "Que devez-vous faire ?"
     "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter..."
+    "search tag input": "une étiquette..."

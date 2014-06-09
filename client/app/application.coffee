@@ -7,7 +7,6 @@ module.exports =
         @locale = window.locale
         delete window.locale
 
-
         @polyglot = new Polyglot locale: @locale
         try
             locales = require 'locales/'+ @locale
