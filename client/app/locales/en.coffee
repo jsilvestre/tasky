@@ -22,4 +22,6 @@ module.exports =
     "form headline tags": "What's next about %{tagsList}?"
     "form headline": "What's next?"
     "reindexing message": "Server is reindexing all the tasks, please wait a little..."
-    "search tag input": "search a tag..."
+    "search tag input": "search..."
+    "match criterion no tag": "of criterion"
+    "match criterion with tag": "and of criterion"

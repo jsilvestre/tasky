@@ -42,6 +42,8 @@ module.exports = class TaskListView extends BaseView
             $('#modal').hide()
             console.log error if error?
 
+    setSearchQuery: (searchQuery) -> @searchQuery = searchQuery
+
     setTags: (tags) ->
         @selectedTags = tags
 
@@ -50,6 +52,7 @@ module.exports = class TaskListView extends BaseView
             delete @collection
 
         @collection = @baseCollection.getByTags @selectedTags
+
         @listenTo @collection, 'add', @render
         @listenTo @collection, 'remove', (task) =>
             # set the focus to the previous view
@@ -79,12 +82,23 @@ module.exports = class TaskListView extends BaseView
         if @taskForm?
             @stopListening @taskForm
             @taskForm.destroy()
-        @taskForm = new TaskFormView tags: @selectedTags
-        @listenTo @taskForm, 'new-task-submitted', @createNewTask
-        @listenTo @taskForm, 'focus-down', @onFocusDown
-        @taskForm.render()
 
-        @collection.forEach (task) =>
+        # we hide the form is there is a search to prevent the user
+        # from adding a task and not being able to see it
+        unless @searchQuery?
+            @taskForm = new TaskFormView tags: @selectedTags
+            @listenTo @taskForm, 'new-task-submitted', @createNewTask
+            @listenTo @taskForm, 'focus-down', @onFocusDown
+            @taskForm.render()
+
+        if @searchQuery?
+            regex = new RegExp @searchQuery, 'i'
+            list = @collection.filter (task) ->
+                regex.test task.get('description')
+        else
+            list = @collection
+
+        list.forEach (task) =>
             taskView = @views.findByModel task
             unless taskView?
                 taskView = new TaskView model: task
@@ -111,44 +125,18 @@ module.exports = class TaskListView extends BaseView
                 @taskForm.$el.find('input').focus()
             @taskModelCIDToFocus = null
         else
-            @taskForm.$el.find('input').focus()
+            # if there is a search, the form is not displayed
+            @taskForm.$el.find('input').focus() if @taskForm?
 
         return @$el
 
     renderFormTitle: ->
-
         breadcrumbView = new BreadcrumbView
                             selectedTags: @selectedTags
                             collectionLength: @collection.length
                             baseCollection: @baseCollection
+                            searchQuery: @searchQuery
         breadcrumbView.render()
-
-
-        #tagInput.keydown (evt) => @adjustInputSize evt, false
-        #setTimeout =>
-        #    @adjustInputSize currentTarget: tagInput, true
-        #, 100
-
-
-    adjustInputSize: (evt, direct) ->
-        inputEl = $ evt.currentTarget
-        tmp = $ '<span class="tmp-element"/>'
-        body = $ 'h1'
-
-        key = evt.keyCode
-
-        # characters that will take space into the input: alpha numeric, sharp
-        writtenChars = (48 <= key <= 57 or 65 <= key <= 90) or \
-                     key is 220
-        suffix = if direct or not writtenChars then '' else 'a'
-        tmp.html _.escape inputEl.val() + suffix
-        body.append tmp
-        theWidth = tmp.width()
-        #console.log suffix, theWidth
-        tmp.remove()
-
-        widthToSet = theWidth + 4
-        inputEl.width widthToSet
 
     getTitle: ->
         if @collection.length is @baseCollection.length

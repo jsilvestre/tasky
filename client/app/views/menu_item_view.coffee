@@ -17,6 +17,7 @@ module.exports = class MenuItemView extends BaseView
         @selectedTags = options.selectedTags
         @depth = options.depth
         @viewType = options.viewType
+
         @views = new Backbone.ChildViewContainer()
         super options
 
@@ -73,6 +74,7 @@ module.exports = class MenuItemView extends BaseView
                                 viewType: @viewType
                                 baseCollection: @baseCollection
                                 archivedCollection: @archivedCollection
+
                 @views.add menuItem
                 @$el.children(@collectionEl).append menuItem.render().$el
 

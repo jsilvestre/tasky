@@ -72,10 +72,14 @@ module.exports = class MenuView extends BaseView
             template = require './templates/menu_item'
             if @viewType is "#tobedone" then prefix = 'todoByTags'
             else prefix = 'archivedByTags'
+            if @searchQuery?
+                search = ";search/#{@searchQuery}"
+            else
+                search = ''
             isActive = if @activeTags?.length is 0 then " active selected" else ""
             untaggedView = $ '<li class="menu-tag magic' + isActive + '"></li>'
             untaggedViewContent = template
-                url: "##{prefix}/"
+                url: "##{prefix}/#{search}"
                 model:
                     tagName: t 'untagged'
                     count: untaggedNum
@@ -98,6 +102,7 @@ module.exports = class MenuView extends BaseView
                             viewType: @viewType
                             baseCollection: @baseCollection
                             archivedCollection: @archivedCollection
+
             @views.add menuItem
             submenuEl.append menuItem.render().$el
 

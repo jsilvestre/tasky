@@ -22,4 +22,6 @@ module.exports =
     "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?"
     "form headline": "Que devez-vous faire ?"
     "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter..."
-    "search tag input": "une étiquette..."
+    "search tag input": "recherche..."
+    "match criterion no tag": "correspondant au critère"
+    "match criterion with tag": "et au critère"

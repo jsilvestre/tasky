@@ -33,27 +33,28 @@ h1
     font-size 25px
     padding-bottom 10px
 
+    span.size-calculator
     input
         width 150px
-        padding 0 5px
-        margin 0 2px
-        font-size 25px
+        padding 0 3px
+        margin 0 1px
+        font-size 20px
         border 1px solid transparent
-        &:empty
-            font-size 20px
+        white-space pre
+
         &:hover
             border 1px solid orange
         &:focus
             border 1px solid blue
             outline none
-        &:last-of-type
-            width 175px
-            border 1px solid lightgrey
-        &:first-of-type.add-tag
-            margin-left 20px
-
+        &.add-tag
+            margin-left 5px
         &.error
             border 1px solid red
+
+    span.size-calculator
+        visibility hidden
+
 #actions
     font-family styled
     margin 0 20px

@@ -13,7 +13,12 @@ module.exports = class Router extends Backbone.Router
     routes:
         '': 'main'
         'archived': 'archived'
+
+        'search/:query': 'mainSearch'
+        'todoByTags/*tags/;search/:query': 'todoByTagsWithSearch'
+        'todoByTags/;search/:query': 'todoByTagsWithSearch'
         'todoByTags/*tags': 'todoByTags'
+
         'archivedByTags/*tags': 'archivedByTags'
 
     initialize: ->
@@ -38,12 +43,21 @@ module.exports = class Router extends Backbone.Router
             @collection.add task
             @archivedTaskList.render()
 
-    main: ->
+    main: (followUp = false) ->
+
+        # if called by another route, must be called with
+        # followUp to true
+        @taskList.setSearchQuery null unless followUp
+
         @taskList.setTags null
         @taskList.render()
         @menu.setViewType '#tobedone'
         @menu.setActive null
         @menu.render()
+
+    mainSearch: (query) ->
+        @taskList.setSearchQuery query
+        @main true
 
     archived: ->
         @archivedTaskList.setTags null
@@ -52,7 +66,7 @@ module.exports = class Router extends Backbone.Router
         @menu.setActive null
         @menu.render()
 
-    byTags: (viewType, listView, tags) ->
+    byTags: (viewType, listView, tags, searchQuery = null) ->
 
         if tags?
             tags = tags.split '/'
@@ -63,12 +77,20 @@ module.exports = class Router extends Backbone.Router
             tags = []
 
         listView.setTags tags
+        if viewType is '#tobedone'
+            listView.setSearchQuery searchQuery
         listView.render()
         @menu.setViewType viewType
         @menu.setActive tags
         @menu.render()
 
     todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags
+    todoByTagsWithSearch: (tags, query) ->
+        if not query?
+            query = tags
+            tags = null
+        @byTags '#tobedone', @taskList, tags, query
+
     archivedByTags: (tags) -> @byTags '#archived', @archivedTaskList, tags
 
 
