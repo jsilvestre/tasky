@@ -12,7 +12,8 @@ module.exports = class Task extends Backbone.Model
         if tags.length is 0
             return @get('tags').length is 0
         else
-            return _.every tags, _.partial(_.contains, @get('tags'))
+            lowerCasedTags = @get('tags').map (tag) -> tag.toLowerCase()
+            return _.every tags, _.partial(_.contains, lowerCasedTags)
 
     getPreviousWithTags: (tags) ->
         order = @get 'order'
