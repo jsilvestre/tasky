@@ -558,7 +558,7 @@ module.exports = {
   "all tasks": "All tasks",
   "all archived tasks": "All archived tasks",
   "untagged tasks": "Untagged tasks",
-  "tasks of": "Tasks related to %{tagsList}",
+  "tasks of": "Tasks related to",
   "archived tasks of": "Archived tasks related to %{tagsList}",
   "and": "and",
   "archived date format": "{yyyy}/{MM}{dd} at {HH}:{mm}",
@@ -574,7 +574,10 @@ module.exports = {
   "archive button": "Archive all done tasks",
   "form headline tags": "What's next about %{tagsList}?",
   "form headline": "What's next?",
-  "reindexing message": "Server is reindexing all the tasks, please wait a little..."
+  "reindexing message": "Server is reindexing all the tasks, please wait a little...",
+  "search tag input": "search...",
+  "match criterion no tag": "of criterion",
+  "match criterion with tag": "and of criterion"
 };
 });
 
@@ -586,7 +589,7 @@ module.exports = {
   "all tasks": "Toutes les tâches",
   "all archived tasks": "Toutes les tâches archivées",
   "untagged tasks": "Tâches sans étiquettes",
-  "tasks of": "Tâches correspondant à l'étiquette %{tagsList} |||| Tâches correspondant aux étiquettes %{tagsList}",
+  "tasks of": "Tâches correspondant à l'étiquette|||| Tâches correspondant aux étiquettes",
   "archived tasks of": "Tâches archivées correspondant à l'étiquette %{tagsList} |||| Tâches archivées correspondant aux étiquettes %{tagsList}",
   "and": "et",
   "archived date format": "{dd}/{MM}/{yyyy} à {HH}h{mm}",
@@ -602,7 +605,10 @@ module.exports = {
   "archive button": "Archiver toutes les tâches faites",
   "form headline tags": "Que devez-vous faire à propos de %{tagsList} ?",
   "form headline": "Que devez-vous faire ?",
-  "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter..."
+  "reindexing message": "Le serveur est en train de ré-indexer les tâches, merci de patienter...",
+  "search tag input": "recherche...",
+  "match criterion no tag": "correspondant au critère",
+  "match criterion with tag": "et au critère"
 };
 });
 
@@ -628,13 +634,17 @@ module.exports = Task = (function(_super) {
   };
 
   Task.prototype.containsTags = function(tags) {
+    var lowerCasedTags;
     if (!(tags instanceof Array)) {
       tags = [tags];
     }
     if (tags.length === 0) {
       return this.get('tags').length === 0;
     } else {
-      return _.every(tags, _.partial(_.contains, this.get('tags')));
+      lowerCasedTags = this.get('tags').map(function(tag) {
+        return tag.toLowerCase();
+      });
+      return _.every(tags, _.partial(_.contains, lowerCasedTags));
     }
   };
 
@@ -653,14 +663,14 @@ module.exports = Task = (function(_super) {
     }
   };
 
-  Task.regex = /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g;
+  Task.regex = /(^|\s)#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)(?=\s|$)/g;
 
   Task.extractTags = function(desc) {
     var tags;
     tags = desc.match(Task.regex);
     tags = _.unique(tags);
     tags = _.map(tags, function(tag) {
-      return tag.replace('#', '');
+      return tag.trim().replace('#', '');
     });
     return tags;
   };
@@ -699,6 +709,9 @@ module.exports = Router = (function(_super) {
   Router.prototype.routes = {
     '': 'main',
     'archived': 'archived',
+    'search/:query': 'mainSearch',
+    'todoByTags/*tags/;search/:query': 'todoByTagsWithSearch',
+    'todoByTags/;search/:query': 'todoByTagsWithSearch',
     'todoByTags/*tags': 'todoByTags',
     'archivedByTags/*tags': 'archivedByTags'
   };
@@ -734,12 +747,23 @@ module.exports = Router = (function(_super) {
     })(this));
   };
 
-  Router.prototype.main = function() {
+  Router.prototype.main = function(followUp) {
+    if (followUp == null) {
+      followUp = false;
+    }
+    if (!followUp) {
+      this.taskList.setSearchQuery(null);
+    }
     this.taskList.setTags(null);
     this.taskList.render();
     this.menu.setViewType('#tobedone');
     this.menu.setActive(null);
     return this.menu.render();
+  };
+
+  Router.prototype.mainSearch = function(query) {
+    this.taskList.setSearchQuery(query);
+    return this.main(true);
   };
 
   Router.prototype.archived = function() {
@@ -750,7 +774,10 @@ module.exports = Router = (function(_super) {
     return this.menu.render();
   };
 
-  Router.prototype.byTags = function(viewType, listView, tags) {
+  Router.prototype.byTags = function(viewType, listView, tags, searchQuery) {
+    if (searchQuery == null) {
+      searchQuery = null;
+    }
     if (tags != null) {
       tags = tags.split('/');
       if (tags[tags.length - 1].length === 0) {
@@ -760,6 +787,9 @@ module.exports = Router = (function(_super) {
       tags = [];
     }
     listView.setTags(tags);
+    if (viewType === '#tobedone') {
+      listView.setSearchQuery(searchQuery);
+    }
     listView.render();
     this.menu.setViewType(viewType);
     this.menu.setActive(tags);
@@ -768,6 +798,14 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.todoByTags = function(tags) {
     return this.byTags('#tobedone', this.taskList, tags);
+  };
+
+  Router.prototype.todoByTagsWithSearch = function(tags, query) {
+    if (query == null) {
+      query = tags;
+      tags = null;
+    }
+    return this.byTags('#tobedone', this.taskList, tags, query);
   };
 
   Router.prototype.archivedByTags = function(tags) {
@@ -984,6 +1022,203 @@ module.exports = ArchiveTaskView = (function(_super) {
 })(TaskView);
 });
 
+;require.register("views/breadcrumb_view", function(exports, require, module) {
+var BaseView, BreadcrumbView, Task, Utils, app,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+BaseView = require('../lib/base_view');
+
+Utils = require('../lib/utils');
+
+app = require('../application');
+
+Task = require('../models/task');
+
+module.exports = BreadcrumbView = (function(_super) {
+  __extends(BreadcrumbView, _super);
+
+  BreadcrumbView.prototype.el = '#breadcrumb';
+
+  function BreadcrumbView(options) {
+    this.adjustInputSize = __bind(this.adjustInputSize, this);
+    this.onInputChange = __bind(this.onInputChange, this);
+    this.baseCollection = options.baseCollection;
+    this.selectedTags = options.selectedTags;
+    this.collectionLength = options.collectionLength;
+    this.searchQuery = options.searchQuery;
+    BreadcrumbView.__super__.constructor.call(this, options);
+  }
+
+  BreadcrumbView.prototype.render = function() {
+    var _ref;
+    this.noTagSelected = (this.selectedTags == null) || ((_ref = this.selectedTags) != null ? _ref.length : void 0) === 0;
+    if (this.selectedTags == null) {
+      this.$el.append(t('all tasks'));
+    } else if (this.noTagSelected) {
+      this.$el.append(t('untagged tasks'));
+    } else {
+      this.$el.append(t('tasks of', {
+        smart_count: this.selectedTags.length
+      }));
+    }
+    this.$sizeCalculator = $('<span class="size-calculator"></span>');
+    this.$el.append(this.$sizeCalculator);
+    if (this.selectedTags != null) {
+      this.renderSelectedTags();
+    }
+    if (this.searchQuery != null) {
+      this.renderSearchInput();
+    }
+    if (((this.selectedTags == null) || this.selectedTags.length === 0) && !this.searchQuery) {
+      return this.renderDefaultInput();
+    }
+  };
+
+  BreadcrumbView.prototype.renderSelectedTags = function() {
+    var tag, tagInput, _i, _len, _ref;
+    _ref = this.selectedTags;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      tag = _ref[_i];
+      tagInput = $('<input type="text" value="#' + tag + '" />');
+      this.$el.find('.size-calculator').before(tagInput);
+      this.bindInputEvents(tagInput);
+    }
+    if (!this.noTagSelected) {
+      return this.renderDefaultInput();
+    }
+  };
+
+  BreadcrumbView.prototype.renderSearchInput = function() {
+    var searchInput, translationKey;
+    translationKey = 'match criterion';
+    if (this.noTagSelected) {
+      translationKey = "" + translationKey + " no tag";
+    } else {
+      translationKey = "" + translationKey + " with tag";
+    }
+    searchInput = $('<input class="search" type="text" value="' + this.searchQuery + '" />');
+    this.$el.find('.size-calculator').before(" " + (t(translationKey)) + " \"");
+    this.$el.find('.size-calculator').before(searchInput);
+    this.$el.find('.size-calculator').before('"');
+    this.bindInputEvents(searchInput);
+    if (this.noTagSelected) {
+      return this.renderDefaultInput();
+    }
+  };
+
+  BreadcrumbView.prototype.renderDefaultInput = function() {
+    var className, newTagInput, placeholder;
+    className = "class='add-tag'";
+    placeholder = "placeholder='" + (t('search tag input')) + "'";
+    newTagInput = $("<input " + className + " type='text' " + placeholder + "/>");
+    this.$el.find('.size-calculator').before(newTagInput);
+    return this.bindInputEvents(newTagInput);
+  };
+
+  BreadcrumbView.prototype.bindInputEvents = function(input) {
+    this.adjustInputSize({
+      currentTarget: input
+    });
+    input.change(this.onInputChange);
+    input.keypress(this.adjustInputSize);
+    return input.keydown((function(_this) {
+      return function(evt) {
+        var key;
+        key = evt.keyCode;
+        if (input.val().length === 0 && key === 8) {
+          evt.preventDefault();
+          return _this.onInputChange(evt);
+        }
+      };
+    })(this));
+  };
+
+  BreadcrumbView.prototype.onInputChange = function(evt) {
+    var allTags, detectedTags, hasTasksRelatedTo, input, inputEl, location, newInput, newInputVal, query, searchInput, searchInputVal, searchLocation, tag, tags, _i, _len, _ref, _ref1;
+    inputEl = $(evt.currentTarget);
+    detectedTags = inputEl.val().match(Task.regex);
+    if (detectedTags != null) {
+      inputEl.val(detectedTags[0]);
+      this.adjustInputSize(evt);
+    }
+    tags = [];
+    _ref = this.$('input:not(.search):not(.add-tag)');
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      input = _ref[_i];
+      tag = $(input).val();
+      tag = tag.replace('#', '');
+      if (tag.length > 0) {
+        tags.push(tag);
+      }
+    }
+    newInput = this.$('input.add-tag');
+    newInputVal = newInput.val();
+    if ((newInput != null) && (newInputVal = newInput.val()).length > 0) {
+      if (newInputVal.indexOf('#') === 0) {
+        newInputVal = newInputVal.replace('#', '');
+        tags.push(newInputVal);
+      } else {
+        query = newInputVal;
+      }
+    }
+    tags = _.uniq(tags);
+    if (query == null) {
+      searchInput = this.$('input.search');
+      if ((searchInput != null) && ((_ref1 = (searchInputVal = searchInput.val())) != null ? _ref1.length : void 0) > 0) {
+        query = searchInputVal;
+      } else {
+        query = null;
+      }
+    }
+    if ((tags != null) && tags.length === 0) {
+      if (query != null) {
+        location = "#search/" + query;
+      } else {
+        location = '#';
+      }
+      return app.router.navigate(location, true);
+    } else {
+      allTags = this.baseCollection.getAllTags().pluck('id');
+      if (_.every(tags, (function(tag) {
+        return __indexOf.call(allTags, tag) >= 0;
+      }))) {
+        hasTasksRelatedTo = this.baseCollection.getByTags(tags).length > 0;
+        if (hasTasksRelatedTo) {
+          tags = tags.join('/');
+          searchLocation = query != null ? "/;search/" + query : '';
+          location = "#todoByTags/" + tags + searchLocation;
+          return app.router.navigate(location, true);
+        } else {
+          return $(evt.currentTarget).addClass('error');
+        }
+      } else {
+        return $(evt.currentTarget).addClass('error');
+      }
+    }
+  };
+
+  BreadcrumbView.prototype.adjustInputSize = function(evt) {
+    var char, inputEl, inputVal, key, widthToSet;
+    inputEl = $(evt.currentTarget);
+    key = evt.keyCode;
+    char = String.fromCharCode(key);
+    inputVal = inputEl.val();
+    if (inputVal.length === 0) {
+      inputVal = inputEl.prop('placeholder');
+    }
+    this.$sizeCalculator.text(inputVal + char);
+    widthToSet = this.$sizeCalculator.width();
+    return inputEl.width(widthToSet);
+  };
+
+  return BreadcrumbView;
+
+})(BaseView);
+});
+
 ;require.register("views/menu_item_view", function(exports, require, module) {
 var BaseView, MenuItemView, TagsCollection,
   __hasProp = {}.hasOwnProperty,
@@ -1194,7 +1429,7 @@ module.exports = MenuView = (function(_super) {
   };
 
   MenuView.prototype.afterRender = function() {
-    var archivedListEl, isActive, prefix, submenuEl, tags, template, typeViewEl, untaggedNum, untaggedView, untaggedViewContent, _ref;
+    var archivedListEl, isActive, prefix, search, submenuEl, tags, template, typeViewEl, untaggedNum, untaggedView, untaggedViewContent, _ref;
     typeViewEl = this.$("" + this.viewType);
     submenuEl = this.$("" + this.viewType + " > .submenu");
     if (this.viewType === "#tobedone") {
@@ -1212,10 +1447,15 @@ module.exports = MenuView = (function(_super) {
       } else {
         prefix = 'archivedByTags';
       }
+      if (this.searchQuery != null) {
+        search = ";search/" + this.searchQuery;
+      } else {
+        search = '';
+      }
       isActive = ((_ref = this.activeTags) != null ? _ref.length : void 0) === 0 ? " active selected" : "";
       untaggedView = $('<li class="menu-tag magic' + isActive + '"></li>');
       untaggedViewContent = template({
-        url: "#" + prefix + "/",
+        url: "#" + prefix + "/" + search,
         model: {
           tagName: t('untagged'),
           count: untaggedNum
@@ -1381,7 +1621,7 @@ module.exports = TaskFormView = (function(_super) {
 });
 
 ;require.register("views/task_list_view", function(exports, require, module) {
-var BaseView, Task, TaskFormView, TaskListView, TaskView, Utils,
+var BaseView, BreadcrumbView, Task, TaskFormView, TaskListView, TaskView, Utils,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1394,6 +1634,8 @@ Task = require('../models/task');
 TaskView = require('./task_view');
 
 TaskFormView = require('./task_form_view');
+
+BreadcrumbView = require('./breadcrumb_view');
 
 module.exports = TaskListView = (function(_super) {
   __extends(TaskListView, _super);
@@ -1410,7 +1652,7 @@ module.exports = TaskListView = (function(_super) {
 
   TaskListView.prototype.events = {
     'click #archive-action': 'onArchiveClicked',
-    'click h1': 'reindex'
+    'onkeydown h1 input': 'onKeyDownMenuInput'
   };
 
   TaskListView.prototype.reindex = function() {
@@ -1437,6 +1679,10 @@ module.exports = TaskListView = (function(_super) {
         return console.log(error);
       }
     });
+  };
+
+  TaskListView.prototype.setSearchQuery = function(searchQuery) {
+    return this.searchQuery = searchQuery;
   };
 
   TaskListView.prototype.setTags = function(tags) {
@@ -1485,19 +1731,29 @@ module.exports = TaskListView = (function(_super) {
   };
 
   TaskListView.prototype.afterRender = function() {
-    var view;
+    var list, regex, view;
     this.updateArchiveButtonState();
     if (this.taskForm != null) {
       this.stopListening(this.taskForm);
       this.taskForm.destroy();
     }
-    this.taskForm = new TaskFormView({
-      tags: this.selectedTags
-    });
-    this.listenTo(this.taskForm, 'new-task-submitted', this.createNewTask);
-    this.listenTo(this.taskForm, 'focus-down', this.onFocusDown);
-    this.taskForm.render();
-    this.collection.forEach((function(_this) {
+    if (this.searchQuery == null) {
+      this.taskForm = new TaskFormView({
+        tags: this.selectedTags
+      });
+      this.listenTo(this.taskForm, 'new-task-submitted', this.createNewTask);
+      this.listenTo(this.taskForm, 'focus-down', this.onFocusDown);
+      this.taskForm.render();
+    }
+    if (this.searchQuery != null) {
+      regex = new RegExp(this.searchQuery, 'i');
+      list = this.collection.filter(function(task) {
+        return regex.test(task.get('description'));
+      });
+    } else {
+      list = this.collection;
+    }
+    list.forEach((function(_this) {
       return function(task) {
         var taskView;
         taskView = _this.views.findByModel(task);
@@ -1517,6 +1773,7 @@ module.exports = TaskListView = (function(_super) {
         return $(_this.collectionEl).append(taskView.render().$el);
       };
     })(this));
+    this.renderFormTitle();
     if (this.taskModelCIDToFocus != null) {
       view = this.views.findByModelCid(this.taskModelCIDToFocus);
       if (view != null) {
@@ -1527,9 +1784,22 @@ module.exports = TaskListView = (function(_super) {
       }
       this.taskModelCIDToFocus = null;
     } else {
-      this.taskForm.$el.find('input').focus();
+      if (this.taskForm != null) {
+        this.taskForm.$el.find('input').focus();
+      }
     }
     return this.$el;
+  };
+
+  TaskListView.prototype.renderFormTitle = function() {
+    var breadcrumbView;
+    breadcrumbView = new BreadcrumbView({
+      selectedTags: this.selectedTags,
+      collectionLength: this.collection.length,
+      baseCollection: this.baseCollection,
+      searchQuery: this.searchQuery
+    });
+    return breadcrumbView.render();
   };
 
   TaskListView.prototype.getTitle = function() {
@@ -1544,6 +1814,7 @@ module.exports = TaskListView = (function(_super) {
         regularSeparator: ', ',
         lastSeparator: " " + (t('and')) + " "
       });
+      tagsList = '';
       return t('tasks of', {
         tagsList: tagsList,
         smart_count: this.selectedTags.length
@@ -2014,8 +2285,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-var locals_ = (locals || {}),title = locals_.title;
-buf.push("<h1>" + (jade.escape((jade_interp = title) == null ? '' : jade_interp)) + "</h1><p id=\"actions\">" + (jade.escape((jade_interp = t('actions headline')) == null ? '' : jade_interp)) + ":<button id=\"archive-action\" class=\"button disable\">" + (jade.escape(null == (jade_interp = t('archive button')) ? "" : jade_interp)) + "</button></p><div id=\"new-task\" class=\"task\"></div><ul id=\"task-list\"></ul>");;return buf.join("");
+
+buf.push("<h1 id=\"breadcrumb\"></h1><p id=\"actions\">" + (jade.escape((jade_interp = t('actions headline')) == null ? '' : jade_interp)) + ":<button id=\"archive-action\" class=\"button disable\">" + (jade.escape(null == (jade_interp = t('archive button')) ? "" : jade_interp)) + "</button></p><div id=\"new-task\" class=\"task\"></div><ul id=\"task-list\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
