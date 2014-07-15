@@ -29,13 +29,14 @@ module.exports = class Task extends Backbone.Model
         else
             return subCollection.at nextIndex - 1
 
-    @regex: /#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/g
+    # weird stuff are for accentated characters
+    # see http://stackoverflow.com/questions/1073412/javascript-validation-issue-with-international-characters
+    @regex: /(^|\s)#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)(?=\s|$)/g
+
     # helper function to extract tag from description
     @extractTags: (desc) ->
-        # weird stuff are for accentated characters
-        # see http://stackoverflow.com/questions/1073412/javascript-validation-issue-with-international-characters
         tags = desc.match Task.regex
         tags = _.unique tags
-        tags = _.map tags, (tag) -> tag.replace '#', ''
+        tags = _.map tags, (tag) -> tag.trim().replace '#', ''
 
         return tags
