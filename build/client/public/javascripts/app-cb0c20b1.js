@@ -589,8 +589,8 @@ module.exports = {
   "all tasks": "Toutes les tâches",
   "all archived tasks": "Toutes les tâches archivées",
   "untagged tasks": "Tâches sans étiquettes",
-  "tasks of": "Tâches correspondant à l'étiquette|||| Tâches correspondant aux étiquettes",
-  "archived tasks of": "Tâches archivées correspondant à l'étiquette %{tagsList} |||| Tâches archivées correspondant aux étiquettes %{tagsList}",
+  "tasks of": "Tâches de",
+  "archived tasks of": "Tâches archivées de %{tagsList}",
   "and": "et",
   "archived date format": "{dd}/{MM}/{yyyy} à {HH}h{mm}",
   "actions headline": "Actions",
@@ -1022,14 +1022,87 @@ module.exports = ArchiveTaskView = (function(_super) {
 })(TaskView);
 });
 
+;require.register("views/breadcrumb_item", function(exports, require, module) {
+var BaseView, BreadcrumbItemView, Task, Utils, app,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+BaseView = require('../lib/base_view');
+
+Utils = require('../lib/utils');
+
+app = require('../application');
+
+Task = require('../models/task');
+
+module.exports = BreadcrumbItemView = (function(_super) {
+  __extends(BreadcrumbItemView, _super);
+
+  BreadcrumbItemView.prototype.tagName = 'div';
+
+  BreadcrumbItemView.prototype.className = 'breadcrumb-item';
+
+  BreadcrumbItemView.prototype.template = function(value) {
+    return "<span>" + value + "</span><a>×</a>";
+  };
+
+  BreadcrumbItemView.prototype.events = {
+    'mouseover a': 'onRemoveHovered',
+    'mouseout a': 'onRemoveHovered',
+    'click a': 'onRemoveClicked',
+    'click': 'onClicked'
+  };
+
+  function BreadcrumbItemView(options) {
+    BreadcrumbItemView.__super__.constructor.call(this, options);
+    this.type = options.type;
+    if (options.type === 'tag') {
+      this.className = "" + this.className + " tag";
+    } else {
+      this.className = "" + this.className + " search";
+    }
+  }
+
+  BreadcrumbItemView.prototype.getRenderData = function() {
+    if (this.type === 'tag') {
+      return "#" + this.model;
+    } else {
+      return "\"" + this.model + "\"";
+    }
+  };
+
+  BreadcrumbItemView.prototype.onRemoveHovered = function() {
+    return this.$el.toggleClass('notice-delete-action');
+  };
+
+  BreadcrumbItemView.prototype.onRemoveClicked = function() {
+    return this.$el.fadeOut((function(_this) {
+      return function() {
+        _this.destroy();
+        return _this.trigger('remove');
+      };
+    })(this));
+  };
+
+  BreadcrumbItemView.prototype.onClicked = function() {
+    return console.log("something coming soon :)");
+  };
+
+  return BreadcrumbItemView;
+
+})(BaseView);
+});
+
 ;require.register("views/breadcrumb_view", function(exports, require, module) {
-var BaseView, BreadcrumbView, Task, Utils, app,
+var BaseView, BreadcrumbItemView, BreadcrumbView, Task, Utils, app,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 BaseView = require('../lib/base_view');
+
+BreadcrumbItemView = require('./breadcrumb_item');
 
 Utils = require('../lib/utils');
 
@@ -1042,6 +1115,8 @@ module.exports = BreadcrumbView = (function(_super) {
 
   BreadcrumbView.prototype.el = '#breadcrumb';
 
+  BreadcrumbView.prototype.views = null;
+
   function BreadcrumbView(options) {
     this.adjustInputSize = __bind(this.adjustInputSize, this);
     this.onInputChange = __bind(this.onInputChange, this);
@@ -1049,6 +1124,7 @@ module.exports = BreadcrumbView = (function(_super) {
     this.selectedTags = options.selectedTags;
     this.collectionLength = options.collectionLength;
     this.searchQuery = options.searchQuery;
+    this.views = new Backbone.ChildViewContainer();
     BreadcrumbView.__super__.constructor.call(this, options);
   }
 
@@ -1064,53 +1140,57 @@ module.exports = BreadcrumbView = (function(_super) {
         smart_count: this.selectedTags.length
       }));
     }
-    this.$sizeCalculator = $('<span class="size-calculator"></span>');
-    this.$el.append(this.$sizeCalculator);
     if (this.selectedTags != null) {
       this.renderSelectedTags();
     }
     if (this.searchQuery != null) {
       this.renderSearchInput();
     }
-    if (((this.selectedTags == null) || this.selectedTags.length === 0) && !this.searchQuery) {
+    if ((this.selectedTags == null) || ((this.selectedTags != null) && !this.noTagSelected)) {
       return this.renderDefaultInput();
     }
   };
 
   BreadcrumbView.prototype.renderSelectedTags = function() {
-    var tag, tagInput, _i, _len, _ref;
+    var breadcrumbItem, tag, tagInput, _i, _len, _ref, _results;
     _ref = this.selectedTags;
+    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       tag = _ref[_i];
-      tagInput = $('<input type="text" value="#' + tag + '" />');
-      this.$el.find('.size-calculator').before(tagInput);
-      this.bindInputEvents(tagInput);
+      breadcrumbItem = new BreadcrumbItemView({
+        model: tag,
+        type: 'tag'
+      });
+      this.listenTo(breadcrumbItem, 'remove', this.onInputChange);
+      this.views.add(breadcrumbItem);
+      tagInput = breadcrumbItem.render().$el;
+      _results.push(this.$el.append(tagInput));
     }
-    if (!this.noTagSelected) {
-      return this.renderDefaultInput();
-    }
+    return _results;
   };
 
   BreadcrumbView.prototype.renderSearchInput = function() {
-    var searchInput, translationKey;
+    var breadcrumbItem, searchInput, translationKey;
     translationKey = 'match criterion';
     if (this.noTagSelected) {
       translationKey = "" + translationKey + " no tag";
     } else {
       translationKey = "" + translationKey + " with tag";
     }
-    searchInput = $('<input class="search" type="text" value="' + this.searchQuery + '" />');
-    this.$el.find('.size-calculator').before(" " + (t(translationKey)) + " \"");
-    this.$el.find('.size-calculator').before(searchInput);
-    this.$el.find('.size-calculator').before('"');
-    this.bindInputEvents(searchInput);
-    if (this.noTagSelected) {
-      return this.renderDefaultInput();
-    }
+    breadcrumbItem = new BreadcrumbItemView({
+      model: this.searchQuery,
+      type: 'searcg'
+    });
+    this.listenTo(breadcrumbItem, 'remove', this.onInputChange);
+    this.views.add(breadcrumbItem);
+    searchInput = breadcrumbItem.render().$el;
+    return this.$el.append(searchInput);
   };
 
   BreadcrumbView.prototype.renderDefaultInput = function() {
     var className, newTagInput, placeholder;
+    this.$sizeCalculator = $('<span class="size-calculator"></span>');
+    this.$el.append(this.$sizeCalculator);
     className = "class='add-tag'";
     placeholder = "placeholder='" + (t('search tag input')) + "'";
     newTagInput = $("<input " + className + " type='text' " + placeholder + "/>");
@@ -1123,35 +1203,31 @@ module.exports = BreadcrumbView = (function(_super) {
       currentTarget: input
     });
     input.change(this.onInputChange);
-    input.keypress(this.adjustInputSize);
-    return input.keydown((function(_this) {
-      return function(evt) {
-        var key;
-        key = evt.keyCode;
-        if (input.val().length === 0 && key === 8) {
-          evt.preventDefault();
-          return _this.onInputChange(evt);
-        }
-      };
-    })(this));
+    return input.keypress(this.adjustInputSize);
   };
 
   BreadcrumbView.prototype.onInputChange = function(evt) {
-    var allTags, detectedTags, hasTasksRelatedTo, input, inputEl, location, newInput, newInputVal, query, searchInput, searchInputVal, searchLocation, tag, tags, _i, _len, _ref, _ref1;
-    inputEl = $(evt.currentTarget);
-    detectedTags = inputEl.val().match(Task.regex);
-    if (detectedTags != null) {
-      inputEl.val(detectedTags[0]);
-      this.adjustInputSize(evt);
+    var allTags, detectedTags, hasTasksRelatedTo, input, inputEl, location, newInput, newInputVal, query, searchInput, searchInputVal, searchLocation, tag, tags, value, _i, _len, _ref, _ref1;
+    if (evt != null) {
+      inputEl = $(evt.currentTarget);
+      detectedTags = inputEl.val().match(Task.regex);
+      if (detectedTags != null) {
+        inputEl.val(detectedTags[0]);
+        this.adjustInputSize(evt);
+      }
     }
     tags = [];
-    _ref = this.$('input:not(.search):not(.add-tag)');
+    _ref = this.$('.breadcrumb-item');
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       input = _ref[_i];
-      tag = $(input).val();
-      tag = tag.replace('#', '');
-      if (tag.length > 0) {
-        tags.push(tag);
+      value = $(input).find('span').html();
+      if (value.indexOf('#') === 0) {
+        tag = value.replace('#', '');
+        if (tag.length > 0) {
+          tags.push(tag);
+        }
+      } else {
+        query = value.substr(1, value.length - 2);
       }
     }
     newInput = this.$('input.add-tag');
@@ -1161,7 +1237,11 @@ module.exports = BreadcrumbView = (function(_super) {
         newInputVal = newInputVal.replace('#', '');
         tags.push(newInputVal);
       } else {
-        query = newInputVal;
+        if (query != null) {
+          query = "" + query + " " + newInputVal;
+        } else {
+          query = newInputVal;
+        }
       }
     }
     tags = _.uniq(tags);
@@ -1192,10 +1272,14 @@ module.exports = BreadcrumbView = (function(_super) {
           location = "#todoByTags/" + tags + searchLocation;
           return app.router.navigate(location, true);
         } else {
-          return $(evt.currentTarget).addClass('error');
+          if (evt != null) {
+            return $(evt.currentTarget).addClass('error');
+          }
         }
       } else {
-        return $(evt.currentTarget).addClass('error');
+        if (evt != null) {
+          return $(evt.currentTarget).addClass('error');
+        }
       }
     }
   };
@@ -1203,7 +1287,7 @@ module.exports = BreadcrumbView = (function(_super) {
   BreadcrumbView.prototype.adjustInputSize = function(evt) {
     var char, inputEl, inputVal, key, widthToSet;
     inputEl = $(evt.currentTarget);
-    key = evt.keyCode;
+    key = evt.keyCode || evt.charCode;
     char = String.fromCharCode(key);
     inputVal = inputEl.val();
     if (inputVal.length === 0) {
@@ -1212,6 +1296,12 @@ module.exports = BreadcrumbView = (function(_super) {
     this.$sizeCalculator.text(inputVal + char);
     widthToSet = this.$sizeCalculator.width();
     return inputEl.width(widthToSet);
+  };
+
+  BreadcrumbView.prototype.destroy = function() {
+    return this.views.forEach(function(view) {
+      return this.stopListening(view);
+    });
   };
 
   return BreadcrumbView;
