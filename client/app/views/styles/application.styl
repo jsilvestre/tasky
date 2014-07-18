@@ -33,6 +33,7 @@ h1
     font-size 25px
     padding-bottom 10px
 
+    // new search form
     span.size-calculator
     input
         width 150px
@@ -41,19 +42,47 @@ h1
         font-size 20px
         border 1px solid transparent
         white-space pre
+        margin-left 5px
 
         &:hover
             border 1px solid orange
         &:focus
             border 1px solid blue
             outline none
-        &.add-tag
-            margin-left 5px
         &.error
             border 1px solid red
 
     span.size-calculator
         visibility hidden
+
+    .breadcrumb-item
+        display inline-block
+        padding 5px
+        margin 0 5px
+        font-size 20px
+        background #ebf6ff
+        color #3097d8
+        border 1px solid transparent
+        cursor pointer
+
+        a
+            font-size 13px
+            margin-left 10px
+            vertical-align middle
+            text-decoration none
+
+        &:hover
+            background #fff3e5
+            color #985200
+
+            a
+                color #985200
+
+                &:hover
+                    color red
+
+        &.notice-delete-action
+            border-color red + 20%
 
 #actions
     font-family styled

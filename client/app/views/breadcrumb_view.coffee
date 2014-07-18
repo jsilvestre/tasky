@@ -1,4 +1,5 @@
 BaseView = require '../lib/base_view'
+BreadcrumbItemView = require './breadcrumb_item'
 Utils = require '../lib/utils'
 app = require '../application'
 Task = require '../models/task'
@@ -6,12 +7,14 @@ Task = require '../models/task'
 module.exports = class BreadcrumbView extends BaseView
 
     el: '#breadcrumb'
+    views: null
 
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @selectedTags = options.selectedTags
         @collectionLength = options.collectionLength
         @searchQuery = options.searchQuery
+        @views = new Backbone.ChildViewContainer()
         super options
 
     render: ->
@@ -24,25 +27,22 @@ module.exports = class BreadcrumbView extends BaseView
         else
             @$el.append t 'tasks of', smart_count: @selectedTags.length
 
-        # size calcultor is used to compute width of each input field
-        @$sizeCalculator = $ '<span class="size-calculator"></span>'
-        @$el.append @$sizeCalculator
-
         if @selectedTags?
             @renderSelectedTags()
 
         if @searchQuery?
             @renderSearchInput()
 
-        if (not @selectedTags? or @selectedTags.length is 0) and not @searchQuery
+        if not @selectedTags? or (@selectedTags? and not @noTagSelected)
             @renderDefaultInput()
 
     renderSelectedTags: ->
         for tag in @selectedTags
-            tagInput = $ '<input type="text" value="#' + tag + '" />'
-            @$el.find('.size-calculator').before tagInput
-            @bindInputEvents tagInput
-        @renderDefaultInput() unless @noTagSelected
+            breadcrumbItem = new BreadcrumbItemView model: tag, type: 'tag'
+            @listenTo breadcrumbItem, 'remove', @onInputChange
+            @views.add breadcrumbItem
+            tagInput = breadcrumbItem.render().$el
+            @$el.append tagInput
 
     renderSearchInput: ->
         translationKey = 'match criterion'
@@ -51,15 +51,17 @@ module.exports = class BreadcrumbView extends BaseView
         else
             translationKey = "#{translationKey} with tag"
 
-        searchInput = $ '<input class="search" type="text" value="' + @searchQuery + '" />'
-        @$el.find('.size-calculator').before " #{t translationKey} \""
-        @$el.find('.size-calculator').before searchInput
-        @$el.find('.size-calculator').before '"'
-        @bindInputEvents searchInput
-
-        @renderDefaultInput() if @noTagSelected
+        breadcrumbItem = new BreadcrumbItemView model: @searchQuery, type: 'searcg'
+        @listenTo breadcrumbItem, 'remove', @onInputChange
+        @views.add breadcrumbItem
+        searchInput = breadcrumbItem.render().$el
+        @$el.append searchInput
 
     renderDefaultInput: ->
+        # size calcultor is used to compute width of the input field
+        @$sizeCalculator = $ '<span class="size-calculator"></span>'
+        @$el.append @$sizeCalculator
+
         className = "class='add-tag'"
         placeholder = "placeholder='#{t('search tag input')}'"
         newTagInput = $ "<input #{className} type='text' #{placeholder}/>"
@@ -71,27 +73,25 @@ module.exports = class BreadcrumbView extends BaseView
         input.change @onInputChange
         input.keypress @adjustInputSize
 
-        # triggers the change handler if the field is empty
-        # and the user strokes backspace
-        input.keydown (evt) =>
-            key = evt.keyCode
-            if input.val().length is 0 and key is 8
-                evt.preventDefault()
-                @onInputChange evt
-
     onInputChange: (evt) =>
-        # correct the input to have only one tag
-        inputEl = $ evt.currentTarget
-        detectedTags = inputEl.val().match Task.regex
-        if detectedTags?
-            inputEl.val detectedTags[0]
-            @adjustInputSize evt
+        if evt?
+            # correct the input to have only one tag
+            inputEl = $ evt.currentTarget
+            detectedTags = inputEl.val().match Task.regex
+            if detectedTags?
+                inputEl.val detectedTags[0]
+                @adjustInputSize evt
 
         tags = []
-        for input in @$ 'input:not(.search):not(.add-tag)'
-            tag = $(input).val()
-            tag = tag.replace '#', ''
-            tags.push tag if tag.length > 0
+        for input in @$ '.breadcrumb-item'
+            value = $(input).find('span').html()
+
+            if value.indexOf('#') is 0
+                tag = value.replace '#', ''
+                tags.push tag if tag.length > 0
+            else
+                # cut the first and last <"> characters
+                query = value.substr 1, value.length - 2
 
         # we manage individually the default input
         # it can hold a tag search or a plain text search
@@ -102,7 +102,11 @@ module.exports = class BreadcrumbView extends BaseView
                 newInputVal = newInputVal.replace '#', ''
                 tags.push newInputVal
             else
-                query = newInputVal
+                # if there is already a query, we append to it
+                if query?
+                    query = "#{query} #{newInputVal}"
+                else
+                    query = newInputVal
 
         tags = _.uniq tags
 
@@ -135,10 +139,10 @@ module.exports = class BreadcrumbView extends BaseView
                     location = "#todoByTags/#{tags}#{searchLocation}"
                     app.router.navigate location, true
                 else
-                    $(evt.currentTarget).addClass 'error'
+                    $(evt.currentTarget).addClass 'error' if evt?
 
             else
-                $(evt.currentTarget).addClass 'error'
+                $(evt.currentTarget).addClass 'error' if evt?
 
     adjustInputSize: (evt) =>
         inputEl = $ evt.currentTarget
@@ -153,4 +157,7 @@ module.exports = class BreadcrumbView extends BaseView
         @$sizeCalculator.text inputVal + char
         widthToSet = @$sizeCalculator.width()
         inputEl.width widthToSet
+
+    destroy: ->
+        @views.forEach (view) -> @stopListening view
 
