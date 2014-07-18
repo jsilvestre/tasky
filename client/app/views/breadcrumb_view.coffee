@@ -146,7 +146,7 @@ module.exports = class BreadcrumbView extends BaseView
 
     adjustInputSize: (evt) =>
         inputEl = $ evt.currentTarget
-        key = evt.keyCode
+        key = evt.keyCode or evt.charCode
         char = String.fromCharCode key
         inputVal = inputEl.val()
 
