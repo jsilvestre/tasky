@@ -256,6 +256,7 @@ module.exports = TaskCollection = (function(_super) {
   };
 
   TaskCollection.prototype.getByTags = function(tags) {
+    var excludedTags, includedTags;
     if (tags === void 0 || tags === null) {
       return this;
     }
@@ -266,9 +267,18 @@ module.exports = TaskCollection = (function(_super) {
         }
       });
     }
+    includedTags = _.filter(tags, function(tag) {
+      return tag.indexOf('!') !== 0;
+    });
+    excludedTags = _.filter(tags, function(tag) {
+      return tag.indexOf('!') === 0;
+    });
+    excludedTags = _.map(excludedTags, function(tag) {
+      return tag.substr(1);
+    });
     return new BackboneProjections.Filtered(this, {
       filter: function(task) {
-        return task.containsTags(tags);
+        return task.containsTags(includedTags) && task.doesntContainsTags(excludedTags);
       }
     });
   };
@@ -645,6 +655,21 @@ module.exports = Task = (function(_super) {
         return tag.toLowerCase();
       });
       return _.every(tags, _.partial(_.contains, lowerCasedTags));
+    }
+  };
+
+  Task.prototype.doesntContainsTags = function(tags) {
+    var lowerCasedTags;
+    if (!(tags instanceof Array)) {
+      tags = [tags];
+    }
+    if (tags.length === 0) {
+      return true;
+    } else {
+      lowerCasedTags = this.get('tags').map(function(tag) {
+        return tag.toLowerCase();
+      });
+      return !_.some(tags, _.partial(_.contains, lowerCasedTags));
     }
   };
 
@@ -1050,22 +1075,28 @@ module.exports = BreadcrumbItemView = (function(_super) {
     'mouseover a': 'onRemoveHovered',
     'mouseout a': 'onRemoveHovered',
     'click a': 'onRemoveClicked',
-    'click': 'onClicked'
+    'click span': 'onClicked'
   };
 
   function BreadcrumbItemView(options) {
-    BreadcrumbItemView.__super__.constructor.call(this, options);
     this.type = options.type;
     if (options.type === 'tag') {
-      this.className = "" + this.className + " tag";
-    } else {
-      this.className = "" + this.className + " search";
+      if (options.model.indexOf('!') === 0) {
+        this.className = "" + this.className + " excluded";
+      } else {
+        this.className = "" + this.className;
+      }
     }
+    BreadcrumbItemView.__super__.constructor.call(this, options);
   }
 
   BreadcrumbItemView.prototype.getRenderData = function() {
     if (this.type === 'tag') {
-      return "#" + this.model;
+      if (this.model.indexOf('!') === 0) {
+        return "#" + (this.model.substr(1));
+      } else {
+        return "#" + this.model;
+      }
     } else {
       return "\"" + this.model + "\"";
     }
@@ -1084,8 +1115,13 @@ module.exports = BreadcrumbItemView = (function(_super) {
     })(this));
   };
 
-  BreadcrumbItemView.prototype.onClicked = function() {
-    return console.log("something coming soon :)");
+  BreadcrumbItemView.prototype.onClicked = function(evt) {
+    if (this.model.indexOf('!') === 0) {
+      this.model = this.model.substr(1);
+    } else {
+      this.model = "!" + this.model;
+    }
+    return this.trigger('change');
   };
 
   return BreadcrumbItemView;
@@ -1161,7 +1197,12 @@ module.exports = BreadcrumbView = (function(_super) {
         model: tag,
         type: 'tag'
       });
-      this.listenTo(breadcrumbItem, 'remove', this.onInputChange);
+      this.listenTo(breadcrumbItem, 'remove', (function(_this) {
+        return function() {
+          return _this.views.remove(breadcrumbItem);
+        };
+      })(this));
+      this.listenTo(breadcrumbItem, 'change remove', this.onInputChange);
       this.views.add(breadcrumbItem);
       tagInput = breadcrumbItem.render().$el;
       _results.push(this.$el.append(tagInput));
@@ -1181,7 +1222,12 @@ module.exports = BreadcrumbView = (function(_super) {
       model: this.searchQuery,
       type: 'searcg'
     });
-    this.listenTo(breadcrumbItem, 'remove', this.onInputChange);
+    this.listenTo(breadcrumbItem, 'remove', (function(_this) {
+      return function() {
+        return _this.views.remove(breadcrumbItem);
+      };
+    })(this));
+    this.listenTo(breadcrumbItem, 'change remove', this.onInputChange);
     this.views.add(breadcrumbItem);
     searchInput = breadcrumbItem.render().$el;
     return this.$el.append(searchInput);
@@ -1207,7 +1253,7 @@ module.exports = BreadcrumbView = (function(_super) {
   };
 
   BreadcrumbView.prototype.onInputChange = function(evt) {
-    var allTags, detectedTags, hasTasksRelatedTo, input, inputEl, location, newInput, newInputVal, query, searchInput, searchInputVal, searchLocation, tag, tags, value, _i, _len, _ref, _ref1;
+    var allTags, detectedTags, hasTasksRelatedTo, inputEl, location, newInput, newInputVal, query, rawTags, searchInput, searchInputVal, searchLocation, tags, _ref;
     if (evt != null) {
       inputEl = $(evt.currentTarget);
       detectedTags = inputEl.val().match(Task.regex);
@@ -1217,27 +1263,26 @@ module.exports = BreadcrumbView = (function(_super) {
       }
     }
     tags = [];
-    _ref = this.$('.breadcrumb-item');
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      input = _ref[_i];
-      value = $(input).find('span').html();
-      if (value.indexOf('#') === 0) {
+    this.views.forEach(function(view) {
+      var query, tag, value;
+      value = view.model;
+      if (view.type === 'tag') {
         tag = value.replace('#', '');
         if (tag.length > 0) {
-          tags.push(tag);
+          return tags.push(tag);
         }
       } else {
-        query = value.substr(1, value.length - 2);
+        return query = value.substr(1, value.length - 2);
       }
-    }
+    });
     newInput = this.$('input.add-tag');
     newInputVal = newInput.val();
     if ((newInput != null) && (newInputVal = newInput.val()).length > 0) {
-      if (newInputVal.indexOf('#') === 0) {
+      if (newInputVal.indexOf('#') === 0 || newInputVal.indexOf('!#') === 0) {
         newInputVal = newInputVal.replace('#', '');
         tags.push(newInputVal);
       } else {
-        if (query != null) {
+        if (typeof query !== "undefined" && query !== null) {
           query = "" + query + " " + newInputVal;
         } else {
           query = newInputVal;
@@ -1247,7 +1292,7 @@ module.exports = BreadcrumbView = (function(_super) {
     tags = _.uniq(tags);
     if (query == null) {
       searchInput = this.$('input.search');
-      if ((searchInput != null) && ((_ref1 = (searchInputVal = searchInput.val())) != null ? _ref1.length : void 0) > 0) {
+      if ((searchInput != null) && ((_ref = (searchInputVal = searchInput.val())) != null ? _ref.length : void 0) > 0) {
         query = searchInputVal;
       } else {
         query = null;
@@ -1262,7 +1307,14 @@ module.exports = BreadcrumbView = (function(_super) {
       return app.router.navigate(location, true);
     } else {
       allTags = this.baseCollection.getAllTags().pluck('id');
-      if (_.every(tags, (function(tag) {
+      rawTags = _.map(tags, function(tag) {
+        if (tag.indexOf('!') === 0) {
+          return tag.substr(1);
+        } else {
+          return tag;
+        }
+      });
+      if (_.every(rawTags, (function(tag) {
         return __indexOf.call(allTags, tag) >= 0;
       }))) {
         hasTasksRelatedTo = this.baseCollection.getByTags(tags).length > 0;
