@@ -15,6 +15,15 @@ module.exports = class Task extends Backbone.Model
             lowerCasedTags = @get('tags').map (tag) -> tag.toLowerCase()
             return _.every tags, _.partial(_.contains, lowerCasedTags)
 
+    doesntContainsTags: (tags) ->
+        tags = [tags] unless tags instanceof Array
+        # no task to excluse, it cannot contain it
+        if tags.length is 0
+            return true
+        else
+            lowerCasedTags = @get('tags').map (tag) -> tag.toLowerCase()
+            return not _.some tags, _.partial(_.contains, lowerCasedTags)
+
     getPreviousWithTags: (tags) ->
         order = @get 'order'
         subCollection = @collection.getByTags tags

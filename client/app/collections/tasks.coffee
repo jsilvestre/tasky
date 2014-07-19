@@ -36,8 +36,13 @@ module.exports = class TaskCollection extends Backbone.Collection
             return new BackboneProjections.Filtered @,
                 filter: (task) -> task.get('tags').length is 0
 
+        includedTags = _.filter tags, (tag) -> return tag.indexOf('!') isnt 0
+        excludedTags = _.filter tags, (tag) -> return tag.indexOf('!') is 0
+        excludedTags = _.map excludedTags, (tag) -> return tag.substr 1
+
         return new BackboneProjections.Filtered @,
-                filter: (task) -> task.containsTags tags
+                filter: (task) ->
+                    task.containsTags(includedTags) and task.doesntContainsTags(excludedTags)
 
     reindex: ->
         @trigger 'reindexing'

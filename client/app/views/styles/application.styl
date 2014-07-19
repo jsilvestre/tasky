@@ -74,15 +74,33 @@ h1
         &:hover
             background #fff3e5
             color #985200
+            border 1px solid orange
+
+            a
+                color #985200
+                &:hover
+                    color red
+
+        &.excluded
+            background #fff3e5
+            color #985200
 
             a
                 color #985200
 
-                &:hover
-                    color red
+            &:hover
+                border 1px solid blue
+                background #ebf6ff
+                color #3097d8
+
+                a
+                    color #3097d8
+                    &:hover
+                        color red
+
 
         &.notice-delete-action
-            border-color red + 20%
+            border-color red + 20% !important
 
 #actions
     font-family styled

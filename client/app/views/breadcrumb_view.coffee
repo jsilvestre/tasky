@@ -39,7 +39,9 @@ module.exports = class BreadcrumbView extends BaseView
     renderSelectedTags: ->
         for tag in @selectedTags
             breadcrumbItem = new BreadcrumbItemView model: tag, type: 'tag'
-            @listenTo breadcrumbItem, 'remove', @onInputChange
+            @listenTo breadcrumbItem, 'remove', =>
+                @views.remove breadcrumbItem
+            @listenTo breadcrumbItem, 'change remove', @onInputChange
             @views.add breadcrumbItem
             tagInput = breadcrumbItem.render().$el
             @$el.append tagInput
@@ -52,7 +54,9 @@ module.exports = class BreadcrumbView extends BaseView
             translationKey = "#{translationKey} with tag"
 
         breadcrumbItem = new BreadcrumbItemView model: @searchQuery, type: 'searcg'
-        @listenTo breadcrumbItem, 'remove', @onInputChange
+        @listenTo breadcrumbItem, 'remove', =>
+            @views.remove breadcrumbItem
+        @listenTo breadcrumbItem, 'change remove', @onInputChange
         @views.add breadcrumbItem
         searchInput = breadcrumbItem.render().$el
         @$el.append searchInput
@@ -83,10 +87,10 @@ module.exports = class BreadcrumbView extends BaseView
                 @adjustInputSize evt
 
         tags = []
-        for input in @$ '.breadcrumb-item'
-            value = $(input).find('span').html()
+        @views.forEach (view) ->
+            value = view.model
 
-            if value.indexOf('#') is 0
+            if view.type is 'tag'
                 tag = value.replace '#', ''
                 tags.push tag if tag.length > 0
             else
@@ -98,7 +102,7 @@ module.exports = class BreadcrumbView extends BaseView
         newInput = @$ 'input.add-tag'
         newInputVal = newInput.val()
         if newInput? and (newInputVal = newInput.val()).length > 0
-            if newInputVal.indexOf('#') is 0
+            if newInputVal.indexOf('#') is 0 or newInputVal.indexOf('!#') is 0
                 newInputVal = newInputVal.replace '#', ''
                 tags.push newInputVal
             else
@@ -128,7 +132,13 @@ module.exports = class BreadcrumbView extends BaseView
             allTags = @baseCollection.getAllTags().pluck 'id'
 
             # if the tag doesn't exist, we don't process the change
-            if _.every tags, ((tag) -> tag in allTags)
+            rawTags = _.map tags, (tag) ->
+                if tag.indexOf('!') is 0
+                    return tag.substr 1
+                else
+                    return tag
+
+            if _.every rawTags, ((tag) -> tag in allTags)
 
                 # if the new combination of tags doesn't have related tasks
                 # we don't process the change

@@ -15,20 +15,26 @@ module.exports = class BreadcrumbItemView extends BaseView
         'mouseover a': 'onRemoveHovered'
         'mouseout a': 'onRemoveHovered'
         'click a': 'onRemoveClicked'
-        'click': 'onClicked'
+        'click span': 'onClicked'
 
     constructor: (options) ->
-        super options
         @type = options.type
 
+
         if options.type is 'tag'
-            @className = "#{@className} tag"
-        else
-            @className = "#{@className} search"
+            if options.model.indexOf('!') is 0
+                @className = "#{@className} excluded"
+            else
+                @className = "#{@className}"
+
+        super options
 
     getRenderData: ->
         if @type is 'tag'
-            return "##{@model}"
+            if @model.indexOf('!') is 0
+                return "##{@model.substr 1}"
+            else
+                return "##{@model}"
         else
             return "\"#{@model}\""
 
@@ -39,5 +45,9 @@ module.exports = class BreadcrumbItemView extends BaseView
             @destroy()
             @trigger 'remove'
 
-    onClicked: ->
-        console.log "something coming soon :)"
+    onClicked: (evt) ->
+        if @model.indexOf('!') is 0
+            @model = @model.substr 1
+        else
+            @model = "!#{@model}"
+        @trigger 'change'
