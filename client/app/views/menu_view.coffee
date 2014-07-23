@@ -13,10 +13,18 @@ module.exports = class MenuView extends BaseView
     activeTags: null
     subMenuHandler: null
 
+    events: 'click #order': 'onToggleSortOrder'
+
+    defaultSortOrder: 0
+    onToggleSortOrder: () ->
+        @sortOrder = 1 - @sortOrder
+        @render()
+
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @archivedCollection = options.archivedCollection
         @views = new Backbone.ChildViewContainer()
+        @sortOrder = @defaultSortOrder
         super options
 
     initialize: (options) ->
@@ -46,7 +54,7 @@ module.exports = class MenuView extends BaseView
         archivedCount: archivedCount
 
     beforeRender: ->
-        tagsList = @baseCollection.getAllTags()
+        tagsList = @baseCollection.getAllTags @sortOrder
         @views.forEach (taskView) =>
             if tagsList.indexOf(taskView.model.get('tagName')) isnt -1
                 taskView.$el.detach()
@@ -90,7 +98,7 @@ module.exports = class MenuView extends BaseView
             archivedListEl = @$ '#archived'
             @$('ul:first-child').prepend archivedListEl
 
-        tags = @collection.getAllTags()
+        tags = @collection.getAllTags @sortOrder
         tags.forEach (tagInfo) =>
             menuItem = new MenuItemView
                             model: new Backbone.Model
@@ -100,6 +108,7 @@ module.exports = class MenuView extends BaseView
                             selectedTags: @activeTags
                             depth: 0
                             viewType: @viewType
+                            sortOrder: @sortOrder
                             baseCollection: @baseCollection
                             archivedCollection: @archivedCollection
 

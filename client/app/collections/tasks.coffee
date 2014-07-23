@@ -24,7 +24,7 @@ module.exports = class TaskCollection extends Backbone.Collection
         return {order, step}
 
     # Returns tags once
-    getAllTags: -> return TagsCollection.extractFromTasks @
+    getAllTags: (sortOrder) -> return TagsCollection.extractFromTasks @, [], [], sortOrder
 
     getByTags: (tags) ->
 

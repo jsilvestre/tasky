@@ -1,20 +1,30 @@
 module.exports = class TagsCollection extends Backbone.Collection
 
+    constructor: (@sortMode) ->
+        super()
+
     comparator: (a, b) ->
-        if a.get('count') > b.get('count')
-            return -1
-        else if a.get('count') is b.get('count')
-            if a.get('id') < b.get('id')
-                return -1
-            else if a.get('id') > b.get('id')
-                return 1
+        if @sortMode == 0
+            # sort by -count, then +id
+            [first, second, factor] = ['count', 'id', 1]
+        else
+            # sort by +id, then -count
+            [first, second, factor] = ['id', 'count', -1]
+
+        if a.get(first) > b.get(first)
+            return -1 * factor
+        else if a.get(first) is b.get(first)
+            if a.get(second) < b.get(second)
+                return -1 * factor
+            else if a.get(second) > b.get(second)
+                return 1 * factor
             else
                 return 0
         else
-            return 1
+            return 1 * factor
 
-    @extractFromTasks: (taskCollection, excludes = [], selectedTags = []) ->
-        tagsList = new TagsCollection()
+    @extractFromTasks: (taskCollection, excludes = [], selectedTags = [], sortMode = 0) ->
+        tagsList = new TagsCollection sortMode
 
         taskCollection.pluck('tags').forEach (tagsOfTask) ->
             tagsOfTask.forEach (tag) ->
@@ -30,3 +40,4 @@ module.exports = class TagsCollection extends Backbone.Collection
 
         tagsList.sort()
         return tagsList
+

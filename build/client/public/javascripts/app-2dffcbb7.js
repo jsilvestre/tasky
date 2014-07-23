@@ -154,27 +154,34 @@ var TagsCollection,
 module.exports = TagsCollection = (function(_super) {
   __extends(TagsCollection, _super);
 
-  function TagsCollection() {
-    return TagsCollection.__super__.constructor.apply(this, arguments);
+  function TagsCollection(sortMode) {
+    this.sortMode = sortMode;
+    TagsCollection.__super__.constructor.call(this);
   }
 
   TagsCollection.prototype.comparator = function(a, b) {
-    if (a.get('count') > b.get('count')) {
-      return -1;
-    } else if (a.get('count') === b.get('count')) {
-      if (a.get('id') < b.get('id')) {
-        return -1;
-      } else if (a.get('id') > b.get('id')) {
-        return 1;
+    var factor, first, second, _ref, _ref1;
+    if (this.sortMode === 0) {
+      _ref = ['count', 'id', 1], first = _ref[0], second = _ref[1], factor = _ref[2];
+    } else {
+      _ref1 = ['id', 'count', -1], first = _ref1[0], second = _ref1[1], factor = _ref1[2];
+    }
+    if (a.get(first) > b.get(first)) {
+      return -1 * factor;
+    } else if (a.get(first) === b.get(first)) {
+      if (a.get(second) < b.get(second)) {
+        return -1 * factor;
+      } else if (a.get(second) > b.get(second)) {
+        return 1 * factor;
       } else {
         return 0;
       }
     } else {
-      return 1;
+      return 1 * factor;
     }
   };
 
-  TagsCollection.extractFromTasks = function(taskCollection, excludes, selectedTags) {
+  TagsCollection.extractFromTasks = function(taskCollection, excludes, selectedTags, sortMode) {
     var tagsList;
     if (excludes == null) {
       excludes = [];
@@ -182,7 +189,10 @@ module.exports = TagsCollection = (function(_super) {
     if (selectedTags == null) {
       selectedTags = [];
     }
-    tagsList = new TagsCollection();
+    if (sortMode == null) {
+      sortMode = 0;
+    }
+    tagsList = new TagsCollection(sortMode);
     taskCollection.pluck('tags').forEach(function(tagsOfTask) {
       return tagsOfTask.forEach(function(tag) {
         var tagInfo;
@@ -251,8 +261,8 @@ module.exports = TaskCollection = (function(_super) {
     };
   };
 
-  TaskCollection.prototype.getAllTags = function() {
-    return TagsCollection.extractFromTasks(this);
+  TaskCollection.prototype.getAllTags = function(sortOrder) {
+    return TagsCollection.extractFromTasks(this, [], [], sortOrder);
   };
 
   TaskCollection.prototype.getByTags = function(tags) {
@@ -1393,6 +1403,7 @@ module.exports = MenuItemView = (function(_super) {
     this.selectedTags = options.selectedTags;
     this.depth = options.depth;
     this.viewType = options.viewType;
+    this.sortOrder = options.sortOrder;
     this.views = new Backbone.ChildViewContainer();
     MenuItemView.__super__.constructor.call(this, options);
   }
@@ -1459,6 +1470,7 @@ module.exports = MenuItemView = (function(_super) {
             selectedTags: _this.selectedTags,
             depth: _this.depth + 1,
             viewType: _this.viewType,
+            sortOrder: _this.sortOrder,
             baseCollection: _this.baseCollection,
             archivedCollection: _this.archivedCollection
           });
@@ -1484,7 +1496,7 @@ module.exports = MenuItemView = (function(_super) {
       collection = this.archivedCollection;
     }
     this.collection = collection.getByTags(includedTags);
-    tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags);
+    tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags, this.sortOrder);
     return tagsList;
   };
 
@@ -1517,10 +1529,22 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.subMenuHandler = null;
 
+  MenuView.prototype.events = {
+    'click #order': 'onToggleSortOrder'
+  };
+
+  MenuView.prototype.defaultSortOrder = 0;
+
+  MenuView.prototype.onToggleSortOrder = function() {
+    this.sortOrder = 1 - this.sortOrder;
+    return this.render();
+  };
+
   function MenuView(options) {
     this.baseCollection = options.baseCollection;
     this.archivedCollection = options.archivedCollection;
     this.views = new Backbone.ChildViewContainer();
+    this.sortOrder = this.defaultSortOrder;
     MenuView.__super__.constructor.call(this, options);
   }
 
@@ -1556,7 +1580,7 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.beforeRender = function() {
     var tagsList;
-    tagsList = this.baseCollection.getAllTags();
+    tagsList = this.baseCollection.getAllTags(this.sortOrder);
     return this.views.forEach((function(_this) {
       return function(taskView) {
         if (tagsList.indexOf(taskView.model.get('tagName')) !== -1) {
@@ -1610,7 +1634,7 @@ module.exports = MenuView = (function(_super) {
       archivedListEl = this.$('#archived');
       this.$('ul:first-child').prepend(archivedListEl);
     }
-    tags = this.collection.getAllTags();
+    tags = this.collection.getAllTags(this.sortOrder);
     tags.forEach((function(_this) {
       return function(tagInfo) {
         var menuItem;
@@ -1623,6 +1647,7 @@ module.exports = MenuView = (function(_super) {
           selectedTags: _this.activeTags,
           depth: 0,
           viewType: _this.viewType,
+          sortOrder: _this.sortOrder,
           baseCollection: _this.baseCollection,
           archivedCollection: _this.archivedCollection
         });
@@ -2333,7 +2358,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),allCount = locals_.allCount,archivedCount = locals_.archivedCount;
-buf.push("<ul><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
+buf.push("<ul><li id=\"settings\" class=\"first-level\"><a href=\"#\" id=\"order\">Toggle sort order</a></li><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
