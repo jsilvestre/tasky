@@ -15,4 +15,5 @@ results
 node_modules
 npm-debug.log
 client/public
+client/bower_components
 .DS_STORE
