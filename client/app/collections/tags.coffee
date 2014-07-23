@@ -1,30 +1,33 @@
 module.exports = class TagsCollection extends Backbone.Collection
 
-    constructor: (@sortMode) ->
+    constructor: (@sortCriteria) ->
         super()
 
     comparator: (a, b) ->
-        if @sortMode == 0
+        if @sortCriteria is 'count'
             # sort by -count, then +id
             [first, second, factor] = ['count', 'id', 1]
-        else
+        else if @sortCriteria is 'alpha'
             # sort by +id, then -count
             [first, second, factor] = ['id', 'count', -1]
+        else throw new Error 'NYI'
 
-        if a.get(first) > b.get(first)
+        [af, bf] = [a.get(first), b.get(first)]
+        if af > bf
             return -1 * factor
-        else if a.get(first) is b.get(first)
-            if a.get(second) < b.get(second)
+        else if af is bf
+            [as, bs] = [a.get(second), b.get(second)]
+            if as < bs
                 return -1 * factor
-            else if a.get(second) > b.get(second)
+            else if as > bs
                 return 1 * factor
             else
                 return 0
         else
             return 1 * factor
 
-    @extractFromTasks: (taskCollection, excludes = [], selectedTags = [], sortMode = 0) ->
-        tagsList = new TagsCollection sortMode
+    @extractFromTasks: (taskCollection, excludes = [], selectedTags = [], sortCriteria = 'count') ->
+        tagsList = new TagsCollection sortCriteria
 
         taskCollection.pluck('tags').forEach (tagsOfTask) ->
             tagsOfTask.forEach (tag) ->

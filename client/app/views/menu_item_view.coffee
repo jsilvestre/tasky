@@ -17,7 +17,7 @@ module.exports = class MenuItemView extends BaseView
         @selectedTags = options.selectedTags
         @depth = options.depth
         @viewType = options.viewType
-        @sortOrder = options.sortOrder
+        @sortCriteria = options.sortCriteria
 
         @views = new Backbone.ChildViewContainer()
         super options
@@ -73,7 +73,7 @@ module.exports = class MenuItemView extends BaseView
                                 selectedTags: @selectedTags
                                 depth: @depth + 1
                                 viewType: @viewType
-                                sortOrder: @sortOrder
+                                sortCriteria: @sortCriteria
                                 baseCollection: @baseCollection
                                 archivedCollection: @archivedCollection
 
@@ -97,5 +97,5 @@ module.exports = class MenuItemView extends BaseView
         tagsList = TagsCollection.extractFromTasks @collection,
                                                     excludedItems,
                                                     @selectedTags,
-                                                    @sortOrder
+                                                    @sortCriteria
         return tagsList

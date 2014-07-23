@@ -1,8 +1,11 @@
 ul
-    li#settings.first-level
-        a(href='#')#order Toggle sort order
     li#tobedone.first-level
         a(href="#") #{t('todo')} (#{allCount})
+        ul.sorts
+            li
+                a(href='#').fa.fa-sort-alpha-asc#sortalpha
+            li
+                a(href='#').fa.fa-sort-numeric-desc#sortcount
         ul.submenu
     li#archived.first-level
         a(href="#archived") #{t('archived')} (#{archivedCount})
