@@ -21,6 +21,7 @@
       display block
       font-family styled
       font-weight normal
+      position relative
 
       a
         display inline-block
@@ -43,10 +44,15 @@
         margin-top -5.1px // dirty hack because of overflow blank space...
       .submenu > li a
         padding-left 25px
+
       .sorts
-        margin-top -5.1px // dirty hack as well
+        position absolute
+        top 0
+        right 0
         li
           float right
+          a
+            height 39px
 
       &.first-level > a
         opacity 0.4
