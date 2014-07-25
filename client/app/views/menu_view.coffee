@@ -13,10 +13,25 @@ module.exports = class MenuView extends BaseView
     activeTags: null
     subMenuHandler: null
 
+    events:
+        'click #sortalpha': 'onSortAlpha'
+        'click #sortcount': 'onSortCount'
+
+    defaultSortCriteria: 'count'
+    onSortAlpha: () ->
+        if @sortCriteria isnt 'alpha'
+            @sortCriteria = 'alpha'
+            @render()
+    onSortCount: () ->
+        if @sortCriteria isnt 'count'
+            @sortCriteria = 'count'
+            @render()
+
     constructor: (options) ->
         @baseCollection = options.baseCollection
         @archivedCollection = options.archivedCollection
         @views = new Backbone.ChildViewContainer()
+        @sortCriteria = @defaultSortCriteria
         super options
 
     initialize: (options) ->
@@ -46,7 +61,7 @@ module.exports = class MenuView extends BaseView
         archivedCount: archivedCount
 
     beforeRender: ->
-        tagsList = @baseCollection.getAllTags()
+        tagsList = @baseCollection.getAllTags @sortCriteria
         @views.forEach (taskView) =>
             if tagsList.indexOf(taskView.model.get('tagName')) isnt -1
                 taskView.$el.detach()
@@ -90,7 +105,7 @@ module.exports = class MenuView extends BaseView
             archivedListEl = @$ '#archived'
             @$('ul:first-child').prepend archivedListEl
 
-        tags = @collection.getAllTags()
+        tags = @collection.getAllTags @sortCriteria
         tags.forEach (tagInfo) =>
             menuItem = new MenuItemView
                             model: new Backbone.Model
@@ -100,6 +115,7 @@ module.exports = class MenuView extends BaseView
                             selectedTags: @activeTags
                             depth: 0
                             viewType: @viewType
+                            sortCriteria: @sortCriteria
                             baseCollection: @baseCollection
                             archivedCollection: @archivedCollection
 

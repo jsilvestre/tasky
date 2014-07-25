@@ -154,27 +154,38 @@ var TagsCollection,
 module.exports = TagsCollection = (function(_super) {
   __extends(TagsCollection, _super);
 
-  function TagsCollection() {
-    return TagsCollection.__super__.constructor.apply(this, arguments);
+  function TagsCollection(sortCriteria) {
+    this.sortCriteria = sortCriteria;
+    TagsCollection.__super__.constructor.call(this);
   }
 
   TagsCollection.prototype.comparator = function(a, b) {
-    if (a.get('count') > b.get('count')) {
-      return -1;
-    } else if (a.get('count') === b.get('count')) {
-      if (a.get('id') < b.get('id')) {
-        return -1;
-      } else if (a.get('id') > b.get('id')) {
-        return 1;
+    var af, as, bf, bs, factor, first, second, _ref, _ref1, _ref2, _ref3;
+    if (this.sortCriteria === 'count') {
+      _ref = ['count', 'id', 1], first = _ref[0], second = _ref[1], factor = _ref[2];
+    } else if (this.sortCriteria === 'alpha') {
+      _ref1 = ['id', 'count', -1], first = _ref1[0], second = _ref1[1], factor = _ref1[2];
+    } else {
+      throw new Error('NYI');
+    }
+    _ref2 = [a.get(first), b.get(first)], af = _ref2[0], bf = _ref2[1];
+    if (af > bf) {
+      return -1 * factor;
+    } else if (af === bf) {
+      _ref3 = [a.get(second), b.get(second)], as = _ref3[0], bs = _ref3[1];
+      if (as < bs) {
+        return -1 * factor;
+      } else if (as > bs) {
+        return 1 * factor;
       } else {
         return 0;
       }
     } else {
-      return 1;
+      return 1 * factor;
     }
   };
 
-  TagsCollection.extractFromTasks = function(taskCollection, excludes, selectedTags) {
+  TagsCollection.extractFromTasks = function(taskCollection, excludes, selectedTags, sortCriteria) {
     var tagsList;
     if (excludes == null) {
       excludes = [];
@@ -182,7 +193,10 @@ module.exports = TagsCollection = (function(_super) {
     if (selectedTags == null) {
       selectedTags = [];
     }
-    tagsList = new TagsCollection();
+    if (sortCriteria == null) {
+      sortCriteria = 'count';
+    }
+    tagsList = new TagsCollection(sortCriteria);
     taskCollection.pluck('tags').forEach(function(tagsOfTask) {
       return tagsOfTask.forEach(function(tag) {
         var tagInfo;
@@ -251,8 +265,8 @@ module.exports = TaskCollection = (function(_super) {
     };
   };
 
-  TaskCollection.prototype.getAllTags = function() {
-    return TagsCollection.extractFromTasks(this);
+  TaskCollection.prototype.getAllTags = function(sortCriteria) {
+    return TagsCollection.extractFromTasks(this, [], [], sortCriteria);
   };
 
   TaskCollection.prototype.getByTags = function(tags) {
@@ -1393,6 +1407,7 @@ module.exports = MenuItemView = (function(_super) {
     this.selectedTags = options.selectedTags;
     this.depth = options.depth;
     this.viewType = options.viewType;
+    this.sortCriteria = options.sortCriteria;
     this.views = new Backbone.ChildViewContainer();
     MenuItemView.__super__.constructor.call(this, options);
   }
@@ -1459,6 +1474,7 @@ module.exports = MenuItemView = (function(_super) {
             selectedTags: _this.selectedTags,
             depth: _this.depth + 1,
             viewType: _this.viewType,
+            sortCriteria: _this.sortCriteria,
             baseCollection: _this.baseCollection,
             archivedCollection: _this.archivedCollection
           });
@@ -1484,7 +1500,7 @@ module.exports = MenuItemView = (function(_super) {
       collection = this.archivedCollection;
     }
     this.collection = collection.getByTags(includedTags);
-    tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags);
+    tagsList = TagsCollection.extractFromTasks(this.collection, excludedItems, this.selectedTags, this.sortCriteria);
     return tagsList;
   };
 
@@ -1517,10 +1533,32 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.subMenuHandler = null;
 
+  MenuView.prototype.events = {
+    'click #sortalpha': 'onSortAlpha',
+    'click #sortcount': 'onSortCount'
+  };
+
+  MenuView.prototype.defaultSortCriteria = 'count';
+
+  MenuView.prototype.onSortAlpha = function() {
+    if (this.sortCriteria !== 'alpha') {
+      this.sortCriteria = 'alpha';
+      return this.render();
+    }
+  };
+
+  MenuView.prototype.onSortCount = function() {
+    if (this.sortCriteria !== 'count') {
+      this.sortCriteria = 'count';
+      return this.render();
+    }
+  };
+
   function MenuView(options) {
     this.baseCollection = options.baseCollection;
     this.archivedCollection = options.archivedCollection;
     this.views = new Backbone.ChildViewContainer();
+    this.sortCriteria = this.defaultSortCriteria;
     MenuView.__super__.constructor.call(this, options);
   }
 
@@ -1556,7 +1594,7 @@ module.exports = MenuView = (function(_super) {
 
   MenuView.prototype.beforeRender = function() {
     var tagsList;
-    tagsList = this.baseCollection.getAllTags();
+    tagsList = this.baseCollection.getAllTags(this.sortCriteria);
     return this.views.forEach((function(_this) {
       return function(taskView) {
         if (tagsList.indexOf(taskView.model.get('tagName')) !== -1) {
@@ -1610,7 +1648,7 @@ module.exports = MenuView = (function(_super) {
       archivedListEl = this.$('#archived');
       this.$('ul:first-child').prepend(archivedListEl);
     }
-    tags = this.collection.getAllTags();
+    tags = this.collection.getAllTags(this.sortCriteria);
     tags.forEach((function(_this) {
       return function(tagInfo) {
         var menuItem;
@@ -1623,6 +1661,7 @@ module.exports = MenuView = (function(_super) {
           selectedTags: _this.activeTags,
           depth: 0,
           viewType: _this.viewType,
+          sortCriteria: _this.sortCriteria,
           baseCollection: _this.baseCollection,
           archivedCollection: _this.archivedCollection
         });
@@ -2333,7 +2372,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),allCount = locals_.allCount,archivedCount = locals_.archivedCount;
-buf.push("<ul><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
+buf.push("<ul><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"sorts\"><li><a href=\"#\" id=\"sortalpha\" class=\"fa fa-sort-alpha-asc\"></a></li><li><a href=\"#\" id=\"sortcount\" class=\"fa fa-sort-numeric-desc\"></a></li></ul><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
