@@ -45,7 +45,6 @@ module.exports = class Task extends Backbone.Model
     # helper function to extract tag from description
     @extractTags: (desc) ->
         tags = desc.match Task.regex
-        tags = _.unique tags
         tags = _.map tags, (tag) -> tag.trim().replace '#', ''
-
+        tags = _.uniq tags
         return tags
