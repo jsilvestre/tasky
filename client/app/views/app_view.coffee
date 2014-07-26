@@ -7,3 +7,11 @@ module.exports = class AppView extends BaseView
 
     el: 'body'
     template: require './templates/home'
+
+    events:
+        'click .fa-bars': 'onMenuToggle'
+        'click .fa-arrow-left': 'onMenuToggle'
+
+    onMenuToggle: ->
+        @$('#menu').toggle()
+        @$('.container').toggle()

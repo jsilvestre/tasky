@@ -25,6 +25,9 @@ i.tag-icon
     display inline-block
     opacity 0.2
 
+.fa-bars
+    display none
+
 h1
     border-bottom 1px solid #ccc
     margin 20px
@@ -207,3 +210,34 @@ ul#task-list-done
     background #fff
     text-align center
     overflow auto
+
+@media (max-width: 960px)
+    #menu
+        display none
+        width 50%
+        position relative
+
+        .fa-arrow-left
+            font-size 25px
+            margin 10px 0
+            position absolute
+            right 15px
+            top 0
+            display block
+
+        ul
+            margin-top 40px
+
+    .container
+        margin auto
+
+        .fa-bars
+            display inline-block
+            margin 20px 0 0 20px
+            font-size 25px
+
+        h1#breadcrumb
+            display inline-block
+            border-bottom 0
+            margin 10px auto 0 20px
+
