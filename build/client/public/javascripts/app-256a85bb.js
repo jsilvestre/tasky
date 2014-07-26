@@ -878,6 +878,16 @@ module.exports = AppView = (function(_super) {
 
   AppView.prototype.template = require('./templates/home');
 
+  AppView.prototype.events = {
+    'click .fa-bars': 'onMenuToggle',
+    'click .fa-arrow-left': 'onMenuToggle'
+  };
+
+  AppView.prototype.onMenuToggle = function() {
+    this.$('#menu').toggle();
+    return this.$('.container').toggle();
+  };
+
   return AppView;
 
 })(BaseView);
@@ -2372,7 +2382,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),allCount = locals_.allCount,archivedCount = locals_.archivedCount;
-buf.push("<ul><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"sorts\"><li><a href=\"#\" id=\"sortalpha\" class=\"fa fa-sort-alpha-asc\"></a></li><li><a href=\"#\" id=\"sortcount\" class=\"fa fa-sort-numeric-desc\"></a></li></ul><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
+buf.push("<i class=\"fa fa-arrow-left\"></i><ul><li id=\"tobedone\" class=\"first-level\"><a href=\"#\">" + (jade.escape((jade_interp = t('todo')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = allCount) == null ? '' : jade_interp)) + ")</a><ul class=\"sorts\"><li><a href=\"#\" id=\"sortalpha\" class=\"fa fa-sort-alpha-asc\"></a></li><li><a href=\"#\" id=\"sortcount\" class=\"fa fa-sort-numeric-desc\"></a></li></ul><ul class=\"submenu\"></ul></li><li id=\"archived\" class=\"first-level\"><a href=\"#archived\">" + (jade.escape((jade_interp = t('archived')) == null ? '' : jade_interp)) + " (" + (jade.escape((jade_interp = archivedCount) == null ? '' : jade_interp)) + ")</a><ul class=\"submenu\"></ul></li></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -2467,7 +2477,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<h1 id=\"breadcrumb\"></h1><p id=\"actions\">" + (jade.escape((jade_interp = t('actions headline')) == null ? '' : jade_interp)) + ":<button id=\"archive-action\" class=\"button disable\">" + (jade.escape(null == (jade_interp = t('archive button')) ? "" : jade_interp)) + "</button></p><div id=\"new-task\" class=\"task\"></div><ul id=\"task-list\"></ul>");;return buf.join("");
+buf.push("<i class=\"fa fa-bars\"></i><h1 id=\"breadcrumb\"></h1><p id=\"actions\">" + (jade.escape((jade_interp = t('actions headline')) == null ? '' : jade_interp)) + ":<button id=\"archive-action\" class=\"button disable\">" + (jade.escape(null == (jade_interp = t('archive button')) ? "" : jade_interp)) + "</button></p><div id=\"new-task\" class=\"task\"></div><ul id=\"task-list\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
