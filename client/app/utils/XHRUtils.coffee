@@ -4,7 +4,7 @@ module.exports =
 
     create: (rawTask, callback) ->
 
-        request.post "/tasks"
+        request.post "tasks"
         .send rawTask
         .set 'Accept', 'application/json'
         .end (res) ->
@@ -15,7 +15,7 @@ module.exports =
 
     update: (taskID, attributes, callback) ->
 
-        request.put "/tasks/#{taskID}"
+        request.put "tasks/#{taskID}"
         .send attributes
         .set 'Accept', 'application/json'
         .end (res) ->
@@ -26,7 +26,7 @@ module.exports =
 
     remove: (taskID, callback) ->
 
-        request.del "/tasks/#{taskID}"
+        request.del "tasks/#{taskID}"
         .set 'Accept', 'application/json'
         .end (res) ->
             if res.ok
@@ -35,7 +35,7 @@ module.exports =
                 callback "Something went wrong -- #{res.body}"
 
     reindex: (callback) ->
-        request.post '/tasks/reindex'
+        request.post 'tasks/reindex'
         .end (res) ->
             if res.ok
                 callback null, res.body
