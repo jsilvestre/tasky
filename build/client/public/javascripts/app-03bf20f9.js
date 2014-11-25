@@ -2487,7 +2487,7 @@ request = superagent;
 
 module.exports = {
   create: function(rawTask, callback) {
-    return request.post("/tasks").send(rawTask).set('Accept', 'application/json').end(function(res) {
+    return request.post("tasks").send(rawTask).set('Accept', 'application/json').end(function(res) {
       if (res.ok) {
         return callback(null, res.body);
       } else {
@@ -2496,7 +2496,7 @@ module.exports = {
     });
   },
   update: function(taskID, attributes, callback) {
-    return request.put("/tasks/" + taskID).send(attributes).set('Accept', 'application/json').end(function(res) {
+    return request.put("tasks/" + taskID).send(attributes).set('Accept', 'application/json').end(function(res) {
       if (res.ok) {
         return callback(null, res.body);
       } else {
@@ -2505,7 +2505,7 @@ module.exports = {
     });
   },
   remove: function(taskID, callback) {
-    return request.del("/tasks/" + taskID).set('Accept', 'application/json').end(function(res) {
+    return request.del("tasks/" + taskID).set('Accept', 'application/json').end(function(res) {
       if (res.ok) {
         return callback(null);
       } else {
@@ -2514,7 +2514,7 @@ module.exports = {
     });
   },
   reindex: function(callback) {
-    return request.post('/tasks/reindex').end(function(res) {
+    return request.post('tasks/reindex').end(function(res) {
       if (res.ok) {
         return callback(null, res.body);
       } else {
