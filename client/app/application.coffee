@@ -16,9 +16,12 @@ module.exports =
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
 
+        TaskStore = require './stores/TaskStore'
+        TagStore = require './stores/TagStore'
+
         # Routing management
-        Router = require 'router'
-        @router = new Router()
+        @router = require 'router'
+        window.router = @router
         Backbone.history.start()
 
         # Makes this object immuable.

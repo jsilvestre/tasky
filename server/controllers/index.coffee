@@ -18,7 +18,6 @@ module.exports.main = (req, res) ->
 
     ], (err, results) ->
 
-        divisor = 1.01
         if err? then res.send
             error: 'Server error occurred while retrieving data'
             stack: err.stack
@@ -26,7 +25,6 @@ module.exports.main = (req, res) ->
             [tasks, archivedTasks, locale] = results
             res.render 'index.jade', imports: """
                 window.locale = "#{locale}";
-                window.initTasks = #{JSON.stringify(tasks)};
+                window.tasks = #{JSON.stringify(tasks)};
                 window.archivedTasks = #{JSON.stringify(archivedTasks)};
-                window.DIVISOR = #{divisor};
             """

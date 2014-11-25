@@ -12,7 +12,7 @@ module.exports.config =
                 before: [
                     'vendor/scripts/jquery-1.11.0.js'
                     'vendor/scripts/underscore-1.5.2.js'
-                    'vendor/scripts/backbone-1.1.0.js'
+                    'vendor/scripts/backbone-1.1.2.js'
                     'vendor/scripts/backbone.babysitter.js'
                     'vendor/scripts/backbone.projections.js'
                 ]

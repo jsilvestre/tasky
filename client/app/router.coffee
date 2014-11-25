@@ -1,14 +1,11 @@
-AppView = require 'views/app_view'
+window.__DEV__ = true
 
-MenuView = require 'views/menu_view'
-TaskListView = require 'views/task_list_view'
-ArchivedTaskListView = require 'views/archive_list_view'
+TaskActionCreator = require './actions/TaskActionCreator'
+TagActionCreator = require './actions/TagActionCreator'
+TaskActionCreator = require './actions/TaskActionCreator'
+App = require './components/application'
 
-TaskCollection = require 'collections/tasks'
-ArchivedTaskCollection = require 'collections/archived_tasks'
-Task = require 'models/task'
-
-module.exports = class Router extends Backbone.Router
+class Router extends Backbone.Router
 
     routes:
         '': 'main'
@@ -21,76 +18,45 @@ module.exports = class Router extends Backbone.Router
 
         'archivedByTags/*tags': 'archivedByTags'
 
-    initialize: ->
-        @collection = new TaskCollection initTasks
-        @archivedCollection = new ArchivedTaskCollection archivedTasks
-
-        @mainView = new AppView()
-        @mainView.render()
-
-        @menu = new MenuView
-            baseCollection: @collection
-            archivedCollection: @archivedCollection
-
-        @taskList = new TaskListView baseCollection: @collection
-        @listenTo @taskList, 'archive-tasks', (tasks) =>
-            @collection.remove tasks
-            @archivedCollection.add tasks
-            @taskList.render()
-        @archivedTaskList = new ArchivedTaskListView baseCollection: @archivedCollection
-        @listenTo @archivedTaskList, 'restore-task', (task) =>
-            @archivedCollection.remove task
-            @collection.add task
-            @archivedTaskList.render()
 
     main: (followUp = false) ->
-
-        # if called by another route, must be called with
-        # followUp to true
-        @taskList.setSearchQuery null unless followUp
-
-        @taskList.setTags null
-        @taskList.render()
-        @menu.setViewType '#tobedone'
-        @menu.setActive null
-        @menu.render()
+        TaskActionCreator.setArchivedMode false
+        TagActionCreator.selectTags null
+        React.renderComponent App(), $('body')[0]
 
     mainSearch: (query) ->
-        @taskList.setSearchQuery query
-        @main true
+        TaskActionCreator.setSearchQuery query
 
     archived: ->
-        @archivedTaskList.setTags null
-        @archivedTaskList.render()
-        @menu.setViewType '#archived'
-        @menu.setActive null
-        @menu.render()
+        TaskActionCreator.setArchivedMode true
+        TagActionCreator.selectTags null
+        React.renderComponent App(), $('body')[0]
 
-    byTags: (viewType, listView, tags, searchQuery = null) ->
-
+    byTags: (viewType, listView, tags, searchQuery, isArchived) ->
         if tags?
             tags = tags.split '/'
 
             # if the last char is '/', there is an empty element
-            delete tags[tags.length - 1] if tags[tags.length - 1].length is 0
+            tags.splice tags.length - 1 if tags[tags.length - 1].length is 0
         else
             tags = []
 
-        listView.setTags tags
-        if viewType is '#tobedone'
-            listView.setSearchQuery searchQuery
-        listView.render()
-        @menu.setViewType viewType
-        @menu.setActive tags
-        @menu.render()
+        TaskActionCreator.setArchivedMode isArchived
+        TagActionCreator.selectTags tags
+        TaskActionCreator.setSearchQuery searchQuery
 
-    todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags
+        React.renderComponent App(), $('body')[0]
+
+    todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags, null, false
+
     todoByTagsWithSearch: (tags, query) ->
         if not query?
             query = tags
             tags = null
         @byTags '#tobedone', @taskList, tags, query
 
-    archivedByTags: (tags) -> @byTags '#archived', @archivedTaskList, tags
+    archivedByTags: (tags) ->
+        @byTags '#archived', @archivedTaskList, tags, null, true
 
 
+module.exports = new Router()
