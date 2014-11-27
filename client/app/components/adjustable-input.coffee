@@ -29,7 +29,7 @@ module.exports = React.createClass
         node = @refs['input'].getDOMNode()
         @setState content: node.value
 
-    onKeyUp: ->
+    onKeyUp: (event) ->
         key = event.keyCode or event.charCode
 
         if key is KeyboardKeys.ENTER
