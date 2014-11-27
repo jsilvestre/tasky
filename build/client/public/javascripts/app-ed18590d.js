@@ -458,7 +458,7 @@ module.exports = React.createClass({
       content: node.value
     });
   },
-  onKeyUp: function() {
+  onKeyUp: function(event) {
     var key;
     key = event.keyCode || event.charCode;
     if (key === KeyboardKeys.ENTER) {
