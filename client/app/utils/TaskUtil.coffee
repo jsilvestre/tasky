@@ -20,7 +20,7 @@ module.exports.doesntContainsTags = (task, tags) ->
 # helper function to extract tag from description
 module.exports.extractTags = (desc) ->
     tags = desc.match regex
-    tags = _.map tags, (tag) -> tag.trim().replace '#', ''
+    tags = _.map tags, (tag) -> tag.trim().replace('#', '').toLowerCase()
     tags = _.uniq tags
     return tags
 
