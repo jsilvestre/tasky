@@ -20,6 +20,7 @@ class Router extends Backbone.Router
 
 
     main: (followUp = false) ->
+        TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode false
         TagActionCreator.selectTags null
         React.renderComponent App(), $('body')[0]
@@ -31,6 +32,7 @@ class Router extends Backbone.Router
         React.renderComponent App(), $('body')[0]
 
     archived: ->
+        TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode true
         TagActionCreator.selectTags null
         React.renderComponent App(), $('body')[0]
