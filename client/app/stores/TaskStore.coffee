@@ -177,31 +177,30 @@ class TaskStore extends Store
 
         {tasksList} = _getTaskLists()
 
-        # returns all tasks if there is not tag filter
-        if not tags?
-            return tasksList
-
         # returns all unselected tags if the tag filter is empty
-        else if tags.length is 0
+        if tags? and tags.length is 0
             return tasksList.filter (task) -> task.tags.length is 0
 
         # filter by tag
         else
-            mapValue = (tag) -> tag.value
-            includedTags = tags
-                .filter (tag) -> not tag.isExcluded
-                .map mapValue
-            noInclusion = includedTags.length is 0
+            filteredTasksList = tasksList
 
-            excludedTags = tags
-                .filter (tag) -> tag.isExcluded
-                .map mapValue
+            if tags?
+                mapValue = (tag) -> tag.value
+                includedTags = tags
+                    .filter (tag) -> not tag.isExcluded
+                    .map mapValue
+                noInclusion = includedTags.length is 0
 
-            # When there are no included tags, it means all tasks should
-            # be selected.
-            filteredTasksList = tasksList.filter (task) ->
-                return (TaskUtils.containsTags(task, includedTags) or noInclusion) and \
-                       TaskUtils.doesntContainsTags(task, excludedTags)
+                excludedTags = tags
+                    .filter (tag) -> tag.isExcluded
+                    .map mapValue
+
+                # When there are no included tags, it means all tasks should
+                # be selected.
+                filteredTasksList = filteredTasksList.filter (task) ->
+                    return (TaskUtils.containsTags(task, includedTags) or noInclusion) and \
+                           TaskUtils.doesntContainsTags(task, excludedTags)
 
             if _searchQuery?
                 regex = new RegExp _searchQuery, 'i'
