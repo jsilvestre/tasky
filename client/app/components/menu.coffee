@@ -120,7 +120,7 @@ module.exports = React.createClass
             getSubmenu: getSubmenuHandler
             url: url
 
-    onSelectCriterion: (criterion) ->
+    onSelectCriterion: (criterion, event) ->
         event.preventDefault()
         TagActionCreator.selectSortCriterion criterion
 
