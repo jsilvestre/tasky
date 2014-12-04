@@ -694,21 +694,22 @@ module.exports = React.createClass({
     return this.buildUrl(newTagsList, this.props.searchQuery);
   },
   onSubmit: function(newTagValue) {
-    var newTagsList, searchQuery, _ref1;
+    var isExcluded, newTagsList, searchQuery, _ref1;
     searchQuery = this.props.searchQuery;
     newTagsList = (_ref1 = this.props.selectedTags) != null ? _ref1.slice(0) : void 0;
-    if (newTagValue.indexOf('#') === 0) {
-      newTagValue = newTagValue.replace('#', '');
+    if (newTagValue.indexOf('#') === 0 || newTagValue.indexOf('!#') === 0) {
+      isExcluded = newTagValue.indexOf('!') === 0;
+      newTagValue = newTagValue.replace(/[!#]*/, '');
       if (newTagsList != null) {
         newTagsList.push({
           value: newTagValue,
-          isExcluded: false
+          isExcluded: isExcluded
         });
       } else {
         newTagsList = [
           {
             value: newTagValue,
-            isExcluded: false
+            isExcluded: isExcluded
           }
         ];
       }
@@ -956,7 +957,7 @@ module.exports = React.createClass({
       url: url
     });
   },
-  onSelectCriterion: function(criterion) {
+  onSelectCriterion: function(criterion, event) {
     event.preventDefault();
     return TagActionCreator.selectSortCriterion(criterion);
   },
@@ -1308,8 +1309,8 @@ module.exports = React.createClass({
     var authorizedComboKeys, comboKeyPressed, ctrlPressed, key, neutralKeys, node;
     node = this.refs['task-content'].getDOMNode();
     key = event.keyCode || event.charCode;
-    ctrlPressed = event.controlKey || event.metaKey;
-    comboKeyPressed = event.metaKey || event.controlKey || event.altKey;
+    ctrlPressed = event.ctrlKey || event.metaKey;
+    comboKeyPressed = event.metaKey || event.ctrlKey || event.altKey;
     neutralKeys = [KeyboardKeys.BACKSPACE, KeyboardKeys.SPACE, KeyboardKeys.TAB, KeyboardKeys.ENTER, KeyboardKeys.ARROW_TOP, KeyboardKeys.ARROW_DOWN, KeyboardKeys.ARROW_LEFT, KeyboardKeys.ARROW_RIGHT];
     authorizedComboKeys = [KeyboardKeys.OSX_SHARP, KeyboardKeys.V];
     if (this.isNewTaskForm() && node.value.length === 0 && __indexOf.call(neutralKeys, key) < 0 && (!comboKeyPressed || __indexOf.call(authorizedComboKeys, key) >= 0)) {
@@ -1936,16 +1937,21 @@ Router = (function(_super) {
     if (followUp == null) {
       followUp = false;
     }
+    TaskActionCreator.setSearchQuery(null);
     TaskActionCreator.setArchivedMode(false);
     TagActionCreator.selectTags(null);
     return React.renderComponent(App(), $('body')[0]);
   };
 
   Router.prototype.mainSearch = function(query) {
-    return TaskActionCreator.setSearchQuery(query);
+    TaskActionCreator.setSearchQuery(query);
+    TaskActionCreator.setArchivedMode(false);
+    TagActionCreator.selectTags(null);
+    return React.renderComponent(App(), $('body')[0]);
   };
 
   Router.prototype.archived = function() {
+    TaskActionCreator.setSearchQuery(null);
     TaskActionCreator.setArchivedMode(true);
     TagActionCreator.selectTags(null);
     return React.renderComponent(App(), $('body')[0]);
@@ -2338,26 +2344,27 @@ TaskStore = (function(_super) {
   TaskStore.prototype.getByTags = function(tags) {
     var excludedTags, filteredTasksList, includedTags, mapValue, noInclusion, regex, tasksList;
     tasksList = _getTaskLists().tasksList;
-    if (tags == null) {
-      return tasksList;
-    } else if (tags.length === 0) {
+    if ((tags != null) && tags.length === 0) {
       return tasksList.filter(function(task) {
         return task.tags.length === 0;
       });
     } else {
-      mapValue = function(tag) {
-        return tag.value;
-      };
-      includedTags = tags.filter(function(tag) {
-        return !tag.isExcluded;
-      }).map(mapValue);
-      noInclusion = includedTags.length === 0;
-      excludedTags = tags.filter(function(tag) {
-        return tag.isExcluded;
-      }).map(mapValue);
-      filteredTasksList = tasksList.filter(function(task) {
-        return (TaskUtils.containsTags(task, includedTags) || noInclusion) && TaskUtils.doesntContainsTags(task, excludedTags);
-      });
+      filteredTasksList = tasksList;
+      if (tags != null) {
+        mapValue = function(tag) {
+          return tag.value;
+        };
+        includedTags = tags.filter(function(tag) {
+          return !tag.isExcluded;
+        }).map(mapValue);
+        noInclusion = includedTags.length === 0;
+        excludedTags = tags.filter(function(tag) {
+          return tag.isExcluded;
+        }).map(mapValue);
+        filteredTasksList = filteredTasksList.filter(function(task) {
+          return (TaskUtils.containsTags(task, includedTags) || noInclusion) && TaskUtils.doesntContainsTags(task, excludedTags);
+        });
+      }
       if (_searchQuery != null) {
         regex = new RegExp(_searchQuery, 'i');
         filteredTasksList = filteredTasksList.filter(function(task) {
@@ -2432,7 +2439,7 @@ module.exports.extractTags = function(desc) {
   var tags;
   tags = desc.match(regex);
   tags = _.map(tags, function(tag) {
-    return tag.trim().replace('#', '');
+    return tag.trim().replace('#', '').toLowerCase();
   });
   tags = _.uniq(tags);
   return tags;
