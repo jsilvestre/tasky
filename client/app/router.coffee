@@ -26,6 +26,9 @@ class Router extends Backbone.Router
 
     mainSearch: (query) ->
         TaskActionCreator.setSearchQuery query
+        TaskActionCreator.setArchivedMode false
+        TagActionCreator.selectTags null
+        React.renderComponent App(), $('body')[0]
 
     archived: ->
         TaskActionCreator.setArchivedMode true
