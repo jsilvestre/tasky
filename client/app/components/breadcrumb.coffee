@@ -67,13 +67,18 @@ module.exports = React.createClass
         searchQuery = @props.searchQuery
         newTagsList = @props.selectedTags?.slice 0
 
+
         # tag or search query?
-        if newTagValue.indexOf('#') is 0
-            newTagValue = newTagValue.replace '#', ''
+        if newTagValue.indexOf('#') is 0 or newTagValue.indexOf('!#') is 0
+            isExcluded = newTagValue.indexOf('!') is 0
+
+            # removes tag and exclusion markers
+            newTagValue = newTagValue.replace /[!#]*/, ''
+
             if newTagsList?
-                newTagsList.push value: newTagValue, isExcluded: false
+                newTagsList.push value: newTagValue, isExcluded: isExcluded
             else
-                newTagsList = [value: newTagValue, isExcluded: false]
+                newTagsList = [value: newTagValue, isExcluded: isExcluded]
         else
             searchQuery = newTagValue
 
