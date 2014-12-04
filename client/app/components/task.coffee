@@ -117,9 +117,8 @@ module.exports = React.createClass
     onKeyDown: (event) ->
         node = @refs['task-content'].getDOMNode()
         key = event.keyCode or event.charCode
-        ctrlPressed = event.controlKey or event.metaKey
-        comboKeyPressed = event.metaKey or event.controlKey or event.altKey
-
+        ctrlPressed = event.ctrlKey or event.metaKey
+        comboKeyPressed = event.metaKey or event.ctrlKey or event.altKey
         # neutral keys shouldn't add the tags list
         # backspace, space, tab, enter, top/bottom/left/right arrows
         neutralKeys = [
