@@ -119,6 +119,7 @@ module.exports = React.createClass
         key = event.keyCode or event.charCode
         ctrlPressed = event.ctrlKey or event.metaKey
         comboKeyPressed = event.metaKey or event.ctrlKey or event.altKey
+
         # neutral keys shouldn't add the tags list
         # backspace, space, tab, enter, top/bottom/left/right arrows
         neutralKeys = [
@@ -146,6 +147,10 @@ module.exports = React.createClass
             @props.moveUpHandler()
         else if key is KeyboardKeys.ARROW_DOWN and ctrlPressed
             @props.moveDownHandler()
+        else if key is KeyboardKeys.ARROW_TOP
+            @props.moveFocusUpHandler()
+        else if key is KeyboardKeys.ARROW_DOWN
+            @props.moveFocusDownHandler()
 
     # Changes focus with top/bottom keys
     # Creates new task with 'enter' key
@@ -154,10 +159,6 @@ module.exports = React.createClass
 
         if key is KeyboardKeys.ENTER
             @createNewTask() unless @props.isArchivedMode
-        else if key is KeyboardKeys.ARROW_TOP
-            @props.moveFocusUpHandler()
-        else if key is KeyboardKeys.ARROW_DOWN
-            @props.moveFocusDownHandler()
 
     # Handles focus by mouse click
     onFocus: ->
