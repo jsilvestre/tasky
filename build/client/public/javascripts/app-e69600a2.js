@@ -1324,6 +1324,10 @@ module.exports = React.createClass({
       return this.props.moveUpHandler();
     } else if (key === KeyboardKeys.ARROW_DOWN && ctrlPressed) {
       return this.props.moveDownHandler();
+    } else if (key === KeyboardKeys.ARROW_TOP) {
+      return this.props.moveFocusUpHandler();
+    } else if (key === KeyboardKeys.ARROW_DOWN) {
+      return this.props.moveFocusDownHandler();
     }
   },
   onKeyUp: function(event) {
@@ -1333,10 +1337,6 @@ module.exports = React.createClass({
       if (!this.props.isArchivedMode) {
         return this.createNewTask();
       }
-    } else if (key === KeyboardKeys.ARROW_TOP) {
-      return this.props.moveFocusUpHandler();
-    } else if (key === KeyboardKeys.ARROW_DOWN) {
-      return this.props.moveFocusDownHandler();
     }
   },
   onFocus: function() {
