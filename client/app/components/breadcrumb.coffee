@@ -58,7 +58,9 @@ module.exports = React.createClass
         newTagsList = @props.selectedTags?.slice 0
         if newTagsList?
             index = @props.selectedTags.indexOf tag
-            newTagsList[index] = value: tag.value, isExcluded: not tag.isExcluded
+            newTagsList[index] =
+                label: tag.label
+                isExcluded: not tag.isExcluded
 
         @buildUrl newTagsList, @props.searchQuery
 
@@ -76,9 +78,9 @@ module.exports = React.createClass
             newTagValue = newTagValue.replace /[!#]*/, ''
 
             if newTagsList?
-                newTagsList.push value: newTagValue, isExcluded: isExcluded
+                newTagsList.push label: newTagValue, isExcluded: isExcluded
             else
-                newTagsList = [value: newTagValue, isExcluded: isExcluded]
+                newTagsList = [label: newTagValue, isExcluded: isExcluded]
         else
             searchQuery = newTagValue
 
@@ -88,9 +90,9 @@ module.exports = React.createClass
         if tagsList?
             formattedList = tagsList.map (tag) ->
                 if tag.isExcluded
-                    return "!#{tag.value}"
+                    return "!#{tag.label}"
                 else
-                    return "#{tag.value}"
+                    return "#{tag.label}"
 
             formattedList = formattedList.join '/'
         else

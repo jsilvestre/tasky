@@ -21,9 +21,9 @@ module.exports = React.createClass
             key: @props.key
 
         if not isTag
-            value = "\"#{@props.value}\""
+            value = "\"#{@props.label}\""
         else
-            value = @props.tag.value
+            value = @props.tag.label
 
         removeProperties =
             onMouseOver: @onMouseOver

@@ -65,10 +65,11 @@ module.exports = React.createClass
                 @getUntaggedMenuItem()
 
             tags.map (tag) =>
-                @getMenuItem tag.value, tag.count, depth
+                @getMenuItem tag, depth
 
-    getMenuItem: (label, count, depth) ->
-        selectedTagNames = @props.selectedTags?.map (tag) -> tag.value
+    getMenuItem: (tag, depth) ->
+        label = tag.label
+        selectedTagNames = @props.selectedTags?.map (tag) -> tag.label
 
         # if the tag is the selected tags path, then it has a submenu
         if selectedTagNames?[depth] is label
@@ -112,8 +113,7 @@ module.exports = React.createClass
 
         return MenuItem
             key: "#{label}-#{depth}"
-            label: label
-            count: count
+            tag: tag
             depth: depth
             isActive: isActive
             isSelected: isActive and isLeaf

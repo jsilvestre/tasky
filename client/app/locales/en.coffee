@@ -27,3 +27,4 @@ module.exports =
     "match criterion with tag": "and of criterion"
     "sort alpha": "Sort by tag name"
     "sort numeric": "Sort by number of tasks"
+    "tag title": "%{label} (%{todoCount} to do, %{smart_count} done)"

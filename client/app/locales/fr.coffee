@@ -27,3 +27,4 @@ module.exports =
     "match criterion with tag": "et au critère"
     "sort alpha": "Tri par étiquette"
     "sort numeric": "Tri par nombre de tâches"
+    "tag title": "%{label} (%{todoCount} à faire, %{smart_count} faite) |||| %{label} (%{todoCount} à faire, %{smart_count} faites)"

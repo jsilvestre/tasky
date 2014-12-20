@@ -186,7 +186,7 @@ class TaskStore extends Store
             filteredTasksList = tasksList
 
             if tags?
-                mapValue = (tag) -> tag.value
+                mapValue = (tag) -> tag.label
                 includedTags = tags
                     .filter (tag) -> not tag.isExcluded
                     .map mapValue

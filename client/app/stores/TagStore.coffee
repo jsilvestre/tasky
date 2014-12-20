@@ -20,8 +20,8 @@ class TagStore extends Store
         handle ActionTypes.SELECT_TAGS, (tags) ->
             _selectedTags = tags?.map (tag) ->
                 isExcluded = tag.indexOf('!') isnt -1
-                value = tag.replace '!', ''
-                return {value, isExcluded}
+                label = tag.replace '!', ''
+                return {label, isExcluded}
 
             @emit 'change'
 
@@ -31,7 +31,7 @@ class TagStore extends Store
 
     getSelected: -> return _selectedTags
 
-    getSelectedNames: -> _selectedTags?.map (tag) -> tag.value
+    getSelectedNames: -> _selectedTags?.map (tag) -> tag.label
 
     getSortCriterion: -> return _sortCriterion
 
@@ -45,7 +45,7 @@ class TagStore extends Store
         tree.push {} for depth in [0..maxDepth] by 1
 
         # count number of tasks for each tag at the relevant depth
-        buildTree = (depth, list, excludeList = []) ->
+        buildTree = (depth, list, isDone, excludeList = []) ->
 
             # only count a task once for a tag
             uniqList = _.uniq list
@@ -53,15 +53,18 @@ class TagStore extends Store
             uniqList.forEach (tag) ->
                 if tag not in excludeList
                     # initialize if it doesn't exist yet
-                    tree[depth][tag] ?= 0
-                    tree[depth][tag]++
+                    tree[depth][tag] ?= global: 0, done: 0
+                    tree[depth][tag]['global']++
+                    tree[depth][tag]['done']++ if isDone
 
         # Processes each tasks to build the tag tree (based on selected tags)
         TaskStore.getAll()
-            .map (task) -> task.tags
-            .forEach (tagsOfTask) ->
+            .forEach (task) ->
+                tagsOfTask = task.tags
+                isDone = task.done
+
                 # all tags are represented at depth 0
-                buildTree 0, tagsOfTask
+                buildTree 0, tagsOfTask, isDone
 
                 # build the tree with task's tags if relevant
                 for depth in [1..maxDepth] by 1
@@ -72,21 +75,26 @@ class TagStore extends Store
 
                     intersection = _.intersection processedSelection, tagsOfTask
                     if intersection.length is processedSelection.length
-                        buildTree depth, tagsOfTask, processedSelection
+                        buildTree depth, tagsOfTask, isDone, processedSelection
 
         # tree is now complete
         aTree = []
         if _sortCriterion is 'count'
-            # sort by -count, then +value
-            [firstCriterion, secondCriterion, factor] = ['count', 'value', 1]
+            # sort by -count, then +label
+            [firstCriterion, secondCriterion, factor] = ['count', 'label', 1]
         else if _sortCriterion is 'alpha'
-            # sort by +value, then -count
-            [firstCriterion, secondCriterion, factor] = ['value', 'count', -1]
+            # sort by +label, then -count
+            [firstCriterion, secondCriterion, factor] = ['label', 'count', -1]
 
 
         for branch in tree
             depths = []
-            depths.push value: tag, count: count for tag, count of branch
+            for tag, count of branch
+                depths.push
+                    label: tag
+                    count: count.global
+                    doneCount: count.done
+
             depths.sort (a, b) ->
                 aFirst = a[firstCriterion]
                 bFirst = b[firstCriterion]
