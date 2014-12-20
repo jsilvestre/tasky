@@ -17,6 +17,11 @@ config = {
     ],
     set: {
       views: path.resolve(__dirname, '../client')
+    },
+    engine: {
+      js: function(path, locals, callback) {
+        return callback(null, require(path)(locals));
+      }
     }
   },
   development: [americano.logger('dev')],
