@@ -586,9 +586,9 @@ module.exports = React.createClass({
       key: this.props.key
     };
     if (!isTag) {
-      value = "\"" + this.props.value + "\"";
+      value = "\"" + this.props.label + "\"";
     } else {
-      value = this.props.tag.value;
+      value = this.props.tag.label;
     }
     removeProperties = {
       onMouseOver: this.onMouseOver,
@@ -687,7 +687,7 @@ module.exports = React.createClass({
     if (newTagsList != null) {
       index = this.props.selectedTags.indexOf(tag);
       newTagsList[index] = {
-        value: tag.value,
+        label: tag.label,
         isExcluded: !tag.isExcluded
       };
     }
@@ -702,13 +702,13 @@ module.exports = React.createClass({
       newTagValue = newTagValue.replace(/[!#]*/, '');
       if (newTagsList != null) {
         newTagsList.push({
-          value: newTagValue,
+          label: newTagValue,
           isExcluded: isExcluded
         });
       } else {
         newTagsList = [
           {
-            value: newTagValue,
+            label: newTagValue,
             isExcluded: isExcluded
           }
         ];
@@ -723,9 +723,9 @@ module.exports = React.createClass({
     if (tagsList != null) {
       formattedList = tagsList.map(function(tag) {
         if (tag.isExcluded) {
-          return "!" + tag.value;
+          return "!" + tag.label;
         } else {
-          return "" + tag.value;
+          return "" + tag.label;
         }
       });
       formattedList = formattedList.join('/');
@@ -799,7 +799,8 @@ styler = React.addons.classSet;
 module.exports = React.createClass({
   displayName: 'MenuItem',
   render: function() {
-    var classNames, linkStyle;
+    var classNames, label, linkStyle;
+    label = this.props.tag.label;
     classNames = styler({
       'menu-tag': true,
       'active': this.props.isActive,
@@ -813,11 +814,32 @@ module.exports = React.createClass({
       className: classNames
     }, a({
       href: this.props.url,
-      title: this.props.label,
+      title: this.getTitle(),
       style: linkStyle
     }, i({
       className: 'tag-icon'
-    }), span(null, "" + this.props.label + " (" + this.props.count + ")")), this.props.getSubmenu(this.props.depth + 1));
+    }), span(null, "" + label + " (" + (this.getCount()) + ")")), this.props.getSubmenu(this.props.depth + 1));
+  },
+  getCount: function() {
+    var count, doneCount, todoCount, _ref1;
+    _ref1 = this.props.tag, count = _ref1.count, doneCount = _ref1.doneCount;
+    todoCount = count - doneCount;
+    if (todoCount !== count && todoCount !== 0) {
+      return "" + todoCount + " / " + count;
+    } else {
+      return count;
+    }
+  },
+  getTitle: function() {
+    var count, doneCount, label, smart_count, todoCount, _ref1;
+    _ref1 = this.props.tag, label = _ref1.label, count = _ref1.count, doneCount = _ref1.doneCount;
+    todoCount = count - doneCount;
+    smart_count = doneCount;
+    return t('tag title', {
+      label: label,
+      todoCount: todoCount,
+      smart_count: smart_count
+    });
   }
 });
 });
@@ -908,14 +930,15 @@ module.exports = React.createClass({
       className: 'submenu'
     }, depth === 0 && this.props.untaggedTasks.length > 0 ? this.getUntaggedMenuItem() : void 0, tags.map((function(_this) {
       return function(tag) {
-        return _this.getMenuItem(tag.value, tag.count, depth);
+        return _this.getMenuItem(tag, depth);
       };
     })(this)));
   },
-  getMenuItem: function(label, count, depth) {
-    var currentIndex, getSubmenuHandler, isActive, isLeaf, prefix, selectedTagNames, tagsInUrl, url, _ref1;
+  getMenuItem: function(tag, depth) {
+    var currentIndex, getSubmenuHandler, isActive, isLeaf, label, prefix, selectedTagNames, tagsInUrl, url, _ref1;
+    label = tag.label;
     selectedTagNames = (_ref1 = this.props.selectedTags) != null ? _ref1.map(function(tag) {
-      return tag.value;
+      return tag.label;
     }) : void 0;
     if ((selectedTagNames != null ? selectedTagNames[depth] : void 0) === label) {
       getSubmenuHandler = this.getSubmenu;
@@ -948,8 +971,7 @@ module.exports = React.createClass({
     }
     return MenuItem({
       key: "" + label + "-" + depth,
-      label: label,
-      count: count,
+      tag: tag,
       depth: depth,
       isActive: isActive,
       isSelected: isActive && isLeaf,
@@ -1247,9 +1269,9 @@ module.exports = React.createClass({
       if (this.state.buttonHover && isArchived) {
         buttonText = t('restore button?');
       } else if (this.state.buttonHover && isDone) {
-        buttonText = t('done button?');
-      } else if (this.state.buttonHover && !isDone) {
         buttonText = t('todo button?');
+      } else if (this.state.buttonHover && !isDone) {
+        buttonText = t('done button?');
       } else if (!this.state.buttonHover && isDone) {
         buttonText = t('done button');
       } else if (!this.state.buttonHover && !isDone) {
@@ -1835,7 +1857,8 @@ module.exports = {
   "match criterion no tag": "of criterion",
   "match criterion with tag": "and of criterion",
   "sort alpha": "Sort by tag name",
-  "sort numeric": "Sort by number of tasks"
+  "sort numeric": "Sort by number of tasks",
+  "tag title": "%{label} (%{todoCount} to do, %{smart_count} done)"
 };
 });
 
@@ -1868,7 +1891,8 @@ module.exports = {
   "match criterion no tag": "correspondant au critère",
   "match criterion with tag": "et au critère",
   "sort alpha": "Tri par étiquette",
-  "sort numeric": "Tri par nombre de tâches"
+  "sort numeric": "Tri par nombre de tâches",
+  "tag title": "%{label} (%{todoCount} à faire, %{smart_count} faite) |||| %{label} (%{todoCount} à faire, %{smart_count} faites)"
 };
 });
 
@@ -2030,11 +2054,11 @@ TagStore = (function(_super) {
   TagStore.prototype.__bindHandlers = function(handle) {
     handle(ActionTypes.SELECT_TAGS, function(tags) {
       _selectedTags = tags != null ? tags.map(function(tag) {
-        var isExcluded, value;
+        var isExcluded, label;
         isExcluded = tag.indexOf('!') !== -1;
-        value = tag.replace('!', '');
+        label = tag.replace('!', '');
         return {
-          value: value,
+          label: label,
           isExcluded: isExcluded
         };
       }) : void 0;
@@ -2052,7 +2076,7 @@ TagStore = (function(_super) {
 
   TagStore.prototype.getSelectedNames = function() {
     return _selectedTags != null ? _selectedTags.map(function(tag) {
-      return tag.value;
+      return tag.label;
     }) : void 0;
   };
 
@@ -2068,7 +2092,7 @@ TagStore = (function(_super) {
     for (depth = _i = 0; _i <= maxDepth; depth = _i += 1) {
       tree.push({});
     }
-    buildTree = function(depth, list, excludeList) {
+    buildTree = function(depth, list, isDone, excludeList) {
       var uniqList;
       if (excludeList == null) {
         excludeList = [];
@@ -2078,23 +2102,29 @@ TagStore = (function(_super) {
         var _base;
         if (__indexOf.call(excludeList, tag) < 0) {
           if ((_base = tree[depth])[tag] == null) {
-            _base[tag] = 0;
+            _base[tag] = {
+              global: 0,
+              done: 0
+            };
           }
-          return tree[depth][tag]++;
+          tree[depth][tag]['global']++;
+          if (isDone) {
+            return tree[depth][tag]['done']++;
+          }
         }
       });
     };
-    TaskStore.getAll().map(function(task) {
-      return task.tags;
-    }).forEach(function(tagsOfTask) {
-      var intersection, processedSelection, _j, _results;
-      buildTree(0, tagsOfTask);
+    TaskStore.getAll().forEach(function(task) {
+      var intersection, isDone, processedSelection, tagsOfTask, _j, _results;
+      tagsOfTask = task.tags;
+      isDone = task.done;
+      buildTree(0, tagsOfTask, isDone);
       _results = [];
       for (depth = _j = 1; _j <= maxDepth; depth = _j += 1) {
         processedSelection = selectedTagNames != null ? selectedTagNames.slice(0, depth) : void 0;
         intersection = _.intersection(processedSelection, tagsOfTask);
         if (intersection.length === processedSelection.length) {
-          _results.push(buildTree(depth, tagsOfTask, processedSelection));
+          _results.push(buildTree(depth, tagsOfTask, isDone, processedSelection));
         } else {
           _results.push(void 0);
         }
@@ -2103,9 +2133,9 @@ TagStore = (function(_super) {
     });
     aTree = [];
     if (_sortCriterion === 'count') {
-      _ref1 = ['count', 'value', 1], firstCriterion = _ref1[0], secondCriterion = _ref1[1], factor = _ref1[2];
+      _ref1 = ['count', 'label', 1], firstCriterion = _ref1[0], secondCriterion = _ref1[1], factor = _ref1[2];
     } else if (_sortCriterion === 'alpha') {
-      _ref2 = ['value', 'count', -1], firstCriterion = _ref2[0], secondCriterion = _ref2[1], factor = _ref2[2];
+      _ref2 = ['label', 'count', -1], firstCriterion = _ref2[0], secondCriterion = _ref2[1], factor = _ref2[2];
     }
     for (_j = 0, _len = tree.length; _j < _len; _j++) {
       branch = tree[_j];
@@ -2113,8 +2143,9 @@ TagStore = (function(_super) {
       for (tag in branch) {
         count = branch[tag];
         depths.push({
-          value: tag,
-          count: count
+          label: tag,
+          count: count.global,
+          doneCount: count.done
         });
       }
       depths.sort(function(a, b) {
@@ -2352,7 +2383,7 @@ TaskStore = (function(_super) {
       filteredTasksList = tasksList;
       if (tags != null) {
         mapValue = function(tag) {
-          return tag.value;
+          return tag.label;
         };
         includedTags = tags.filter(function(tag) {
           return !tag.isExcluded;
