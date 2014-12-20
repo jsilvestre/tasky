@@ -1001,8 +1001,13 @@ module.exports = React.createClass({
     }
     return MenuItem({
       key: "untagged",
-      label: t('untagged'),
-      count: this.props.untaggedTasks.length,
+      tag: {
+        label: t('untagged'),
+        count: this.props.untaggedTasks.length,
+        doneCount: this.props.untaggedTasks.filter(function(task) {
+          return task.done;
+        }).length
+      },
       depth: 0,
       isActive: isActive,
       isSelected: isActive,
