@@ -7,15 +7,31 @@ Tasky is a simple yet powerful task manager. I found the usual tree structure to
 
 Clone this repository, install dependencies and run server (it requires Node.js)
 
-    npm install -g coffee-script brunch nodemon
     git clone git://github.com/jsilvestre/tasky.git
     cd tasky
     npm install
-    cd client/
-    npm install
-    brunch w &
-    cd ..
-    nodemon server.coffee --ignore client
+    npm run dev # starts everything you need
+
+When you have made your modification, you will have to build the application **in a separate commit**.
+
+    npm run build
+    git add --all build/
+    git commit -m "Built"
+    git push origin master
+
+And then submit your PR!
+
+**DISCLAMER**
+Windows users, the build system assume that you can run the following UNIX commands:
+
+* cat
+* cp
+* rm
+* sed
+* touch
+* mkdir
+
+If you have any trouble finding a solution, let me know you are intested, so we can look into it together.
 
 # Contributing
 Let me know what you would like to see in the application so we can discuss it. The simplest way to do it is [opening an issue](https://github.com/jsilvestre/tasky/issues/new).

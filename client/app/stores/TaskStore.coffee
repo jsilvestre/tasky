@@ -15,6 +15,7 @@ class TaskStore extends Store
     _cid = 0
 
     # Creates an OrderedMap of tasks
+    ###
     _tasks = Immutable.Sequence window.tasks
 
         # sets task ID as index
@@ -24,6 +25,7 @@ class TaskStore extends Store
         .map (task) -> Immutable.fromJS task
 
         .toOrderedMap()
+    ###
 
     _archivedMode = false
     _archivedTasks = window.archivedTasks

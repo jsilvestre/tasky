@@ -1,3 +1,4 @@
+_ = require 'underscore'
 Store = require '../libs/flux/store/Store'
 
 TaskStore = require './TaskStore'

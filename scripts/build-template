@@ -1,0 +1,20 @@
+#!/bin/bash
+cp client/index.jade build/client
+REV=$(git rev-parse --short HEAD)
+
+# replace dev value by prod value in template
+sed -i '' \
+    -e 's/script(src="scripts\/bundle-vendors.js")//g' \
+    -e 's/bundle.js/bundle.min.js?'$REV'/g' \
+    -e 's/application.css/application.css?'$REV'/g' build/client/index.jade
+
+# pre-compile the template
+node_modules/.bin/jade build/client/index.jade --client --no-debug --output
+
+# append node stuff so it can be required by the application
+echo "var jade = require('jade/runtime');module.exports=" \
+    | cat - build/client/index.js > build/client/index.tmp.js
+mv build/client/index.tmp.js build/client/index.js
+
+# clean compilation remaining
+rm build/client/index.jade

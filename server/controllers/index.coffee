@@ -1,6 +1,16 @@
+fs = require 'fs'
+path = require 'path'
 async = require 'async'
 Task = require '../models/tasky'
 CozyInstance = require '../models/cozy_instance'
+
+getTemplateExtension = ->
+    # If run from build/, templates are compiled to JS
+    # otherwise, they are in jade
+    filePath = path.resolve __dirname, '../../client/index.js'
+    runFromBuild = fs.existsSync filePath
+    extension = if runFromBuild then 'js' else 'jade'
+    return extension
 
 module.exports.main = (req, res) ->
     async.parallel [
@@ -23,7 +33,8 @@ module.exports.main = (req, res) ->
             stack: err.stack
         else
             [tasks, archivedTasks, locale] = results
-            res.render 'index.jade', imports: """
+            extension = getTemplateExtension()
+            res.render "index.#{extension}", imports: """
                 window.locale = "#{locale}";
                 window.tasks = #{JSON.stringify(tasks)};
                 window.archivedTasks = #{JSON.stringify(archivedTasks)};

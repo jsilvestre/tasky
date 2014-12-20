@@ -1,7 +1,8 @@
+React = require 'react/addons'
 {h1, span, input} = React.DOM
 
-BreadcrumbItem = require './breadcrumb-item'
-AdjustableInput = require './adjustable-input'
+BreadcrumbItem = React.createFactory require './breadcrumb-item'
+AdjustableInput = React.createFactory require './adjustable-input'
 
 module.exports = React.createClass
     displayName: 'Breadcrumb'

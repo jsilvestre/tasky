@@ -1,5 +1,8 @@
-module.exports =
+Backbone = require 'backbone'
+Polyglot = require 'node-polyglot'
+Backbone.$ = require 'jquery'
 
+module.exports =
     initialize: ->
         # Used in inter-app communication
         #SocketListener = require '../lib/socket_listener'
@@ -9,9 +12,9 @@ module.exports =
 
         @polyglot = new Polyglot locale: @locale
         try
-            locales = require 'locales/'+ @locale
+            locales = require './locales/'+ @locale
         catch e
-            locales = require 'locales/en'
+            locales = require './locales/en'
 
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
@@ -20,7 +23,7 @@ module.exports =
         TagStore = require './stores/TagStore'
 
         # Routing management
-        @router = require 'router'
+        @router = require './router'
         window.router = @router
         Backbone.history.start()
 

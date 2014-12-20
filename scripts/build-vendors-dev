@@ -1,0 +1,10 @@
+#!/bin/bash
+node_modules/.bin/browserify --debug \
+    -r jquery \
+    -r underscore \
+    -r backbone \
+    -r react/addons \
+    -r superagent \
+    -r node-polyglot \
+    | node_modules/.bin/exorcist client/public/scripts/bundle-vendors.js.map \
+    > client/public/scripts/bundle-vendors.js

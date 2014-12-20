@@ -1,9 +1,13 @@
 window.__DEV__ = true
 
+Backbone = require 'backbone'
+React = require 'react/addons'
+$ = require 'jquery'
+
 TaskActionCreator = require './actions/TaskActionCreator'
 TagActionCreator = require './actions/TagActionCreator'
 TaskActionCreator = require './actions/TaskActionCreator'
-App = require './components/application'
+App = React.createFactory require './components/application'
 
 class Router extends Backbone.Router
 
@@ -23,19 +27,19 @@ class Router extends Backbone.Router
         TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode false
         TagActionCreator.selectTags null
-        React.renderComponent App(), $('body')[0]
+        React.render App(), $('body')[0]
 
     mainSearch: (query) ->
         TaskActionCreator.setSearchQuery query
         TaskActionCreator.setArchivedMode false
         TagActionCreator.selectTags null
-        React.renderComponent App(), $('body')[0]
+        React.render App(), $('body')[0]
 
     archived: ->
         TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode true
         TagActionCreator.selectTags null
-        React.renderComponent App(), $('body')[0]
+        React.render App(), $('body')[0]
 
     byTags: (viewType, listView, tags, searchQuery, isArchived) ->
         if tags?
@@ -50,7 +54,7 @@ class Router extends Backbone.Router
         TagActionCreator.selectTags tags
         TaskActionCreator.setSearchQuery searchQuery
 
-        React.renderComponent App(), $('body')[0]
+        React.render App(), $('body')[0]
 
     todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags, null, false
 

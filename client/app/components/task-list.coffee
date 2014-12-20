@@ -1,10 +1,11 @@
+React = require 'react/addons'
 {div, ul, li, i, h1, p, button} = React.DOM
 
 TaskActionCreator = require '../actions/TaskActionCreator'
 TaskUtils = require '../utils/TaskUtil'
 
-Breadcrumb = require './breadcrumb'
-Task = require './task'
+Breadcrumb = React.createFactory require './breadcrumb'
+Task = React.createFactory require './task'
 
 classer = React.addons.classSet
 

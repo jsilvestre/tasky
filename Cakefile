@@ -57,23 +57,3 @@ task 'tests', "Run tests #{taskDetails}", (opts) ->
         else
             console.log "Tests succeeded!"
             process.exit 0
-
-task 'build', 'Build CoffeeScript to Javascript', ->
-    logger.options.prefix = 'cake:build'
-    logger.info "Start compilation..."
-    command = "coffee -cb --output build/server server " + \
-              "&& coffee -cb --output build/ server.coffee " + \
-              "&& rm -rf build/client && mkdir build/client " + \
-              # prepare to "digest" the index.jade
-              "&& cp client/index_build.jade client/app/assets/index.jade " + \
-              "&& cd client/ && brunch build --production && cd .." + \
-              "&& rm client/app/assets/index.jade " + \
-              "&& mv build/client/public/index.jade build/client/"
-
-    exec command, (err, stdout, stderr) ->
-        if err? and err.length > 0
-            logger.error "An error has occurred while building:\n" + err
-            process.exit 1
-        else
-            logger.info "Build succeeded."
-            process.exit 0

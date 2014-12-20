@@ -1,3 +1,5 @@
+React = require 'react/addons'
+$ = require 'jquery'
 {div, button, input, p} = React.DOM
 
 {KeyboardKeys, Options} = require '../constants/AppConstants'

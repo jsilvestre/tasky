@@ -1,4 +1,4 @@
-request = superagent
+request = require 'superagent'
 
 module.exports =
 

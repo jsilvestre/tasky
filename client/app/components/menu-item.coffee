@@ -1,3 +1,4 @@
+React = require 'react/addons'
 {li, a, i, span, ul} = React.DOM
 
 styler = React.addons.classSet
@@ -13,7 +14,7 @@ module.exports = React.createClass
             'selected': @props.isSelected
             'magic': @props.magic
 
-        linkStyle = 'padding-left': (@props.depth + 1) * 20
+        linkStyle = 'paddingLeft': (@props.depth + 1) * 20
 
         li className: classNames,
             a href: @props.url, title: @getTitle(), style: linkStyle,

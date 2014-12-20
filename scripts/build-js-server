@@ -1,0 +1,3 @@
+#!/bin/bash
+node_modules/.bin/coffee -cb --output build/server server
+node_modules/.bin/coffee -cb --output build/ server.coffee

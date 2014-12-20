@@ -15,6 +15,11 @@ config =
         set:
             views: path.resolve __dirname, '../client'
 
+        engine:
+            # Allows res.render of .js files (pre-rendered jade)
+            js: (path, locals, callback) ->
+                callback null, require(path)(locals)
+
     development: [
         americano.logger 'dev'
     ]

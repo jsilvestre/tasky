@@ -1,4 +1,5 @@
-app = require 'application'
+$ = require 'jquery'
+app = require './application'
 
 # The function called from index.html
 $ ->

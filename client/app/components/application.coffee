@@ -1,8 +1,9 @@
 # UI components
+React = require 'react/addons'
 {div, p} = React.DOM
 
-Menu = require './menu'
-TaskList = require './task-list'
+Menu = React.createFactory require './menu'
+TaskList = React.createFactory require './task-list'
 
 # Stores
 TaskStore = require '../stores/TaskStore'

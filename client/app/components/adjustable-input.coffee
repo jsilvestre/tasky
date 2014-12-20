@@ -1,3 +1,4 @@
+React = require 'react/addons'
 {input, span} = React.DOM
 {KeyboardKeys} = require '../constants/AppConstants'
 

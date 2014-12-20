@@ -1,5 +1,5 @@
+{EventEmitter} = require 'events'
 AppDispatcher = require '../../../AppDispatcher'
-
 
 module.exports = class Store extends EventEmitter
 

@@ -1,6 +1,8 @@
+React = require 'react/addons'
+_ = require 'underscore'
 {div, i, ul, li, a, span} = React.DOM
 
-MenuItem = require './menu-item'
+MenuItem = React.createFactory require './menu-item'
 {SortCriterions} = require '../constants/AppConstants'
 TagActionCreator = require '../actions/TagActionCreator'
 
@@ -144,7 +146,8 @@ module.exports = React.createClass
             tag:
                 label: t 'untagged'
                 count: @props.untaggedTasks.length
-                doneCount: @props.untaggedTasks.filter((task) -> task.done).length
+                doneCount: @props.untaggedTasks
+                    .filter((task) -> task.done).length
             depth: 0
             isActive: isActive
             isSelected: isActive
