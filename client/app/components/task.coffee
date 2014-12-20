@@ -64,9 +64,9 @@ module.exports = React.createClass
             if @state.buttonHover and isArchived
                 buttonText = t 'restore button?'
             else if @state.buttonHover and isDone
-                buttonText = t 'done button?'
-            else if @state.buttonHover and not isDone
                 buttonText = t 'todo button?'
+            else if @state.buttonHover and not isDone
+                buttonText = t 'done button?'
             else if not @state.buttonHover and isDone
                 buttonText = t 'done button'
             else if not @state.buttonHover and not isDone
