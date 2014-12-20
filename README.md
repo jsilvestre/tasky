@@ -22,6 +22,11 @@ Let me know what you would like to see in the application so we can discuss it. 
 
 Make sure there is not already an issue discussing the feature or the bug you are about to post about!
 
+# Contributors
+* @bnjbvr for the code, precious feedback and ideas machinegun
+* @benibur for the thinking on the dynamic tree based on tags
+* @frankrousseau for the feedback and ideas
+
 # About Cozy
 
 This app is suited to be deployed on the Cozy platform. Cozy is the personal
