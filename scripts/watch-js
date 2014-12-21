@@ -2,7 +2,7 @@
 node_modules/.bin/watchify -dv \
     -t coffeeify \
     --extension='.coffee' \
-    -e client/app/initialize.coffee \
+    -e client/src/initialize.coffee \
     -o client/public/scripts/bundle.js.tmp  \
     -x jquery \
     -x underscore \

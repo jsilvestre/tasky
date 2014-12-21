@@ -19,7 +19,7 @@ module.exports.create = (req, res) ->
             res.send 201, task
 
 module.exports.fetch = (req, res, next, id) ->
-    Task.find id, (err, task) =>
+    Task.find id, (err, task) ->
         if err? or not task?
             res.send 404, error: "Task not found"
         else

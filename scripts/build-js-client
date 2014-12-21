@@ -4,8 +4,8 @@ node_modules/.bin/browserify \
     --debug \
     -t coffeeify \
     --extension='.coffee' \
-    -e client/app/initialize.coffee \
-    | exorcist build/client/public/scripts/bundle.js.map \
+    -e client/src/initialize.coffee \
+    | node_modules/.bin/exorcist build/client/public/scripts/bundle.js.map \
     > build/client/public/scripts/bundle.js \
 
 # uglify the build
