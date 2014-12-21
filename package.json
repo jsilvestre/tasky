@@ -60,7 +60,7 @@
     "watch:client": "npm run prepare-watch; npm run watch:js & npm run watch-extract & npm run watch:css",
     "watch:server": "node_modules/.bin/nodemon server.coffee --ignore client/ --ignore tests/",
     "dev": "npm run watch:server & npm run watch:client",
-    "lint": "node_modules/.bin/coffeelint -f coffeelint.json server.coffee server/ client/app"
+    "lint": "node_modules/.bin/coffeelint -f coffeelint.json server.coffee server/ client/src"
   },
   "cozy-permissions": {
     "Tasky": {
