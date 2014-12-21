@@ -32,18 +32,16 @@ module.exports.create = function(req, res) {
 };
 
 module.exports.fetch = function(req, res, next, id) {
-  return Task.find(id, (function(_this) {
-    return function(err, task) {
-      if ((err != null) || (task == null)) {
-        return res.send(404, {
-          error: "Task not found"
-        });
-      } else {
-        req.task = task;
-        return next();
-      }
-    };
-  })(this));
+  return Task.find(id, function(err, task) {
+    if ((err != null) || (task == null)) {
+      return res.send(404, {
+        error: "Task not found"
+      });
+    } else {
+      req.task = task;
+      return next();
+    }
+  });
 };
 
 module.exports.update = function(req, res) {
