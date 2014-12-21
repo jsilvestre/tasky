@@ -49,7 +49,7 @@
     "build:template": "./scripts/build-template",
     "build:css": "./scripts/build-css",
     "build:assets": "cp -R client/assets/* build/client/public",
-    "build": "npm run prepare-build && npm run build:js:client && npm run build:js:server && npm run build:template && npm run build:css && npm run build:assets",
+    "build": "npm run prepare-build && NODE_ENV=production npm run build:js:client && npm run build:js:server && npm run build:template && npm run build:css && npm run build:assets",
     "prepare-watch": "touch client/public/scripts/bundle.js.tmp; mkdir -p client/public/styles && mkdir -p client/public/scripts; npm run build:js:vendors; npm run build:assets:dev",
     "build:js:vendors": "./scripts/build-vendors-dev",
     "build:assets:dev": "cp -R client/assets/* client/public",
