@@ -41,6 +41,7 @@
   },
   "scripts": {
     "start": "node build/server.js",
+    "postinstall": "chmod u+x scripts/*",
     "prepare-build": "mkdir -p build/client/public/styles && mkdir -p build/client/public/scripts",
     "build:js:client": "./scripts/build-js-client",
     "build:js:server": "./scripts/build-js-server",
