@@ -42,4 +42,22 @@ module.exports =
             else
                 callback "Something went wrong -- #{res.body}"
 
+    markTagAsFavorite: (label, callback) ->
+        request.post 'tags'
+        .send {label}
+        .end (res) ->
+            if res.ok
+                callback null
+            else
+                callback "Something went wrong -- #{res.body}"
+
+    unmarkTagAsFavorite: (label, callback) ->
+        request.del 'tags'
+        .send {label}
+        .end (res) ->
+            if res.ok
+                callback null
+            else
+                callback "Something went wrong -- #{res.body}"
+
 

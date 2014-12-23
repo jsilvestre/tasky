@@ -3,6 +3,7 @@ path = require 'path'
 async = require 'async'
 Task = require '../models/tasky'
 CozyInstance = require '../models/cozy_instance'
+FavoriteTag = require '../models/favorite_tag'
 
 getTemplateExtension = ->
     # If run from build/, templates are compiled to JS
@@ -13,29 +14,22 @@ getTemplateExtension = ->
     return extension
 
 module.exports.main = (req, res) ->
-    async.parallel [
-        (callback) -> Task.allNotArchived (err, tasks) ->
-            if err? then return callback err
-            else return callback null, tasks
-
-        (callback) -> Task.allArchived (err, tasks) ->
-            if err? then return callback err
-            else return callback null, tasks
-
-        (callback) -> CozyInstance.getLocale (err, locale) ->
-            if err? then return callback err
-            else return callback null, locale
-
-    ], (err, results) ->
+    async.parallel {
+        tasks: (done) -> Task.allNotArchived done
+        archivedTasks: (done) -> Task.allArchived done
+        locale: (done) -> CozyInstance.getLocale done
+        favoriteTags: (done) -> FavoriteTag.allForTasky done
+    }, (err, results) ->
 
         if err? then res.send
             error: 'Server error occurred while retrieving data'
             stack: err.stack
         else
-            [tasks, archivedTasks, locale] = results
+            {tasks, archivedTasks, locale, favoriteTags} = results
             extension = getTemplateExtension()
             res.render "index.#{extension}", imports: """
                 window.locale = "#{locale}";
                 window.tasks = #{JSON.stringify(tasks)};
                 window.archivedTasks = #{JSON.stringify(archivedTasks)};
+                window.favoriteTags = #{JSON.stringify(favoriteTags)};
             """

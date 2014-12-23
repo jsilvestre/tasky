@@ -45,6 +45,32 @@
         white-space nowrap
         overflow hidden
 
+        i.fa-tag
+          color #333
+          margin-right 5px
+          display inline-block
+          opacity 0.2
+
+        i.fa-star-o
+        i.fa-star
+          color #333
+          display none
+          position absolute
+          right 10px
+          font-size 19px
+
+        &:hover:not(.favorite)
+          i.fa-star-o
+          i.fa-star
+            display inline-block
+            opacity 0.5
+
+        &.favorite
+          i.fa-star-o
+          i.fa-star
+            display inline-block
+            color #bbbb00
+
       .submenu > li a
         padding-left 25px
 
@@ -66,7 +92,7 @@
 
       &.selected > a
         background #aedbff
-      &.active > a i.tag-icon
+      &.active > a i.fa-tag
         opacity 0.8
       &.active.first-level > a
         opacity 1

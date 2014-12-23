@@ -2,6 +2,7 @@
 
 index = require './index'
 tasks = require './tasks'
+tags = require './tags'
 
 module.exports =
     '':
@@ -18,4 +19,8 @@ module.exports =
         del: tasks.delete
 
     'tasks/reindex': post: tasks.reindex
+
+    'tags':
+        post: tags.create
+        delete: tags.delete
 

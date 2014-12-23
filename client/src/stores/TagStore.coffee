@@ -13,6 +13,8 @@ class TagStore extends Store
     ###
     _selectedTags = null
 
+    _favoriteTags = window.favoriteTags or []
+
     fromLocalStorage = localStorage.getItem 'sort-criterion'
     _sortCriterion = fromLocalStorage or SortCriterions.COUNT
 
@@ -30,11 +32,23 @@ class TagStore extends Store
             _sortCriterion = criterion
             @emit 'change'
 
+        handle ActionTypes.TOGGLE_FAVORITE_TAG, (tag) ->
+            tagIndex = _favoriteTags.indexOf tag
+
+            if tagIndex is -1
+                _favoriteTags.push tag
+            else
+                _favoriteTags.splice tagIndex, 1
+
+            @emit 'change'
+
     getSelected: -> return _selectedTags
 
     getSelectedNames: -> _selectedTags?.map (tag) -> tag.label
 
     getSortCriterion: -> return _sortCriterion
+
+    getFavoriteTags: -> return _favoriteTags
 
     getTree: ->
         selectedTagNames = @getSelectedNames()
@@ -95,23 +109,30 @@ class TagStore extends Store
                     label: tag
                     count: count.global
                     doneCount: count.done
+                    isFavorite: _favoriteTags.indexOf(tag) isnt -1
 
             depths.sort (a, b) ->
-                aFirst = a[firstCriterion]
-                bFirst = b[firstCriterion]
-                if aFirst > bFirst
-                    return -1 * factor
-                else if aFirst < bFirst
-                    return 1 * factor
+
+                if a.isFavorite and not b.isFavorite
+                    return -1
+                else if not a.isFavorite and b.isFavorite
+                    return 1
                 else
-                    aSecond = a[secondCriterion]
-                    bSecond = b[secondCriterion]
-                    if aSecond > bSecond
+                    aFirst = a[firstCriterion]
+                    bFirst = b[firstCriterion]
+                    if aFirst > bFirst
                         return -1 * factor
-                    else if aSecond < bSecond
+                    else if aFirst < bFirst
                         return 1 * factor
                     else
-                        return 0
+                        aSecond = a[secondCriterion]
+                        bSecond = b[secondCriterion]
+                        if aSecond > bSecond
+                            return -1 * factor
+                        else if aSecond < bSecond
+                            return 1 * factor
+                        else
+                            return 0
 
             aTree.push depths
 

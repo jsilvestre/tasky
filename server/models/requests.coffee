@@ -12,3 +12,7 @@ module.exports =
 
     cozy_instance:
         all: americano.defaultRequests.all
+
+    favorite_tag:
+        allByApp: (doc) -> emit doc.application, doc
+        byAppbyLabel: (doc) -> emit [doc.application, doc.label], doc

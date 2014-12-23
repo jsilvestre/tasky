@@ -120,11 +120,15 @@ module.exports = React.createClass
             isActive: isActive
             isSelected: isActive and isLeaf
             getSubmenu: getSubmenuHandler
+            onFavorite: @onFavorite.bind @, tag
             url: url
 
     onSelectCriterion: (criterion, event) ->
         event.preventDefault()
         TagActionCreator.selectSortCriterion criterion
+
+    onFavorite: (tag) ->
+        TagActionCreator.toggleFavorite tag.label
 
     getUntaggedMenuItem: ->
         # if tag is in the selected path
