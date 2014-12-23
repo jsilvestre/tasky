@@ -15,4 +15,4 @@ FavoriteTag.allForTasky = (callback) ->
 
 FavoriteTag.ByLabelForTasky = (label, callback) ->
     options = key: ['tasky', label]
-    FavoriteTag.request 'byAppbyLabel', options, callback
+    FavoriteTag.request 'byAppByLabel', options, callback

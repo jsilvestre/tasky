@@ -15,4 +15,4 @@ module.exports =
 
     favorite_tag:
         allByApp: (doc) -> emit doc.application, doc
-        byAppbyLabel: (doc) -> emit [doc.application, doc.label], doc
+        byAppByLabel: (doc) -> emit [doc.application, doc.label], doc
