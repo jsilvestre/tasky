@@ -42,7 +42,7 @@ module.exports = React.createClass
         BreadcrumbItem
             key: 'search-query'
             type: 'search'
-            value: @props.searchQuery
+            label: @props.searchQuery
             removeHandler: @removeHandler
 
     removeHandler: (tag) ->
