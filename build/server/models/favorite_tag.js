@@ -30,5 +30,5 @@ FavoriteTag.ByLabelForTasky = function(label, callback) {
   options = {
     key: ['tasky', label]
   };
-  return FavoriteTag.request('byAppbyLabel', options, callback);
+  return FavoriteTag.request('byAppByLabel', options, callback);
 };

@@ -22,7 +22,7 @@ module.exports = {
     allByApp: function(doc) {
       return emit(doc.application, doc);
     },
-    byAppbyLabel: function(doc) {
+    byAppByLabel: function(doc) {
       return emit([doc.application, doc.label], doc);
     }
   }
