@@ -50,8 +50,11 @@ module.exports = React.createClass
                         input inputProperties
 
             if @props.isArchivedMode
-                completionDate = Date.create @props.task.completionDate
-                formattedDate = completionDate.format t 'archived date format'
+                if @props.task.completionDate?
+                    completionDate = Date.create @props.task.completionDate
+                    formattedDate = completionDate.format t 'archived date format'
+                else
+                    formattedDate = ''
                 div className: 'todo-completionDate',
                     p null, "#{t 'completed headline'} #{formattedDate}"
 
