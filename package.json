@@ -66,6 +66,9 @@
     "Tasky": {
       "description": "Create, edit, organize all your tasks."
     },
+    "FavoriteTag": {
+      "description": "Manage your favorite tags."
+    },
     "CozyInstance": {
       "description": "This information is needed to localize the application in your language."
     }
