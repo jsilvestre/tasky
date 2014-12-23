@@ -8,7 +8,7 @@ module.exports =
     "tasks of": "Tasks related to"
     "archived tasks of": "Archived tasks related to"
     "and": "and"
-    "archived date format": "{yyyy}/{MM}{dd} at {HH}:{mm}"
+    "archived date format": "dddd, MMMM Do YYYY, h:mm:ss a"
     "actions headline": "Actions"
     "completed headline": "Completed on"
     "restore button": "Restore"

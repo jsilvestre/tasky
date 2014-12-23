@@ -52,7 +52,6 @@ module.exports = React.createClass
 
             if @props.isArchivedMode
                 if @props.task.completionDate?
-                    console.log 'yes'
                     completionDate = moment @props.task.completionDate
                     formattedDate = completionDate.format t 'archived date format'
                 else
