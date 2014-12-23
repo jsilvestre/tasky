@@ -9,4 +9,5 @@ node_modules/.bin/watchify -dv \
     -x backbone \
     -x react/addons \
     -x superagent \
-    -x node-polyglot
+    -x node-polyglot \
+    -x async

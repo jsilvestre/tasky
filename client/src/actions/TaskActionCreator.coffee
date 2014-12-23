@@ -1,3 +1,4 @@
+async = require 'async'
 AppDispatcher = require '../AppDispatcher'
 {ActionTypes, Options} = require '../constants/AppConstants'
 TaskStore = require '../stores/TaskStore'
