@@ -2,6 +2,7 @@ Backbone = require 'backbone'
 Polyglot = require 'node-polyglot'
 Backbone.$ = require 'jquery'
 
+
 module.exports =
     initialize: ->
         # Used in inter-app communication
@@ -11,11 +12,13 @@ module.exports =
         delete window.locale
 
         @polyglot = new Polyglot locale: @locale
-        try
-            locales = require './locales/'+ @locale
-        catch e
-            locales = require './locales/en'
 
+        # trick to include all supported localization files with browserify
+        localesLoader =
+            en: require './locales/en'
+            fr: require './locales/fr'
+        locales = localesLoader[@locale]
+        locales = localesLoadre['en'] unless locales?
         @polyglot.extend locales
         window.t = @polyglot.t.bind @polyglot
 
