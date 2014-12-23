@@ -14,7 +14,7 @@ node_modules/.bin/uglifyjs build/client/public/scripts/bundle.js \
     --in-source-map build/client/public/scripts/bundle.js.map \
     --source-map build/client/public/scripts/bundle.min.js.map \
     --source-map-url bundle.min.js.map \
-    --source-map-include-sources \
+    --source-map-include-sources
 
 # clean the build remaining
 rm -rf build/client/public/scripts/bundle.js*
