@@ -17,5 +17,13 @@ module.exports = {
   },
   cozy_instance: {
     all: americano.defaultRequests.all
+  },
+  favorite_tag: {
+    allByApp: function(doc) {
+      return emit(doc.application, doc);
+    },
+    byAppbyLabel: function(doc) {
+      return emit([doc.application, doc.label], doc);
+    }
   }
 };
