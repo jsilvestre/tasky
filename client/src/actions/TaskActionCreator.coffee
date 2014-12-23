@@ -175,8 +175,10 @@ module.exports = SELF =
             AppDispatcher.handleViewAction
                 type: ActionTypes.ARCHIVE_TASK
                 value: task.cid
-
-            XHRUtils.update task.id, isArchived: true, (err) -> callback err
+            payload =
+                isArchived: true
+                completionDate: Date.now()
+            XHRUtils.update task.id, payload, (err) -> callback err
         , (err) ->
             # handle error case
 
@@ -184,8 +186,11 @@ module.exports = SELF =
         AppDispatcher.handleViewAction
             type: ActionTypes.RESTORE_TASK
             value: task.cid
-
-        XHRUtils.update task.id, isArchived: false, done: false, (err, task) ->
+        payload =
+            isArchived: false
+            done: false
+            completionDate: null
+        XHRUtils.update task.id, payload, (err, task) ->
             # handle error case
 
     reindexTasks: ->
