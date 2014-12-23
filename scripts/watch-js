@@ -10,4 +10,5 @@ node_modules/.bin/watchify -dv \
     -x react/addons \
     -x superagent \
     -x node-polyglot \
-    -x async
+    -x async \
+    -x moment

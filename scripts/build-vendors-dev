@@ -7,5 +7,6 @@ node_modules/.bin/browserify --debug \
     -r superagent \
     -r node-polyglot \
     -r async \
+    -r moment \
     | node_modules/.bin/exorcist client/public/scripts/bundle-vendors.js.map \
     > client/public/scripts/bundle-vendors.js
