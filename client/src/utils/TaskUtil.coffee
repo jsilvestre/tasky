@@ -43,8 +43,9 @@ module.exports.buildTagsList = (tags, options = {}) ->
 
     return "" if not tags?
     tagsList = ""
-    includedTags = tags.filter (tag) -> not tag.isExcluded
-                       .map (tag) -> tag.label
+    includedTags = tags
+        .filter (tag) -> not tag.isExcluded
+        .map (tag) -> tag.label
 
     includedTags.forEach (tag) ->
         if includedTags.indexOf(tag) is 0
