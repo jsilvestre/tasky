@@ -12,15 +12,6 @@ Clone this repository, install dependencies and run server (it requires Node.js)
     npm install
     npm run dev # starts everything you need
 
-When you have made your modification, you will have to build the application **in a separate commit**.
-
-    npm run build
-    git add --all build/
-    git commit -m "Built"
-    git push origin master
-
-And then submit your PR!
-
 **DISCLAMER**
 Windows users, the build system assume that you can run the following UNIX commands:
 
