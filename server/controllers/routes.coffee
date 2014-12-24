@@ -16,7 +16,7 @@ module.exports =
         param : tasks.fetch
     'tasks/:taskID':
         put: [tasks.reindexationMiddleware, tasks.update]
-        del: tasks.delete
+        delete: tasks.delete
 
     'tasks/reindex': post: tasks.reindex
 
