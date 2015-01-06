@@ -74,5 +74,7 @@
       "description": "This information is needed to localize the application in your language."
     }
   },
-  "cozy-displayName": "Tasky"
+  "cozy-displayName": "Tasky",
+  "icon-path": "build/client/public/icons/main_icon.png",
+  "cozy-color": "#1bda4c"
 }
