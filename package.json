@@ -75,6 +75,6 @@
     }
   },
   "cozy-displayName": "Tasky",
-  "icon-path": "build/client/public/icons/main_icon.png",
+  "icon-path": "build/client/public/icons/main_icon.svg",
   "cozy-color": "#1bda4c"
 }
