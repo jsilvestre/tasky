@@ -33,6 +33,7 @@ class TaskStore extends Store
     _tasks = window.tasks
     _searchQuery = null
     _isReindexing = false
+    _cache = {}
 
     # TODO: retrieve the tasks sorted server-side
     _archivedTasks.sort (a, b) ->
@@ -71,6 +72,19 @@ class TaskStore extends Store
 
         return {tasksList, tasksListByCid}
 
+    # invalid all cached lists if they contain the task
+    _invalidCache = (task) ->
+        tags = task.tags
+        cacheKeys = Object.keys _cache
+        for cacheKey in cacheKeys
+            i = 0
+            while i < tags.length and cacheKey.indexOf(tags[i]) is -1
+                i++
+
+            # invalidate the cache if the task is in it
+            if cacheKey.indexOf(tags[i]) isnt -1
+                delete _cache[cacheKey]
+
     __bindHandlers: (handle) ->
         handle ActionTypes.CREATE_TASK, (payload) ->
             {nextIndex, rawTask} = payload
@@ -80,6 +94,9 @@ class TaskStore extends Store
 
             # adds the task to the cid index
             _tasksByCid[rawTask.cid] = rawTask
+
+            # invalid cache
+            _invalidCache rawTask
 
             @emit 'change'
 
@@ -92,6 +109,9 @@ class TaskStore extends Store
             # removes task from cid index
             delete tasksListByCid[task.cid]
 
+            # invalid cache
+            _invalidCache task
+
             @emit 'change'
 
         handle ActionTypes.UPDATE_TASK, (payload) ->
@@ -99,8 +119,15 @@ class TaskStore extends Store
             {cid, changes} = payload
             task = tasksListByCid[cid]
 
+            # invalid cache
+            _invalidCache task
+
             for field, value of changes
                 task[field] = value
+
+            # invalid cache if the tags have changed
+            if changes.tags?
+                _invalidCache task
 
             @emit 'change'
 
@@ -114,6 +141,9 @@ class TaskStore extends Store
             # No need to sort the list, just insert at the right spot
             tasksList.splice oldIndex, 1
             tasksList.splice index, 0, task
+
+            # invalid cache
+            _invalidCache task
 
             @emit 'change'
 
@@ -142,6 +172,9 @@ class TaskStore extends Store
                 index = _.sortedIndex _archivedTasks, task, (task) -> -(new Date(task.completionDate).getTime())
                 _archivedTasks.splice index, 0, task
 
+                # invalid cache
+                _invalidCache task
+
                 @emit 'change'
 
         handle ActionTypes.RESTORE_TASK, (cid) ->
@@ -162,6 +195,9 @@ class TaskStore extends Store
                 index = _.sortedIndex _tasks, task, (task) -> task.order
                 _tasks.splice index, 0, task
 
+                # invalid cache
+                _invalidCache task
+
                 @emit 'change'
 
         handle ActionTypes.SET_REINDEX_STATE, (isReindexing) ->
@@ -177,7 +213,6 @@ class TaskStore extends Store
         return tasksList.filter (task) -> task.tags.length is 0
 
     getByTags: (tags) ->
-
         {tasksList} = _getTaskLists()
 
         # returns all unselected tags if the tag filter is empty
@@ -199,11 +234,42 @@ class TaskStore extends Store
                     .filter (tag) -> tag.isExcluded
                     .map mapValue
 
-                # When there are no included tags, it means all tasks should
-                # be selected.
-                filteredTasksList = filteredTasksList.filter (task) ->
-                    return (TaskUtils.containsTags(task, includedTags) or noInclusion) and \
-                           TaskUtils.doesntContainsTags(task, excludedTags)
+                # the cache key is a unique hash based on tag selection
+                cacheKey = [].concat tags # clone the tags
+
+                    # sort the tag list so the cache is stable. I.e. cache is
+                    # the same for tag1/tag2 and tag2/tag1
+                    .sort (a, b) ->
+                        if a.label > b.label
+                            return 1
+                        else if a.label > b.label
+                            return -1
+                        else
+                            return 0
+
+                    # lists are different if they have the same tags but some
+                    # of them are included and others are excluded
+                    .map (tag) ->
+                        prefix = if tag.isExcluded then '!' else ''
+                        return "#{prefix}#{tag.label}"
+
+                    # '#' is the safest separator because it's used to mark the
+                    # beginning of a tag
+                    .join '#'
+
+                cachedList = _cache[cacheKey]
+                if cachedList?
+                    filteredTasksList = cachedList
+                else
+                    # When there are no included tags, it means all tasks should
+                    # be selected.
+                    filteredTasksList = filteredTasksList.filter (task) ->
+                        return (TaskUtils.containsTags(task, includedTags) or \
+                               noInclusion) and \
+                               TaskUtils.doesntContainsTags(task, excludedTags)
+
+                    # add in cache
+                    _cache[cacheKey] = filteredTasksList
 
             if _searchQuery?
                 regex = new RegExp _searchQuery, 'i'
