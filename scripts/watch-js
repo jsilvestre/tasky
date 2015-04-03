@@ -1,9 +1,9 @@
 #!/bin/bash
-node_modules/.bin/watchify -dv \
+./node_modules/.bin/watchify -dv \
     -t coffeeify \
-    --extension='.coffee' \
+    --extension=".coffee" \
     -e client/src/initialize.coffee \
-    -o client/public/scripts/bundle.js.tmp  \
+    -o 'node_modules/.bin/exorcist client/public/scripts/bundle.js.map > client/public/scripts/bundle.js' \
     -x jquery \
     -x underscore \
     -x backbone \
