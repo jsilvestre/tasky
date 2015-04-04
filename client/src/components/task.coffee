@@ -1,7 +1,10 @@
 React = require 'react/addons'
 $ = require 'jquery'
 moment = require 'moment'
-{div, button, input, p} = React.DOM
+{div, button, input, p, label} = React.DOM
+
+ToggleCheckbox = React.createFactory require './toggle-checkbox'
+NewTaskButton = React.createFactory require './new-task-button'
 
 {KeyboardKeys, Options} = require '../constants/AppConstants'
 
@@ -45,7 +48,12 @@ module.exports = React.createClass
 
         div className: wrapperClasses,
             div className: 'task-container',
-                button buttonProperties, buttonText
+                if @isNewTaskForm() and not @props.task?.id?
+                    NewTaskButton
+                        onSubmit: @createNewTask
+                        disabled: @state.inputValue.length is 0
+                else if @props.task.id
+                    ToggleCheckbox id: @props.index, isChecked: @props.task.done, onToggle: @onClick
                 div className: 'todo-field',
                     div className: 'task-input-wrapper',
                         input inputProperties

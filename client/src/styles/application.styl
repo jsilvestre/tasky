@@ -146,9 +146,11 @@ ul#task-list-done
 
     .task-container
         display table
+        position relative
 
     .button
     .todo-field
+    .toggle-checkbox
         display table-cell
 
     .button
@@ -173,13 +175,14 @@ ul#task-list-done
 
         input
             width 100%
-            padding 6px
+            padding 3px
+            margin-left 5px
             text-overflow ellipsis
             background transparent
 
             border 1px solid transparent
             &:hover
-                border 1px solid orange
+                border 1px solid orange !important
             &:focus
                 border 1px solid blue
                 outline none
@@ -191,7 +194,8 @@ ul#task-list-done
         input
         input:hover
         input:focus
-            border 1px solid #ccc
+            border 1px solid transparent
+            border-bottom 1px solid #ccc
 
 #block
     display block
@@ -255,3 +259,73 @@ ul#task-list-done
     .container
         width 75%
 
+.toggle-checkbox
+    position relative
+
+label::before
+.createButton::before
+    display inline-block
+    vertical-align middle
+    position absolute
+    cursor pointer
+
+    width 20px
+    height 20px
+
+    top 0
+    left 0
+
+    cursor pointer
+    border 1px solid grey
+    text-align center
+    content '✓'
+    padding 3px 0
+    font-size 0
+
+
+button.create-new-task
+    display table-cell
+    width 22px
+    height 28px
+
+    padding 3px 0
+
+    background blue
+    border 1px solid blue
+    color #fff
+    font-size 20px
+    font-weight bold
+    line-height 17px
+
+    &:focus
+        outline none
+
+    &:hover
+        background orange
+        border-color orange
+
+    &.disabled
+        background grey
+        border-color grey
+
+label:hover::before
+    border-color orange
+
+input[type="checkbox"]:checked + label::before
+    opacity 1
+    color green
+    border-color green
+    font-size 18px
+    transition font-size 0.2s
+
+
+input[type="checkbox"]
+    opacity 0
+    display inline-block
+    vertical-align middle
+    z-index 100
+
+label::before
+    //content ''
+    //border 4px solid #fff
+    transition opacity 0.3s
