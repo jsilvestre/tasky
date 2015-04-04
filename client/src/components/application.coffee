@@ -1,6 +1,6 @@
 # UI components
 React = require 'react/addons'
-{div, p} = React.DOM
+{div, p, nav} = React.DOM
 
 Menu = React.createFactory require './menu'
 TaskList = React.createFactory require './task-list'
@@ -35,7 +35,7 @@ module.exports = React.createClass
 
     render: ->
         div null,
-            div id: 'menu',
+            nav id: 'menu', role: 'navigation',
                 Menu
                     selectedTags: @state.selectedTags
                     tree: @state.tagTree

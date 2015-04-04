@@ -27,19 +27,19 @@ class Router extends Backbone.Router
         TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode false
         TagActionCreator.selectTags null
-        React.render App(), $('body')[0]
+        React.render App(), $('div[role="application"]')[0]
 
     mainSearch: (query) ->
         TaskActionCreator.setSearchQuery query
         TaskActionCreator.setArchivedMode false
         TagActionCreator.selectTags null
-        React.render App(), $('body')[0]
+        React.render App(), $('div[role="application"]')[0]
 
     archived: ->
         TaskActionCreator.setSearchQuery null
         TaskActionCreator.setArchivedMode true
         TagActionCreator.selectTags null
-        React.render App(), $('body')[0]
+        React.render App(), $('div[role="application"]')[0]
 
     byTags: (viewType, listView, tags, searchQuery, isArchived) ->
         if tags?
@@ -54,7 +54,7 @@ class Router extends Backbone.Router
         TagActionCreator.selectTags tags
         TaskActionCreator.setSearchQuery searchQuery
 
-        React.render App(), $('body')[0]
+        React.render App(), $('div[role="application"]')[0]
 
     todoByTags: (tags) -> @byTags '#tobedone', @taskList, tags, null, false
 
