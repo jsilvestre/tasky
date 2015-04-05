@@ -1,0 +1,117 @@
+.task
+    display flex
+    margin 15px 0
+    padding 0
+
+    // Remove margin top and bottom respectively for first and last item because
+    // it doubles the container margin.
+    &:first-of-type
+        margin-top 0
+    &:last-of-type
+        margin-bottom 0
+
+    [role="button"]
+    [role="checkbox"]
+        width 30px
+        position relative
+
+    [role="checkbox"]
+        label::before
+            display inline-block
+            position absolute
+            cursor pointer
+
+            width 30px
+            height 20px
+
+            top 0
+            left 0
+
+            cursor pointer
+            border 1px solid grey
+            text-align center
+            content '✓'
+            padding 3px 0
+            font-size 0
+            transition font-size 0.2s, color 0.2s, border-color 0.2s
+
+        label:hover::before
+            border-color orange
+            font-size 18px
+            color orange
+
+        input[type="checkbox"]
+            opacity 0
+
+        input[type="checkbox"]:checked + label::before
+            opacity 1
+            color green
+            border-color green
+            font-size 18px
+            transition font-size 0.2s, color 0.2s, border-color 0.2s
+
+        input[type="checkbox"]:checked + label:hover::before
+            border-color orange
+            color orange
+
+    [role="button"]
+        width 32px
+        height 28px
+
+        padding 0
+        text-align center
+        background blue
+        border 1px solid blue
+        color #fff
+        font-size 12px
+        font-weight bold
+        line-height 20px
+
+        &:focus
+            outline none
+
+        &:hover
+            background orange
+            border-color orange
+
+        &.disabled
+            background grey
+            border-color grey
+
+    .wrapper
+        flex 1
+        display flex
+        flex-direction column
+        margin-left 5px
+
+        input
+            padding 3px
+            text-overflow ellipsis
+            background transparent
+            border-color transparent
+
+            &:hover
+                border-color orange
+
+            &:focus
+                border-color blue
+                outline none
+
+        .todo-completionDate
+            font-size 10px
+            padding-left 3px
+
+    &.new-task input
+        border 1px solid transparent
+        border-bottom-color #ccc
+
+        &:focus
+            // reset the inherited style
+            border-color transparent
+            border-bottom-color blue
+
+    &.done input
+        text-decoration line-through
+
+        &:focus
+            border-color green

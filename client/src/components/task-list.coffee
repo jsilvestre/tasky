@@ -1,5 +1,5 @@
 React = require 'react/addons'
-{div, ul, li, i, h1, p, button} = React.DOM
+{div, ul, li, i, h1, p, button, span} = React.DOM
 
 TaskActionCreator = require '../actions/TaskActionCreator'
 TaskUtils = require '../utils/TaskUtil'
@@ -8,20 +8,17 @@ Breadcrumb = React.createFactory require './breadcrumb'
 Task = React.createFactory require './task'
 
 classer = React.addons.classSet
+CSSTransitionGroup = React.createFactory React.addons.CSSTransitionGroup
 
 module.exports = React.createClass
     displayName: 'TaskList'
 
     render: ->
-        div null,
-            i className: 'fa fa-bars'
+        div role: 'main',
             Breadcrumb
                 selectedTags: @props.selectedTags
                 searchQuery: @props.searchQuery
                 isArchivedMode: @props.isArchivedMode
-
-            unless @props.isArchivedMode
-                @getActionsBar()
 
             unless @props.isArchivedMode
                 @getRenderTask
@@ -43,6 +40,9 @@ module.exports = React.createClass
                         defaultValue: @generateDefaultValue()
                         isFocus: index is @state.focusIndex
                         isArchivedMode: @props.isArchivedMode
+
+            unless @props.isArchivedMode
+                @getActionsBar()
 
     # Helper to avoid adding all the handlers in every invokation
     getRenderTask: (options) ->
@@ -72,17 +72,28 @@ module.exports = React.createClass
         return Task options
 
     getActionsBar: ->
-        styles = classer
-            button: 'true'
+        archiveStyles = classer
+            'fa fa-archive': true
             disable: @props.tasksDone.length is 0
 
-        buttonProperties =
-            id: 'archive-button'
-            className: styles
+        archiveProperties =
+            className: archiveStyles
+            role: 'button'
+            title: t('archive button title')
             onClick: @archiveHandler
 
+        # the feature is currently not available
+        saveStyles = classer
+            'fa fa-bookmark disable': true
+
+        saveProperties =
+            className: saveStyles
+            role: 'button'
+            title: t('coming soon')
+
         p id: 'actions', t('actions headline'),
-            button buttonProperties, t 'archive button'
+            i archiveProperties
+            i saveProperties
 
     newTaskHandler: (previousTask, content = '') ->
         if content.length is 0

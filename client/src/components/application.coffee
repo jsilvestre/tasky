@@ -34,7 +34,7 @@ module.exports = React.createClass
         isReindexing: TaskStore.isReindexing()
 
     render: ->
-        div null,
+        div role: 'application',
             nav id: 'menu', role: 'navigation',
                 Menu
                     selectedTags: @state.selectedTags

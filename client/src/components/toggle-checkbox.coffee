@@ -15,6 +15,6 @@ module.exports = React.createClass
             checked: @props.isChecked
             onChange: @props.onToggle
 
-        div className: 'toggle-checkbox',
+        div role: 'checkbox',
             input inputProperties
             label htmlFor: id

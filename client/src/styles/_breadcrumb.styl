@@ -1,0 +1,86 @@
+h1#breadcrumb
+    margin 10px 0 15px 0
+    font-family styled
+    font-weight normal
+    font-size 25px
+
+    min-height 32px
+
+    // new search form
+    span.size-calculator
+    input
+        padding 0 3px
+        margin 0 1px
+        font-size 20px
+        border 1px solid transparent
+        white-space pre
+        margin-left 5px
+        font-family styled
+
+        &:hover
+            border 1px solid orange
+        &:focus
+            border 1px solid blue
+            outline none
+        &.error
+            border 1px solid red
+
+    span.size-calculator
+        visibility hidden
+        position absolute
+        width auto
+
+    .breadcrumb-item
+        display inline-block
+        padding 3px 5px
+        margin 0 5px
+        font-size 20px
+        background #ebf6ff
+        color #3097d8
+        border 1px solid transparent
+        cursor pointer
+
+        a
+            font-size 13px
+            margin-left 10px
+            vertical-align middle
+            text-decoration none
+
+        &:hover
+            background #fff3e5
+            color #985200
+            border 1px solid orange
+
+            span
+                text-decoration line-through
+
+            a
+                color #985200
+                &:hover
+                    color red
+
+        &.excluded
+            background #fff3e5
+            color #985200
+
+            span
+                text-decoration line-through
+            a
+                color #985200
+
+            &:hover
+                border 1px solid blue
+                background #ebf6ff
+                color #3097d8
+
+                span
+                    text-decoration none
+
+                a
+                    color #3097d8
+                    &:hover
+                        color red
+
+
+        &.notice-delete-action
+            border-color red + 20% !important

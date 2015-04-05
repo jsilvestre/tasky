@@ -5,221 +5,21 @@
 @require '_base'
 @require '_cozy'
 @require '_menu'
+@require '_layout'
+@require '_breadcrumb'
+@require '_task'
+@require '_actions'
+@require '_modal'
 
-.spinner
-    margin auto
-
-*
-    box-sizing border-box
-
-body
-    background #fff
-
-.container
-    margin-left 20%
 
 .fa-bars
     display none
-
-h1
-    border-bottom 1px solid #ccc
-    margin 20px
-    font-family styled
-    font-weight normal
-    font-size 25px
-    padding-bottom 10px
-
-    // new search form
-    span.size-calculator
-    input
-        padding 0 3px
-        margin 0 1px
-        font-size 20px
-        border 1px solid transparent
-        white-space pre
-        margin-left 5px
-        font-family styled
-
-        &:hover
-            border 1px solid orange
-        &:focus
-            border 1px solid blue
-            outline none
-        &.error
-            border 1px solid red
-
-    span.size-calculator
-        visibility hidden
-        position absolute
-        width auto
-
-    .breadcrumb-item
-        display inline-block
-        padding 5px
-        margin 0 5px
-        font-size 20px
-        background #ebf6ff
-        color #3097d8
-        border 1px solid transparent
-        cursor pointer
-
-        a
-            font-size 13px
-            margin-left 10px
-            vertical-align middle
-            text-decoration none
-
-        &:hover
-            background #fff3e5
-            color #985200
-            border 1px solid orange
-
-            a
-                color #985200
-                &:hover
-                    color red
-
-        &.excluded
-            background #fff3e5
-            color #985200
-
-            a
-                color #985200
-
-            &:hover
-                border 1px solid blue
-                background #ebf6ff
-                color #3097d8
-
-                a
-                    color #3097d8
-                    &:hover
-                        color red
-
-
-        &.notice-delete-action
-            border-color red + 20% !important
-
-#actions
-    font-family styled
-    margin 0 20px
-    button.button
-        padding 8px
-        font-size 12px
-        margin 0 5px
-        &:focus
-            outline none
-
-        &.disable
-            background grey
-            &:active
-                box-shadow none
 
 ul#task-list
 ul#task-list-done
     list-style-type none
     padding 0
-    padding-bottom 10px
 
-.task
-    margin 15px 20px
-    padding 0
-
-    &.done button
-        background green
-        &:hover
-            background orange
-
-    &.done:not(.archive) .todo-field input
-        text-decoration line-through
-
-    &:not(.new-task)
-        .task-input-wrapper
-            transition background 0.3s ease
-            background linear-gradient(to right, #fff 35%, #ccc 65%)
-            background-size 300% 100%
-            background-position left bottom
-
-    &.is-creating:not(.new-task)
-        .task-input-wrapper
-            background-position right bottom
-
-    .task-container
-        display table
-        position relative
-
-    .button
-    .todo-field
-    .toggle-checkbox
-        display table-cell
-
-    .button
-        width 75px
-        padding 8px
-        font-size 13px
-        overflow hidden
-        text-overflow ellipsis
-        white-space nowrap
-
-        &.disabled
-            box-shadow none
-
-        &:focus
-            outline none
-
-    .todo-field
-        width 100%
-
-        .task-input-wrapper
-            margin-left 10px
-
-        input
-            width 100%
-            padding 3px
-            margin-left 5px
-            text-overflow ellipsis
-            background transparent
-
-            border 1px solid transparent
-            &:hover
-                border 1px solid orange !important
-            &:focus
-                border 1px solid blue
-                outline none
-
-    .todo-completionDate
-        font-size 10px
-
-    &.new-task
-        input
-        input:hover
-        input:focus
-            border 1px solid transparent
-            border-bottom 1px solid #ccc
-
-#block
-    display block
-    position absolute
-    width 100%
-    height 100%
-    background #333
-    opacity 0.8
-#modal
-    display block
-    position absolute
-    width 50%
-    height 110px
-    top 0
-    bottom 0
-    left 0
-    right 0
-    margin auto
-    padding 20px
-    border 10px solid blue
-    border-radius 5px
-    background #fff
-    text-align center
-    overflow auto
 
 @media (max-width: 960px)
     #menu
@@ -239,93 +39,31 @@ ul#task-list-done
             margin-top 40px
 
     .container
-        margin auto
+        margin 0
         width 100%
 
+        [role="main"]
+            padding 10px
+
         .fa-bars
-            display inline-block
-            margin 20px 0 0 20px
+            display inline
+            margin-right 10px
             font-size 25px
 
         h1#breadcrumb
-            display inline-block
-            border-bottom 0
-            margin 10px auto 0 20px
+            margin-top 0
 
-    .task .button
-        width 45px
+            #add-tag-form
+                display none
+
+    .task
+        [role="checkbox"]
+        [role="checkbox"] label::before
+            width 30px
+        [role="button"]
+            width 32px
 
 @media (min-width: 1900px)
     .container
         width 75%
 
-.toggle-checkbox
-    position relative
-
-label::before
-.createButton::before
-    display inline-block
-    vertical-align middle
-    position absolute
-    cursor pointer
-
-    width 20px
-    height 20px
-
-    top 0
-    left 0
-
-    cursor pointer
-    border 1px solid grey
-    text-align center
-    content '✓'
-    padding 3px 0
-    font-size 0
-
-
-button.create-new-task
-    display table-cell
-    width 22px
-    height 28px
-
-    padding 3px 0
-
-    background blue
-    border 1px solid blue
-    color #fff
-    font-size 20px
-    font-weight bold
-    line-height 17px
-
-    &:focus
-        outline none
-
-    &:hover
-        background orange
-        border-color orange
-
-    &.disabled
-        background grey
-        border-color grey
-
-label:hover::before
-    border-color orange
-
-input[type="checkbox"]:checked + label::before
-    opacity 1
-    color green
-    border-color green
-    font-size 18px
-    transition font-size 0.2s
-
-
-input[type="checkbox"]
-    opacity 0
-    display inline-block
-    vertical-align middle
-    z-index 100
-
-label::before
-    //content ''
-    //border 4px solid #fff
-    transition opacity 0.3s

@@ -22,7 +22,11 @@ module.exports = React.createClass
             ref: 'size-calculator'
             className: 'size-calculator'
 
-        span null,
+        wrapperAttributes = {}
+        if @props.id?
+            wrapperAttributes.id = @props.id
+
+        span wrapperAttributes,
             input inputAttributes
             span spanAttributes, @state.content
 
@@ -44,10 +48,12 @@ module.exports = React.createClass
 
     componentDidUpdate: ->
         node = @refs['size-calculator'].getDOMNode()
-        width = node.getClientRects()[0].width
+        rects = node.getClientRects()[0]
+        if rects?
+            width = node.getClientRects()[0].width
 
-        notInitialState = @state.content.length > 0 or @state.width > 150
-        if @state.width isnt width and notInitialState
-            @setState width: width
+            notInitialState = @state.content.length > 0 or @state.width > 150
+            if @state.width isnt width and notInitialState
+                @setState width: width
 
     getInitialState: -> width: 150, content: ''

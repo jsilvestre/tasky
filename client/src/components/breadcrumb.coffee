@@ -1,5 +1,5 @@
 React = require 'react/addons'
-{h1, span, input} = React.DOM
+{h1, i, span, input} = React.DOM
 
 BreadcrumbItem = React.createFactory require './breadcrumb-item'
 AdjustableInput = React.createFactory require './adjustable-input'
@@ -10,7 +10,9 @@ module.exports = React.createClass
     render: ->
         title = @getTitle()
 
-        h1 id: 'breadcrumb', title,
+        h1 id: 'breadcrumb',
+            i className: 'fa fa-bars'
+            span null, title
             if @props.selectedTags?
                 @renderSelectedTags()
 
@@ -19,6 +21,7 @@ module.exports = React.createClass
 
             if not @props.selectedTags? or (@props.selectedTags? and not @hasNoTagSelected())
                 AdjustableInput
+                    id: 'add-tag-form'
                     className: 'add-tag'
                     placeholder: t 'search tag input'
                     onSubmitHandler: @onSubmit

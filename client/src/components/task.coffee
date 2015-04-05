@@ -1,10 +1,10 @@
 React = require 'react/addons'
 $ = require 'jquery'
 moment = require 'moment'
-{div, button, input, p, label} = React.DOM
+{div, li, input, p, label} = React.DOM
 
 ToggleCheckbox = React.createFactory require './toggle-checkbox'
-NewTaskButton = React.createFactory require './new-task-button'
+TaskButton = React.createFactory require './task-button'
 
 {KeyboardKeys, Options} = require '../constants/AppConstants'
 
@@ -16,17 +16,6 @@ module.exports = React.createClass
     interval: null
 
     render: ->
-        buttonText = @getButtonText()
-        buttonProperties =
-            className: classer
-                'toggle-state': true
-                'button': true
-                # only relevant if the component is a creation form
-                'disabled': not @props.task and @state.inputValue.length is 0
-            title: buttonText
-            onMouseOver: @onMouseOver
-            onMouseOut: @onMouseOut
-            onClick: @onClick
 
         inputProperties =
             # For some reason tabIndex should start to 1
@@ -46,51 +35,35 @@ module.exports = React.createClass
             'new-task': @isNewTaskForm()
             'is-creating': not @props.task?.id?
 
-        div className: wrapperClasses,
-            div className: 'task-container',
-                if @isNewTaskForm() and not @props.task?.id?
-                    NewTaskButton
-                        onSubmit: @createNewTask
-                        disabled: @state.inputValue.length is 0
-                else if @props.task.id
-                    ToggleCheckbox id: @props.index, isChecked: @props.task.done, onToggle: @onClick
-                div className: 'todo-field',
-                    div className: 'task-input-wrapper',
-                        input inputProperties
+        li className: wrapperClasses,
+            if @isNewTaskForm() and not @props.task?.id?
+                TaskButton
+                    onSubmit: @createNewTask
+                    disabled: @state.inputValue.length is 0
+                    icon: 'plus'
+            else if @props.isArchivedMode
+                TaskButton
+                    onSubmit: @props.restoreTaskHandler
+                    disabled: @state.inputValue.length is 0
+                    icon: 'mail-reply'
+            else
+                ToggleCheckbox
+                    id: @props.index
+                    isChecked: @props.task.done
+                    onToggle: @onToggle
 
-            if @props.isArchivedMode
-                if @props.task.completionDate?
-                    completionDate = moment @props.task.completionDate
-                    formattedDate = completionDate.format t 'archived date format'
-                else
-                    formattedDate = ''
-                div className: 'todo-completionDate',
-                    p null, "#{t 'completed headline'} #{formattedDate}"
+            div className: 'wrapper',
+                input inputProperties
 
-    # Returns button text based on component state.
-    # The component can represent a task or be a creation form.
-    getButtonText: ->
-        # if there is a task, it can be toggled (todo/done)
-        if @props.task?
-            isDone = @props.task.done
-            isArchived = @props.task.isArchived
-            # Changes the button text depending on its state
-            if @state.buttonHover and isArchived
-                buttonText = t 'restore button?'
-            else if @state.buttonHover and isDone
-                buttonText = t 'todo button?'
-            else if @state.buttonHover and not isDone
-                buttonText = t 'done button?'
-            else if not @state.buttonHover and isDone
-                buttonText = t 'done button'
-            else if not @state.buttonHover and not isDone
-                buttonText = t 'todo button'
+                if @props.isArchivedMode
+                    if @props.task.completionDate?
+                        completionDate = moment @props.task.completionDate
+                        formattedDate = completionDate.format t 'archived date format'
+                    else
+                        formattedDate = ''
+                    div className: 'todo-completionDate',
+                        "#{t 'completed headline'} #{formattedDate}"
 
-        # otherwise it's just a creation form
-        else
-            buttonText = t 'new button'
-
-        return buttonText
 
     componentDidMount: -> @componentDidUpdate()
     componentDidUpdate: ->
@@ -111,14 +84,10 @@ module.exports = React.createClass
 
     getInitialState: ->
         return {
-            buttonHover: false
             inputValue: @props.task?.description or ''
             selectContent: true
         }
 
-    # Toggles button's state
-    onMouseOver: -> @setState buttonHover: true
-    onMouseOut: -> @setState buttonHover: false
 
     # Binds the input value to the component's state
     onChange: ->
@@ -192,14 +161,9 @@ module.exports = React.createClass
         @stopPeriodicalSave()
         @saveDescription()
 
-    onClick: ->
-        if @props.task?
-            if @props.task.isArchived
-                @props.restoreTaskHandler()
-            else
-                @props.toggleStateHandler not @props.task.done
-        else
-            @createNewTask()
+    # DEPRECATED
+    onToggle: ->
+        @props.toggleStateHandler not @props.task.done
 
     createNewTask: ->
         # if the task already exist, we want to create an empty one
