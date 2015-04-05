@@ -38,8 +38,11 @@ ul#task-list-done
             display block
 
         // prevent clicking links when clicking the closing arrow
-        &>ul > li
+        &>ul > li:first-of-type
             max-width 50%
+
+        ul.sorts
+            right 30px
 
     .container
         margin 0
