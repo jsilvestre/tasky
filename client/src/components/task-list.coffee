@@ -6,9 +6,9 @@ TaskUtils = require '../utils/TaskUtil'
 
 Breadcrumb = React.createFactory require './breadcrumb'
 Task = React.createFactory require './task'
+ProgressBar = React.createFactory require './progress-bar'
 
-classer = React.addons.classSet
-CSSTransitionGroup = React.createFactory React.addons.CSSTransitionGroup
+styler = classer = React.addons.classSet
 
 module.exports = React.createClass
     displayName: 'TaskList'
@@ -43,6 +43,11 @@ module.exports = React.createClass
 
             unless @props.isArchivedMode
                 @getActionsBar()
+
+            unless @props.isArchivedMode
+                ProgressBar
+                    tasks: @props.tasks
+                    tasksDone: @props.tasksDone
 
     # Helper to avoid adding all the handlers in every invokation
     getRenderTask: (options) ->
