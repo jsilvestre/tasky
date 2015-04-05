@@ -25,24 +25,28 @@ ul#task-list-done
 
 @media (max-width: 960px)
     #menu
-        display none
-        width 50%
+        left -100%
+        width 80%
         position relative
+        transition left .3s
 
         .fa-arrow-left
-            font-size 25px
-            margin 10px 0
+            font-size 30px
             position absolute
-            right 15px
-            top 0
+            right 10px
+            top 10px
             display block
 
-        ul
-            margin-top 40px
+        // prevent clicking links when clicking the closing arrow
+        &>ul > li
+            max-width 50%
 
     .container
         margin 0
+        left 0
         width 100%
+        position absolute
+        transition left .3s
 
         [role="main"]
             padding-top 10px
@@ -61,7 +65,7 @@ ul#task-list-done
         .fa-bars
             display inline
             margin-right 10px
-            font-size 25px
+            font-size 35px
 
         h1#breadcrumb
             margin-top 0
@@ -72,9 +76,16 @@ ul#task-list-done
     .task
         [role="checkbox"]
         [role="checkbox"] label::before
-            width 35px
+            width 40px
         [role="button"]
-            width 37px
+            width 42px
+    [role="application"].menuOpen
+        #menu
+            left 0
+            transition left .3s
+        .container
+            left 80%
+            transition left .3s
 
 @media (min-width: 1900px)
     .container

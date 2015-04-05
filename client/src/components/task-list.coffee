@@ -19,6 +19,7 @@ module.exports = React.createClass
                 selectedTags: @props.selectedTags
                 searchQuery: @props.searchQuery
                 isArchivedMode: @props.isArchivedMode
+                onOpenMenu: @props.onOpenMenu
 
             unless @props.isArchivedMode
                 @getRenderTask

@@ -1,6 +1,6 @@
 React = require 'react/addons'
 _ = require 'underscore'
-{div, i, ul, li, a, span} = React.DOM
+{nav, div, i, ul, li, a, span} = React.DOM
 
 MenuItem = React.createFactory require './menu-item'
 {SortCriterions} = require '../constants/AppConstants'
@@ -30,8 +30,8 @@ module.exports = React.createClass
         else
             menu = [archivedMenu, todoMenu]
 
-        div id: 'menu',
-            i className: 'fa fa-arrow-left'
+        nav id: 'menu', role: 'navigation',
+            i className: 'fa fa-arrow-left', onClick: @props.onOpenMenu
             ul null,
                 li id: menu[0].id, className: 'first-level',
                     a href: menu[0].link, "#{menu[0].label} (#{menu[0].count})"

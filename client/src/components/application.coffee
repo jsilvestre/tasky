@@ -9,6 +9,8 @@ TaskList = React.createFactory require './task-list'
 TaskStore = require '../stores/TaskStore'
 TagStore = require '../stores/TagStore'
 
+styler = React.addons.classSet
+
 # Mixins
 StoreWatchMixin = require '../mixins/store_watch_mixin'
 
@@ -34,16 +36,20 @@ module.exports = React.createClass
         isReindexing: TaskStore.isReindexing()
 
     render: ->
-        div role: 'application',
-            nav id: 'menu', role: 'navigation',
-                Menu
-                    selectedTags: @state.selectedTags
-                    tree: @state.tagTree
-                    sortCriterion: @state.sortCriterion
-                    isArchivedMode: @state.isArchivedMode
-                    untaggedTasks: @state.untaggedTasks
-                    numTasks: @state.numTasks
-                    numArchivedTasks: @state.numArchivedTasks
+
+        appStyles = styler
+            'menuOpen': @state.isMenuOpen
+
+        div role: 'application', className: appStyles,
+            Menu
+                selectedTags: @state.selectedTags
+                tree: @state.tagTree
+                sortCriterion: @state.sortCriterion
+                isArchivedMode: @state.isArchivedMode
+                untaggedTasks: @state.untaggedTasks
+                numTasks: @state.numTasks
+                numArchivedTasks: @state.numArchivedTasks
+                onOpenMenu: @openMenu
             div className: 'container',
                 TaskList
                     selectedTags: @state.selectedTags
@@ -51,8 +57,14 @@ module.exports = React.createClass
                     isArchivedMode: @state.isArchivedMode
                     searchQuery: @state.searchQuery
                     tasksDone: @state.tasksDone
+                    onOpenMenu: @openMenu
             if @state.isReindexing
                 div id: 'block'
                 div id: 'modal',
                     p null, t 'reindexing message'
 
+    getInitialState: -> isMenuOpen: false
+
+    openMenu: ->
+        isMenuOpen = not @state.isMenuOpen
+        @setState {isMenuOpen}

@@ -11,7 +11,7 @@ module.exports = React.createClass
         title = @getTitle()
 
         h1 id: 'breadcrumb',
-            i className: 'fa fa-bars'
+            i className: 'fa fa-bars', onClick: @props.onOpenMenu
             span null, title
             if @props.selectedTags?
                 @renderSelectedTags()
