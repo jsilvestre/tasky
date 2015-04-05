@@ -61,3 +61,8 @@ module.exports =
                 callback "Something went wrong -- #{res.body}"
 
 
+    markSearchAsFavorite: (search) ->
+        json = JSON.stringify search
+        localStorage.setItem 'tasky.favorite_search', json
+
+

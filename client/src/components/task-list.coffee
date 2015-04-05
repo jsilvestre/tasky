@@ -6,6 +6,7 @@ TaskUtils = require '../utils/TaskUtil'
 
 Breadcrumb = React.createFactory require './breadcrumb'
 Task = React.createFactory require './task'
+ActionsBar = React.createFactory require './actions-bar'
 ProgressBar = React.createFactory require './progress-bar'
 
 styler = classer = React.addons.classSet
@@ -43,7 +44,10 @@ module.exports = React.createClass
                         isArchivedMode: @props.isArchivedMode
 
             unless @props.isArchivedMode
-                @getActionsBar()
+                ActionsBar
+                    tasksDone: @props.tasksDone
+                    favoriteSearch: @props.favoriteSearch
+                    selectedTags: @props.selectedTags
 
             unless @props.isArchivedMode
                 ProgressBar
@@ -77,29 +81,6 @@ module.exports = React.createClass
 
         return Task options
 
-    getActionsBar: ->
-        archiveStyles = classer
-            'fa fa-archive': true
-            disable: @props.tasksDone.length is 0
-
-        archiveProperties =
-            className: archiveStyles
-            role: 'button'
-            title: t('archive button title')
-            onClick: @archiveHandler
-
-        # the feature is currently not available
-        saveStyles = classer
-            'fa fa-bookmark disable': true
-
-        saveProperties =
-            className: saveStyles
-            role: 'button'
-            title: t('coming soon')
-
-        p id: 'actions', t('actions headline'),
-            i archiveProperties
-            i saveProperties
 
     newTaskHandler: (previousTask, content = '') ->
         if content.length is 0

@@ -30,5 +30,8 @@ module.exports =
         window.router = @router
         Backbone.history.start()
 
+        favoriteSearch = TagStore.getFavoriteSearch()
+        @router.goToDefault favoriteSearch
+
         # Makes this object immuable.
         Object.freeze this if typeof Object.freeze is 'function'

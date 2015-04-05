@@ -13,6 +13,7 @@ module.exports =
         'RESTORE_TASK'           : 'RESTORE_TASK'
         'SET_REINDEX_STATE'      : 'SET_REINDEX_STATE'
         'TOGGLE_FAVORITE_TAG'    : 'TOGGLE_FAVORITE_TAG'
+        'MARK_SEARCH_AS_FAVORITE': 'MARK_SEARCH_AS_FAVORITE'
 
     KeyboardKeys:
         'ENTER'         : 13

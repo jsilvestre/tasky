@@ -68,4 +68,20 @@ class Router extends Backbone.Router
         @byTags '#archived', @archivedTaskList, tags, null, true
 
 
+    goToDefault: (favoriteSearch) ->
+
+        # go to favorite search unless there is no or the user didn't load
+        # the home page
+        currentRoute = Backbone.history.getFragment()
+        if currentRoute.length is 0 and favoriteSearch?
+            url = favoriteSearch.map (tag) ->
+                if tag.isExcluded
+                    prefix = "!"
+                else
+                    prefix = ""
+                return "#{prefix}#{tag.label}/"
+
+            url = "#todoByTags/#{url}"
+            @navigate url, true
+
 module.exports = new Router()

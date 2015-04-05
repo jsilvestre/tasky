@@ -15,6 +15,9 @@ class TagStore extends Store
 
     _favoriteTags = window.favoriteTags or []
 
+    json = localStorage.getItem 'tasky.favorite_search'
+    _favoriteSearch = JSON.parse json
+
     fromLocalStorage = localStorage.getItem 'sort-criterion'
     _sortCriterion = fromLocalStorage or SortCriterions.COUNT
 
@@ -42,6 +45,10 @@ class TagStore extends Store
 
             @emit 'change'
 
+        handle ActionTypes.MARK_SEARCH_AS_FAVORITE, (selectedTags) ->
+            _favoriteSearch = selectedTags
+            @emit 'change'
+
     getSelected: -> return _selectedTags
 
     getSelectedNames: -> _selectedTags?.map (tag) -> tag.label
@@ -49,6 +56,8 @@ class TagStore extends Store
     getSortCriterion: -> return _sortCriterion
 
     getFavoriteTags: -> return _favoriteTags
+
+    getFavoriteSearch: -> return _favoriteSearch
 
     getTree: ->
         selectedTagNames = @getSelectedNames()

@@ -35,3 +35,17 @@ module.exports =
                 value: label
 
             XHRUtils.unmarkTagAsFavorite label, ->
+
+    markCurrentSearchAsFavorite: ->
+        selectedTags = TagStore.getSelected()
+        currentFavoriteSearch = TagStore.getFavoriteSearch()
+        if JSON.stringify(selectedTags) is JSON.stringify(currentFavoriteSearch)
+            markAsFavorite = null
+        else
+            markAsFavorite = selectedTags
+
+        AppDispatcher.handleViewAction
+            type: ActionTypes.MARK_SEARCH_AS_FAVORITE
+            value: markAsFavorite
+
+        XHRUtils.markSearchAsFavorite markAsFavorite

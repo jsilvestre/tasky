@@ -34,6 +34,7 @@ module.exports = React.createClass
         searchQuery: TaskStore.getSearchQuery()
         tasksDone: tasks.filter (task) -> task.done
         isReindexing: TaskStore.isReindexing()
+        favoriteSearch: TagStore.getFavoriteSearch()
 
     render: ->
 
@@ -58,6 +59,7 @@ module.exports = React.createClass
                     searchQuery: @state.searchQuery
                     tasksDone: @state.tasksDone
                     onOpenMenu: @openMenu
+                    favoriteSearch: @state.favoriteSearch
             if @state.isReindexing
                 div id: 'block'
                 div id: 'modal',
