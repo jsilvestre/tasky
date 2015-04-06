@@ -1,4 +1,5 @@
 React = require 'react/addons'
+TaskActionCreator = require '../actions/TaskActionCreator'
 TagActionCreator = require '../actions/TagActionCreator'
 {div, i} = React.DOM
 
@@ -16,7 +17,7 @@ module.exports = React.createClass
             className: archiveStyles
             role: 'button'
             title: t('archive button title')
-            onClick: @archiveHandler
+            onClick: @onArchiveClicked
 
         # the feature is currently not available
         saveStyles = styler
@@ -48,3 +49,6 @@ module.exports = React.createClass
 
     onFavoriteClicked: ->
         TagActionCreator.markCurrentSearchAsFavorite()
+
+    onArchiveClicked: ->
+        TaskActionCreator.archiveTasks @props.tasksDone

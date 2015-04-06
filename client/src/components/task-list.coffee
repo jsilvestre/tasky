@@ -143,9 +143,6 @@ module.exports = React.createClass
 
         @setState focusIndex: newIndex
 
-    archiveHandler: ->
-        TaskActionCreator.archiveTasks @props.tasksDone
-
     restoreTaskHandler: (task) ->
         TaskActionCreator.restoreTask task
 
