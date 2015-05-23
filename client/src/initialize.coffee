@@ -1,59 +1,36 @@
-$ = require 'jquery'
-app = require './application'
+window.onload = ->
+    # Required by current Flux implementaiton.
+    window.__DEV__ = true
 
-# The function called from index.html
-$ ->
-    $.fn.spin = (opts, color) ->
-        presets =
-            tiny:
-                lines: 8
-                length: 2
-                width: 2
-                radius: 3
+    # Retrieve locale data from window.
+    @locale = window.locale
 
-            small:
-                lines: 8
-                length: 1
-                width: 2
-                radius: 4
+    Polyglot = require 'node-polyglot'
+    @polyglot = new Polyglot locale: @locale
 
-            medium:
-                lines: 10
-                length: 4
-                width: 3
-                radius: 6
+    # Trick to include all supported localization files with browserify.
+    localesLoader =
+        en: require './locales/en'
+        fr: require './locales/fr'
 
-            large:
-                lines: 10
-                length: 8
-                width: 4
-                radius: 8
+    # Select current locale based on user information.
+    locales = localesLoader[@locale]
 
-            extralarge:
-                lines: 8
-                length: 3
-                width: 10
-                radius: 20
-                top: 30
-                left: 50
+    # Fallback to english if it can't for some reason.
+    locales = localesLoader['en'] unless locales?
 
-        if Spinner?
-            @each ->
-                $this = $(this)
-                spinner = $this.data("spinner")
-                if spinner?
-                    spinner.stop()
-                    $this.data "spinner", null
-                else if opts isnt false
-                    if typeof opts is "string"
-                        if opts of presets
-                            opts = presets[opts]
-                        else
-                            opts = {}
-                        if color then opts.color = color
+    # Initialize polyglot object with locales.
+    @polyglot.extend locales
 
-                    spinner = new Spinner opts
-                    spinner.spin(this)
-                    $this.data "spinner", spinner
+    # Handy shortcut.
+    window.t = @polyglot.t.bind @polyglot
 
-    app.initialize()
+    # Initialize stores.
+    TaskStore = require './stores/TaskStore'
+    TagStore = require './stores/TagStore'
+
+    # Initialize the routing and start the app.
+    require './router'
+
+    # Makes this object immuable.
+    Object.freeze this if typeof Object.freeze is 'function'

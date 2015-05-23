@@ -1,8 +1,6 @@
 #!/bin/bash
 node_modules/.bin/browserify --debug \
-    -r jquery \
     -r underscore \
-    -r backbone \
     -r react/addons \
     -r superagent \
     -r node-polyglot \

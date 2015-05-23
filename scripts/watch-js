@@ -4,9 +4,7 @@
     --extension=".coffee" \
     -e client/src/initialize.coffee \
     -o 'node_modules/.bin/exorcist client/public/scripts/bundle.js.map > client/public/scripts/bundle.js' \
-    -x jquery \
     -x underscore \
-    -x backbone \
     -x react/addons \
     -x superagent \
     -x node-polyglot \
