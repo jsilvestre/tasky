@@ -7,7 +7,7 @@ module.exports =
         request.post "tasks"
         .send rawTask
         .set 'Accept', 'application/json'
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null, res.body
             else
@@ -18,7 +18,7 @@ module.exports =
         request.put "tasks/#{taskID}"
         .send attributes
         .set 'Accept', 'application/json'
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null, res.body
             else
@@ -28,7 +28,7 @@ module.exports =
 
         request.del "tasks/#{taskID}"
         .set 'Accept', 'application/json'
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null
             else
@@ -36,7 +36,7 @@ module.exports =
 
     reindex: (callback) ->
         request.post 'tasks/reindex'
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null, res.body
             else
@@ -45,7 +45,7 @@ module.exports =
     markTagAsFavorite: (label, callback) ->
         request.post 'tags'
         .send {label}
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null
             else
@@ -54,7 +54,7 @@ module.exports =
     unmarkTagAsFavorite: (label, callback) ->
         request.del 'tags'
         .send {label}
-        .end (res) ->
+        .end (err, res) ->
             if res.ok
                 callback null
             else

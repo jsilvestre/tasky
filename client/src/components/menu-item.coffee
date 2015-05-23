@@ -1,7 +1,7 @@
 React = require 'react/addons'
 {li, a, i, span, ul} = React.DOM
 
-styler = React.addons.classSet
+styler = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'MenuItem'

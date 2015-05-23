@@ -1,7 +1,7 @@
 React = require 'react/addons'
 {div, span, a} = React.DOM
 
-styler = React.addons.classSet
+styler = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'BreadcrumbItem'

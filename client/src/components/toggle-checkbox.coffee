@@ -2,7 +2,7 @@ React = require 'react/addons'
 _ = require 'underscore'
 {div, input, label} = React.DOM
 
-classer = React.addons.classSet
+classer = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'ToggleCheckbox'

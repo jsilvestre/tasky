@@ -11,4 +11,5 @@
     -x superagent \
     -x node-polyglot \
     -x async \
-    -x moment
+    -x moment \
+    -x classnames

@@ -2,7 +2,7 @@ React = require 'react/addons'
 _ = require 'underscore'
 {div, input, label, button, i} = React.DOM
 
-styler = React.addons.classSet
+styler = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'TaskButton'

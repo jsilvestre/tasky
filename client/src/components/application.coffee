@@ -9,7 +9,7 @@ TaskList = React.createFactory require './task-list'
 TaskStore = require '../stores/TaskStore'
 TagStore = require '../stores/TagStore'
 
-styler = React.addons.classSet
+styler = require 'classnames'
 
 # Mixins
 StoreWatchMixin = require '../mixins/store_watch_mixin'

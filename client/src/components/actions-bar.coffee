@@ -3,7 +3,7 @@ TaskActionCreator = require '../actions/TaskActionCreator'
 TagActionCreator = require '../actions/TagActionCreator'
 {div, i} = React.DOM
 
-styler = React.addons.classSet
+styler = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'ActionsBar'

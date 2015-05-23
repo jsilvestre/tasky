@@ -8,7 +8,7 @@ TaskButton = React.createFactory require './task-button'
 
 {KeyboardKeys, Options} = require '../constants/AppConstants'
 
-classer = React.addons.classSet
+classer = require 'classnames'
 
 module.exports = React.createClass
 

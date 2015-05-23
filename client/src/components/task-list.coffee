@@ -9,7 +9,7 @@ Task = React.createFactory require './task'
 ActionsBar = React.createFactory require './actions-bar'
 ProgressBar = React.createFactory require './progress-bar'
 
-styler = classer = React.addons.classSet
+styler = classer = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'TaskList'

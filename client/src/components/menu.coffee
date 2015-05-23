@@ -6,7 +6,7 @@ MenuItem = React.createFactory require './menu-item'
 {SortCriterions} = require '../constants/AppConstants'
 TagActionCreator = require '../actions/TagActionCreator'
 
-classer = React.addons.classSet
+classer = require 'classnames'
 
 module.exports = React.createClass
     displayName: 'Menu'
