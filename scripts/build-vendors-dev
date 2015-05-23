@@ -9,5 +9,6 @@ node_modules/.bin/browserify --debug \
     -r async \
     -r moment \
     -r classnames \
+    -r react-router \
     | node_modules/.bin/exorcist client/public/scripts/bundle-vendors.js.map \
     > client/public/scripts/bundle-vendors.js

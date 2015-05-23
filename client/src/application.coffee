@@ -1,37 +1,38 @@
-Backbone = require 'backbone'
-Polyglot = require 'node-polyglot'
-Backbone.$ = require 'jquery'
+module.exports = initialize: ->
 
+    # Required by current Flux implementaiton.
+    window.__DEV__ = true
 
-module.exports =
-    initialize: ->
-        # Used in inter-app communication
-        #SocketListener = require '../lib/socket_listener'
+    # Retrieve locale data from window.
+    @locale = window.locale
+    delete window.locale
 
-        @locale = window.locale
-        delete window.locale
+    Polyglot = require 'node-polyglot'
+    @polyglot = new Polyglot locale: @locale
 
-        @polyglot = new Polyglot locale: @locale
+    # Trick to include all supported localization files with browserify.
+    localesLoader =
+        en: require './locales/en'
+        fr: require './locales/fr'
 
-        # trick to include all supported localization files with browserify
-        localesLoader =
-            en: require './locales/en'
-            fr: require './locales/fr'
-        locales = localesLoader[@locale]
-        locales = localesLoadre['en'] unless locales?
-        @polyglot.extend locales
-        window.t = @polyglot.t.bind @polyglot
+    # Select current locale based on user information.
+    locales = localesLoader[@locale]
 
-        TaskStore = require './stores/TaskStore'
-        TagStore = require './stores/TagStore'
+    # Fallback to english if it can't for some reason.
+    locales = localesLoadre['en'] unless locales?
 
-        # Routing management
-        @router = require './router'
-        window.router = @router
-        Backbone.history.start()
+    # Initialize polyglot object with locales.
+    @polyglot.extend locales
 
-        favoriteSearch = TagStore.getFavoriteSearch()
-        @router.goToDefault favoriteSearch
+    # Handy shortcut.
+    window.t = @polyglot.t.bind @polyglot
 
-        # Makes this object immuable.
-        Object.freeze this if typeof Object.freeze is 'function'
+    # Initialize stores.
+    TaskStore = require './stores/TaskStore'
+    TagStore = require './stores/TagStore'
+
+    # Initialize the routing and start the app.
+    require './router'
+
+    # Makes this object immuable.
+    Object.freeze this if typeof Object.freeze is 'function'

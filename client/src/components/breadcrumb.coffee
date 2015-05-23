@@ -4,8 +4,12 @@ React = require 'react/addons'
 BreadcrumbItem = React.createFactory require './breadcrumb-item'
 AdjustableInput = React.createFactory require './adjustable-input'
 
+Router = require 'react-router'
+
 module.exports = React.createClass
     displayName: 'Breadcrumb'
+
+    mixins: [Router.Navigation]
 
     render: ->
         title = @getTitle()
@@ -123,11 +127,11 @@ module.exports = React.createClass
             if @props.isArchivedMode
                 prefix = 'archived'
             else
-                prefix = '#'
+                prefix = ''
 
 
-        location = "##{prefix}#{formattedList}#{query}"
-        window.router.navigate location, true
+        location = "/#{prefix}#{formattedList}#{query}"
+        @transitionTo location
 
     hasNoTagSelected: ->
         return not @props.selectedTags? or @props.selectedTags?.length is 0

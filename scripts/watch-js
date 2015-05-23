@@ -12,4 +12,5 @@
     -x node-polyglot \
     -x async \
     -x moment \
-    -x classnames
+    -x classnames \
+    -x react-router

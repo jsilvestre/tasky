@@ -4,6 +4,7 @@ React = require 'react/addons'
 
 Menu = React.createFactory require './menu'
 TaskList = React.createFactory require './task-list'
+Router = require 'react-router'
 
 # Stores
 TaskStore = require '../stores/TaskStore'
@@ -17,7 +18,24 @@ StoreWatchMixin = require '../mixins/store_watch_mixin'
 module.exports = React.createClass
     displayName: 'Application'
 
-    mixins: [StoreWatchMixin([TagStore, TaskStore])]
+    mixins: [
+        StoreWatchMixin([TagStore, TaskStore])
+        Router.State
+        Router.Navigation
+    ]
+
+    # Executed only once at startup.
+    componentWillMount: ->
+        # Go to favorite search unless there is no or the user didn't load the
+        # home page.
+        favoriteSearch = TagStore.getFavoriteSearch()
+        if @isActive('main') and favoriteSearch?
+            url = favoriteSearch.map (tag) ->
+                prefix = if tag.isExcluded then "!" else ""
+                return "#{prefix}#{tag.label}"
+
+            @replaceWith 'todoByTags', splat: url.join('/')
+
 
     getStateFromStores: ->
         selectedTags = TagStore.getSelected()

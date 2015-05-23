@@ -1,5 +1,4 @@
 React = require 'react/addons'
-$ = require 'jquery'
 moment = require 'moment'
 {div, li, input, p, label} = React.DOM
 
@@ -76,7 +75,7 @@ module.exports = React.createClass
             # Only selects the content when the task is focused (first render)
             if @state.selectContent
                 node = @refs['task-content'].getDOMNode()
-                $(node).focus()
+                node.focus()
 
                 index = node.value.length
                 node.setSelectionRange 0, index
