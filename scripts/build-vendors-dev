@@ -8,5 +8,6 @@ node_modules/.bin/browserify --debug \
     -r moment \
     -r classnames \
     -r react-router \
+    -r flux \
     | node_modules/.bin/exorcist client/public/scripts/bundle-vendors.js.map \
     > client/public/scripts/bundle-vendors.js

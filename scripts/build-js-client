@@ -3,8 +3,11 @@
 node_modules/.bin/browserify \
     --debug \
     -t coffeeify \
+    -t babelify \
     -t [ envify --NODE_ENV production ] \
     --extension='.coffee' \
+    --extension='.jsx' \
+    --extension='.js' \
     -e client/src/initialize.coffee \
     | node_modules/.bin/exorcist build/client/public/scripts/bundle.js.map \
     > build/client/public/scripts/bundle.js \
