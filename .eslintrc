@@ -9,6 +9,10 @@
         clearInterval: false
         localStorage: false
         location: false
+        process: false
+        __dirname: false
+        module: false
+        console: false
     ecmaFeatures:
         jsx: true
     plugins:
@@ -18,6 +22,8 @@
         max-len: [1, 80, 4]
         no-underscore-dangle: 0
         no-unused-vars: 1
+        new-cap: 0
+        no-console: 0
 
         "react/display-name": 1
         "react/jsx-boolean-value": 1
