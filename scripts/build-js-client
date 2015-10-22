@@ -1,24 +1,9 @@
 #!/bin/bash
-# build the JS
 node_modules/.bin/browserify \
     --debug \
-    -t coffeeify \
     -t babelify \
     -t [ envify --NODE_ENV production ] \
-    --extension='.coffee' \
     --extension='.jsx' \
     --extension='.js' \
-    -e client/src/initialize.coffee \
-    | node_modules/.bin/exorcist build/client/public/scripts/bundle.js.map \
-    > build/client/public/scripts/bundle.js \
-
-# uglify the build
-node_modules/.bin/uglifyjs build/client/public/scripts/bundle.js \
-    -o build/client/public/scripts/bundle.min.js \
-    --in-source-map build/client/public/scripts/bundle.js.map \
-    --source-map build/client/public/scripts/bundle.min.js.map \
-    --source-map-url bundle.min.js.map \
-    --source-map-include-sources
-
-# clean the build remaining
-rm -rf build/client/public/scripts/bundle.js*
+    -e client/src/initialize.js \
+    > build/client/public/scripts/bundle.js

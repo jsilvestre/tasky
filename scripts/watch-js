@@ -1,12 +1,11 @@
 #!/bin/bash
 ./node_modules/.bin/watchify -dv \
-    -t coffeeify \
     -t babelify \
-    --extension=".coffee" \
+    -t [ envify --NODE_ENV development ] \
     --extension=".jsx" \
     --extension=".js" \
     -e client/src/initialize.js \
-    -o 'node_modules/.bin/exorcist client/public/scripts/bundle.js.map > client/public/scripts/bundle.js' \
+    -o 'client/public/scripts/bundle.js' \
     -x underscore \
     -x react/addons \
     -x superagent \
@@ -15,4 +14,9 @@
     -x moment \
     -x classnames \
     -x react-router \
-    -x flux 
+    -x react-redux \
+    -x redux \
+    -x immutable \
+    -x reselect \
+    -x redux-thunk \
+    -x redux-logger

@@ -5,7 +5,7 @@ REV=$(git rev-parse --short HEAD)
 # replace dev value by prod value in template
 sed -i '' \
     -e 's/script(src="scripts\/bundle-vendors.js")//g' \
-    -e 's/bundle.js/bundle.min.js?'$REV'/g' \
+    -e 's/bundle.js/bundle.js?'$REV'/g' \
     -e 's/application.css/application.css?'$REV'/g' build/client/index.jade
 
 # pre-compile the template
