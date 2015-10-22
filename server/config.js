@@ -1,42 +1,49 @@
-"use strict";
-import * as path from "path";
-import * as americano from "americano";
+import americano from 'americano';
+import errorHandler from 'errorhandler';
+import fs from 'fs';
+import path from 'path';
+
+// Detect if it should use the precompiled jade or the raw jade.
+const builtViewPath = path.resolve(__dirname, '../client/index.js');
+const viewEngine = fs.existsSync(builtViewPath) ? 'js' : 'jade';
 
 export const config = {
     common: {
         use: [
             americano.bodyParser(),
             americano.methodOverride(),
-            americano.errorHandler({
-                dumpExceptions: true,
-                showStack: true
-            }),
             americano.static(
-                path.resolve(__dirname, "../client/public"),
+                path.resolve(__dirname, '../client/public'),
                 {maxAge: 86400000}
-            )
+            ),
         ],
+
         set: {
-            views: path.resolve(__dirname, "../client")
+            'view engine': viewEngine,
+            'views': path.resolve(__dirname, '../client/'),
         },
 
         engine: {
             // Allows res.render of .js files (pre-rendered jade)
-            js: function(filePath, locals, callback) {
+            js: (filePath, locals, callback) => {
                 callback(null, require(filePath)(locals));
-            }
-        }
+            },
+        },
+
+        afterStart: (app) => {
+            app.use(errorHandler());
+        },
     },
 
     development: [
-        americano.logger("dev")
+        americano.logger('dev'),
     ],
 
     production: [
-        americano.logger("short")
+        americano.logger('short'),
     ],
 
     plugins: [
-        "americano-cozy"
-    ]
+        'cozydb',
+    ],
 };

@@ -1,30 +1,40 @@
-"use strict";
+import cozydb from 'cozydb';
+import invariant from 'invariant';
+import logger from 'debug';
+import hasValue from '../hasValue';
 
-import * as americano from "americano";
+const debug = logger('app:model:favorite_tag');
 
-import * as hasValue from "../hasValue";
-
-export const FavoriteTag = americano.getModel("FavoriteTag", {
-    "label": String,
-    "application": String
+export const FavoriteTag = cozydb.getModel('FavoriteTag', {
+    'label': String,
+    'application': String,
 });
 
-FavoriteTag.allForTasky = function(callback) {
-    FavoriteTag.request("allByApp", {key: "tasky"}, (err, tags) => {
-        err = err || tags.error;
-        if(hasValue(err)) {
-            callback(err);
-        }
-        else {
+FavoriteTag.allForTasky = (callback) => {
+    invariant(hasValue(callback), '`callback` is a mandatory parameter');
+    invariant(typeof callback === 'function', '`callback` must be a function');
+
+    debug('Retrieve all favorite tag for app Tasky.');
+    FavoriteTag.request('allByApp', {key: 'tasky'}, (err, tags) => {
+        const error = err || tags.error;
+        if (hasValue(error)) {
+            callback(error);
+        } else {
             const labels = tags.map(tag => tag.label);
             callback(null, labels);
         }
     });
 };
 
-FavoriteTag.ByLabelForTasky = function(label, callback) {
+FavoriteTag.ByLabelForTasky = (label, callback) => {
+    invariant(hasValue(label), '`label` is a mandatory parameter');
+    invariant(hasValue(callback), '`callback` is a mandatory parameter');
+    invariant(typeof label === 'string', '`label` must be a string');
+    invariant(typeof callback === 'function', '`callback` must be a function');
+
+    debug('Retrieve a favorite tag given a label, for app Tasky.');
     const options = {
-        key: ["tasky", label]
+        key: ['tasky', label],
     };
-    FavoriteTag.request("byAppByLabel", options, callback);
+    FavoriteTag.request('byAppByLabel', options, callback);
 };

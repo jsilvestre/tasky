@@ -1,35 +1,31 @@
-// See documentation on https://github.com/frankrousseau/americano#routes.
-"use strict";
+import * as index from './index';
+import * as tasks from './tasks';
+import * as tags from './tags';
 
-import * as index from "./index";
-import * as tasks from "./tasks";
-import * as tags from "./tags";
-
-export const routes = {
-    "": {
-        get: index.main
+export default {
+    '': {
+        get: index.main,
     },
 
-    "tasks": {
-        get: tasks.all,
-        post: [tasks.reindexationMiddleware, tasks.create]
+    'tasks': {
+        post: [tasks.reindexationMiddleware, tasks.create],
     },
 
-    "taskID": {
-        param: tasks.fetch
+    'taskID': {
+        param: tasks.fetch,
     },
 
-    "tasks/:taskID": {
+    'tasks/:taskID': {
         put: [tasks.reindexationMiddleware, tasks.update],
-        delete: tasks.delete
+        delete: tasks.delete,
     },
 
-    "tasks/reindex": {
-        post: tasks.reindex
+    'tasks/reindex': {
+        post: tasks.reindex,
     },
 
-    "tags": {
+    'tags': {
         post: tags.create,
-        delete: tags.delete
-    }
+        delete: tags.delete,
+    },
 };

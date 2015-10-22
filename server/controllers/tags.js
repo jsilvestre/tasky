@@ -1,45 +1,52 @@
-"use strict";
+import async from 'async';
+import logger from 'debug';
+import FavoriteTag from '../models/favorite_tag';
+import hasValue from '../hasValue';
 
-import * as async from "async";
-import * as FavoriteTag from "../models/favorite_tag";
-import * as hasValue from "../hasValue";
+const debug = logger('app:controller:tags');
 
-function create(req, res, next) {
+export function create(req, res) {
+    const {label} = req.body;
 
-    const label = req.body.label;
-
-    FavoriteTag.ByLabelForTasky(label, (err, tags) => {
-        if(hasValue(err) || (hasValue(tags) && tags.length > 0)) {
-            err = err || "tag is already favorite";
-            res.status(500).json(err);
-            // next(err);
-        }
-        else {
-            FavoriteTag.create({label, application: "tasky"}, () => {
-                res.send(201);
+    debug('Set a tag as favorite.');
+    FavoriteTag.byLabelForTasky(label, (err, tags) => {
+        if (hasValue(err) || (hasValue(tags) && tags.length > 0)) {
+            const error = err || 'tag is already favorite';
+            next(error);
+        } else {
+            debug('Persist the tag as "favorite"');
+            const payload = {label, application: 'tasky'};
+            FavoriteTag.create(payload, (error) => {
+                if (hasValue(error)) {
+                    next(error);
+                } else {
+                    res.status(201).json(payload);
+                }
             });
         }
     });
 }
 
-function remove(req, res, next) {
+export function remove(req, res) {
+    const {label} = req.body;
 
-    const label = req.body.label;
-
-    FavoriteTag.ByLabelForTasky(label, (err, tags) => {
-        if(hasValue(err) || (hasValue(tags) && tags.length > 0)) {
-            err = err || "tag is not favorite";
-            res.status(500).json(err);
-            // next(err);
-        }
-        else {
+    debug('Unset a tag as favorite.');
+    FavoriteTag.byLabelForTasky(label, (err, tags) => {
+        if (hasValue(err) || (hasValue(tags) && tags.length > 0)) {
+            const error = new Error(err || 'tag is not favorite');
+            next(error);
+        } else {
+            debug('Remove the document.');
             async.eachSeries(tags, (tag, done) => {
                 tag.destroy(done);
-            }, () => {
-                res.send(204);
+            }, (err2) => {
+                if (hasValue(err2)) {
+                    const error = new Error(err2);
+                    next(error);
+                } else {
+                    res.status(204).send();
+                }
             });
         }
     });
 }
-
-export {create, remove};

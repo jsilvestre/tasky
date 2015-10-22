@@ -1,82 +1,73 @@
-"use strict";
+import hasValue from '../hasValue';
+import reindexer from '../lib/reindexer';
+import Task from '../models/tasky';
 
-import * as Task from "../models/tasky";
-import * as reindexer from "../lib/reindexer";
-import * as hasValue from "../hasValue";
-
-function reindexationMiddleware(req, res, next) {
-    if(reindexer.isReindexing()) {
-        res.status(400).send({error: "reindexation is occuring, retry later"});
-        // next(err);
-    }
-    else {
+export function reindexationMiddleware(req, res, next) {
+    if (reindexer.isReindexing()) {
+        const error = new Error('reindexation is occuring, retry later');
+        error.status = 400;
+        next(error);
+    } else {
         next();
     }
 }
 
-function create(req, res, next) {
+export function create(req, res, next) {
     Task.create(req.body, (err, task) => {
-        if(hasValue(err)) {
-            res.status(500).json({
-                error: `An error occured while creating a task -- ${err}`
-            });
-        }
-        else {
+        if (hasValue(err)) {
+            const message =  `An error occured while creating a task -- ${err}`;
+            const error = new Error(message);
+            next(error);
+        } else {
             res.status(201).json(task);
         }
     });
 }
 
-function fetch(req, res, next, id) {
+export function fetch(req, res, next, id) {
     Task.find(id, (err, task) => {
-        if(hasValue(err) || !hasValue(task)) {
-            res.status(404).json({error: "Task not found"});
-            // next(error);
-        }
-        else {
+        if (hasValue(err) || !hasValue(task)) {
+            const error = new Error('Task not found');
+            error.status = 404;
+            next(error);
+        } else {
             req.task = task;
             next();
         }
     });
 }
 
-function update(req, res, next) {
+export function update(req, res, next) {
     req.task.updateAttributes(req.body, (err, task) => {
-        if(hasValue(err)) {
-            res.status(500).json({
-                error: `An error occured while updating a task -- ${err}`
-            });
-            // next(err);
-        }
-        else {
+        if (hasValue(err)) {
+            const message = `An error occured while updating a task -- ${err}`;
+            const error = new Error(message);
+            next(error);
+        } else {
             res.status(200).json(task);
         }
     });
 }
 
-function remove(req, res) {
+export function remove(req, res) {
     req.task.destroy((err) => {
-        if(hasValue(err)) {
-            res.status(500).json({
-                error: `An error occured while deleting a task -- ${err}`
-            });
-            // next(err);
-        }
-        else {
+        if (hasValue(err)) {
+            const message = `An error occured while deleting a task -- ${err}`;
+            const error = new Error(message);
+            next(error);
+        } else {
             res.send(204);
         }
     });
 }
 
-function reindex(req, res) {
+export function reindex(req, res) {
     reindexer.reindex((err, tasks) => {
-        if(hasValue(err)) {
-            res.status(500).json({error: err});
-        }
-        else {
+        if (hasValue(err)) {
+            const error = new Error(err);
+            next(error);
+        } else {
             res.status(200).json(tasks);
         }
     });
 }
-
-export {reindexationMiddleware, create, fetch, update, remove, reindex};

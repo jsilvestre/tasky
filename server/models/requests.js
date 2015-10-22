@@ -1,18 +1,18 @@
-# See documentation on https://github.com/frankrousseau/americano-cozy/#requests
+import americano from 'americano';
 
-americano = require 'americano'
+export default {
+    tasky: {
+        all: americano.defaultRequests.all,
+        byArchiveState: americano.defaultRequests.by('isArchived'),
+        byOrder: (doc) => {
+            if (!doc.isArchived) {
+                emit(doc.order, doc);
+            }
+        },
+    },
 
-module.exports =
-    tasky:
-        all: americano.defaultRequests.all
-        byArchiveState: (doc) -> emit doc.isArchived, doc
-        byOrder: (doc) ->
-            unless doc.isArchived
-                emit doc.order, doc
-
-    cozy_instance:
-        all: americano.defaultRequests.all
-
-    favorite_tag:
-        allByApp: (doc) -> emit doc.application, doc
-        byAppByLabel: (doc) -> emit [doc.application, doc.label], doc
+    favorite_tag: {
+        allByApp: americano.defaultRequests.by('application'),
+        byAppByLabel: (doc) => emit([doc.application, doc.label], doc),
+    },
+};
