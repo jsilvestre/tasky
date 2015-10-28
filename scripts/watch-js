@@ -19,4 +19,6 @@
     -x immutable \
     -x reselect \
     -x redux-thunk \
-    -x redux-logger
+    -x redux-logger \
+    -x debug \
+    -x invariant

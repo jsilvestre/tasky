@@ -14,4 +14,6 @@ node_modules/.bin/browserify --debug \
     -r reselect \
     -r redux-thunk \
     -r redux-logger \
+    -r debug \
+    -r invariant \
     > client/public/scripts/bundle-vendors.js
