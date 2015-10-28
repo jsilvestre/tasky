@@ -7,7 +7,7 @@ import path from 'path';
 const builtViewPath = path.resolve(__dirname, '../client/index.js');
 const viewEngine = fs.existsSync(builtViewPath) ? 'js' : 'jade';
 
-export const config = {
+export default {
     common: {
         use: [
             americano.bodyParser(),
@@ -24,7 +24,7 @@ export const config = {
         },
 
         engine: {
-            // Allows res.render of .js files (pre-rendered jade)
+            // Allow res.render of .js files (pre-rendered jade)
             js: (filePath, locals, callback) => {
                 callback(null, require(filePath)(locals));
             },

@@ -16,6 +16,6 @@ export const boot = function boot(callback) {
  If it's not loaded from another module (i.e. not loaded from tests), it's
  executed so the application actually starts.
 */
-if(!module.parent) {
+if (!module.parent) {
     boot();
 }

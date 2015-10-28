@@ -5,10 +5,12 @@ import hasValue from '../hasValue';
 
 const debug = logger('app:model:favorite_tag');
 
-export const FavoriteTag = cozydb.getModel('FavoriteTag', {
+const FavoriteTag = cozydb.getModel('FavoriteTag', {
     'label': String,
     'application': String,
 });
+
+export default FavoriteTag;
 
 FavoriteTag.allForTasky = (callback) => {
     invariant(hasValue(callback), '`callback` is a mandatory parameter');

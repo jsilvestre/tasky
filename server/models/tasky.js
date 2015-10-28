@@ -5,7 +5,7 @@ import hasValue from '../hasValue';
 
 const debug = logger('app:model:tasky');
 
-export const Task = cozydb.getModel('Tasky', {
+const Task = cozydb.getModel('Tasky', {
     'done': {
         default: false,
         type: Boolean,
@@ -26,6 +26,8 @@ export const Task = cozydb.getModel('Tasky', {
         type: Boolean,
     },
 });
+
+export default Task;
 
 Task.all = (callback) => {
     invariant(hasValue(callback), '`callback` is a mandatory parameter');

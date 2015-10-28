@@ -17,7 +17,7 @@ export default {
 
     'tasks/:taskID': {
         put: [tasks.reindexationMiddleware, tasks.update],
-        delete: tasks.delete,
+        delete: tasks.remove,
     },
 
     'tasks/reindex': {
@@ -26,6 +26,6 @@ export default {
 
     'tags': {
         post: tags.create,
-        delete: tags.delete,
+        delete: tags.remove,
     },
 };
