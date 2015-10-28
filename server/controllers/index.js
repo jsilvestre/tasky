@@ -17,6 +17,7 @@ export function main(req, res, next) {
         locale: (done) => { cozydb.api.getCozyLocale(done); },
         favoriteTags: (done) => { FavoriteTag.allForTasky(done); },
     }, (err, results) => {
+        debug('Data have been retrieved.');
         if (hasValue(err)) {
             next(err);
         } else {

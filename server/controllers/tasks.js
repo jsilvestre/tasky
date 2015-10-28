@@ -1,9 +1,9 @@
 import hasValue from '../hasValue';
-import reindexer from '../lib/reindexer';
+import {isReindexing, processIndexation} from '../lib/reindexer';
 import Task from '../models/tasky';
 
 export function reindexationMiddleware(req, res, next) {
-    if (reindexer.isReindexing()) {
+    if (isReindexing()) {
         const error = new Error('reindexation is occuring, retry later');
         error.status = 400;
         next(error);
@@ -62,7 +62,7 @@ export function remove(req, res) {
 }
 
 export function reindex(req, res) {
-    reindexer.reindex((err, tasks) => {
+    processIndexation((err, tasks) => {
         if (hasValue(err)) {
             const error = new Error(err);
             next(error);

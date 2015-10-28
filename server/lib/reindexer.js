@@ -13,7 +13,7 @@ export function isReindexing() {
     return flagReindexing;
 }
 
-export function reindex(callback) {
+export function processIndexation(callback) {
     invariant(hasValue(callback), '`callback` is a mandatory parameter');
     invariant(typeof callback === 'function', '`callback` must be a function');
 
