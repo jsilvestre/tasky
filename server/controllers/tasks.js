@@ -56,7 +56,7 @@ export function remove(req, res) {
             const error = new Error(message);
             next(error);
         } else {
-            res.send(204);
+            res.sendStatus(204);
         }
     });
 }
