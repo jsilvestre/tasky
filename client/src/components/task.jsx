@@ -74,20 +74,23 @@ export default React.createClass({
     },
 
     createNewTask() {
-        // If the task already exist, we want to create an empty one.
-        const content =
-            hasValue(this.props.task) ? null : this.state.inputValue;
+        // If the task already exist, create an empty one.
+        const content = hasValue(this.props.task) ?
+                        this.props.defaultValue : this.state.inputValue;
 
-        this.props.newTaskHandler(content);
+        // Only create the new task if there is a content.
+        if (content.length > 0 || this.props.defaultValue.length === 0) {
+            this.props.newTaskHandler(content);
 
-        // Resets the form field if it's a form.
-        if (!hasValue(this.props.task)) {
-            this.setState({inputValue: ''});
-        }
+            // Reset the form field if it's a form.
+            if (!hasValue(this.props.task)) {
+                this.setState({inputValue: ''});
+            }
 
-        // Moves the focus to the newly created task if it's not the form.
-        if (hasValue(this.props.task)) {
-            this.props.setFocusHandler(this.props.index + 1);
+            // Move the focus to the newly created task if it's not the form.
+            if (hasValue(this.props.task)) {
+                this.props.setFocusHandler(this.props.index + 1);
+            }
         }
     },
 
