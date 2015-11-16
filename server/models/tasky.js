@@ -18,9 +18,17 @@ const Task = cozydb.getModel('Tasky', {
         default: null,
         type: Date,
     },
-    'description': String,
-    'order': Number,
-    'tags': { type: JSON },
+    'description': {
+        default: '',
+        type: String,
+    },
+    'order': {
+        type: Number,
+    },
+    'tags': {
+        default: [],
+        type: [String],
+    },
     'isArchived': {
         default: false,
         type: Boolean,
