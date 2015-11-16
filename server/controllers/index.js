@@ -17,8 +17,9 @@ export function main(req, res, next) {
         locale: (done) => { cozydb.api.getCozyLocale(done); },
         favoriteTags: (done) => { FavoriteTag.allForTasky(done); },
     }, (err, results) => {
-        debug('Data have been retrieved.');
         if (hasValue(err)) {
+            debug('Some data have not been retrieved due to an unexpected ' +
+                  'error.');
             next(err);
         } else {
             invariant(hasValue(results.tasks), '`tasks` is a mandatory ' +
@@ -29,6 +30,7 @@ export function main(req, res, next) {
                                                 'property');
             invariant(hasValue(results.favoriteTags), '`favoriteTags` is a ' +
                                                       'mandatory property');
+            debug('Data have been retrieved.');
 
             let {tasks, archivedTasks} = results;
             const {locale, favoriteTags} = results;
