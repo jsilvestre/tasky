@@ -32,7 +32,7 @@ export default React.createClass({
         const count = this.props.tag.count;
         const doneCount = this.props.tag.doneCount;
         const todoCount = count - doneCount;
-        const showDifference = todoCount !== count && todoCount !== 0;
+        const showDifference = todoCount !== count;
 
         return showDifference ? `${todoCount} / ${count}` : count;
     },
