@@ -61,27 +61,6 @@ const Application = React.createClass({
 
     },
 
-    /*
-    getStateFromStores() {
-        const selectedTags = TagStore.getSelected();
-        const tasks = TaskStore.getByTags(selectedTags);
-
-        return {
-            tasks: tasks,
-            selectedTags: selectedTags,
-            tagTree: TagStore.getTree(),
-            sortCriterion: TagStore.getSortCriterion(),
-            isArchivedMode: TaskStore.isArchivedMode(),
-            untaggedTasks: TaskStore.getUntagged(),
-            numTasks: TaskStore.getNumTasks(),
-            numArchivedTasks: TaskStore.getNumArchivedTasks(),
-            searchQuery: TaskStore.getSearchQuery(),
-            tasksDone: tasks.filter(task => task.done),
-            isReindexing: TaskStore.isReindexing(),
-            favoriteSearch: TagStore.getFavoriteSearch()
-        };
-    },*/
-
     openMenu() {
         const isMenuOpen = !this.state.isMenuOpen;
         this.setState({isMenuOpen: isMenuOpen});
