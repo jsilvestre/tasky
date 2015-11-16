@@ -78,8 +78,12 @@ export default React.createClass({
         const content = hasValue(this.props.task) ?
                         this.props.defaultValue : this.state.inputValue;
 
-        // Only create the new task if there is a content.
-        if (content.length > 0 || this.props.defaultValue.length === 0) {
+        // Only create the new task if there is a content or if the default
+        // content is empty and it's not a form.
+        const hasContent = content.length > 0;
+        const emptyDefaultContent = this.props.defaultValue.length === 0;
+        const isNewTaskForm = this.isNewTaskForm();
+        if (hasContent || (emptyDefaultContent && !isNewTaskForm)) {
             this.props.newTaskHandler(content);
 
             // Reset the form field if it's a form.
