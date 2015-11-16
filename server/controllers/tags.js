@@ -5,7 +5,7 @@ import hasValue from '../hasValue';
 
 const debug = logger('app:controller:tags');
 
-export function create(req, res) {
+export function create(req, res, next) {
     const {label} = req.body;
 
     debug('Set a tag as favorite.');
@@ -14,7 +14,7 @@ export function create(req, res) {
             const error = err || 'tag is already favorite';
             next(error);
         } else {
-            debug('Persist the tag as "favorite"');
+            debug(`Persist the tag "${label}" as favorite.`);
             const payload = {label, application: 'tasky'};
             FavoriteTag.create(payload, (error) => {
                 if (hasValue(error)) {
@@ -27,12 +27,12 @@ export function create(req, res) {
     });
 }
 
-export function remove(req, res) {
+export function remove(req, res, next) {
     const {label} = req.body;
 
     debug('Unset a tag as favorite.');
     FavoriteTag.byLabelForTasky(label, (err, tags) => {
-        if (hasValue(err) || (hasValue(tags) && tags.length > 0)) {
+        if (hasValue(err) || (hasValue(tags) && tags.length === 0)) {
             const error = new Error(err || 'tag is not favorite');
             next(error);
         } else {
