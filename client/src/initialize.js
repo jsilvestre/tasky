@@ -1,26 +1,29 @@
-"use strict";
+import logger from 'debug';
+const debug = logger('app:init');
 
-window.onload = function() {
+window.onload = () => {
+    debug('`onload` event fired.');
+    debug('Initialize application.');
 
-    window.__DEV__ = true;
-
+    debug('Get localization strings based on given locale.');
     const locale = window.locale;
     delete window.locale;
 
     const localesLoader = {
-        en: require("./locales/en"),
-        fr: require("./locales/fr")
+        en: require('./locales/en'),
+        fr: require('./locales/fr'),
     };
 
     let locales = localesLoader[locale];
 
-    // Fallback to english if it can't for some reason.
-    if(!locales) {
+    if (!locales) {
+        debug(`Localized strings could not be found for locale ${locale}, `
+              `using EN locale instead.`);
         locales = localesLoader.en;
     }
 
     // Initialize polyglot object with locales.
-    const Polyglot = require("node-polyglot");
+    const Polyglot = require('node-polyglot');
     const polyglot = new Polyglot({locale: locale});
 
     polyglot.extend(locales);
@@ -28,16 +31,9 @@ window.onload = function() {
     // Handy shortcut.
     window.t = polyglot.t.bind(polyglot);
 
-    // Initialize stores.
-    const TaskStore = require("./stores/TaskStore");
-    const TagStore = require("./stores/TagStore");
-
-    // Initialize the routing and start the app.
-    const router = require("./router");
+    debug('Initialize router and start application.');
+    const router = require('./router');
     router.start();
 
-    // Make this object immuable.
-    if(typeof Object.freeze === "function") {
-        Object.freeze(this);
-    }
+    debug('Application initialized.');
 };

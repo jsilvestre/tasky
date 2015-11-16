@@ -1,17 +1,17 @@
-"use strict";
+import styler from 'classnames';
+import hasValue from '../utils/hasValue';
+import React from 'react/addons';
 
-import * as React from "react/addons";
-import * as styler from "classnames";
-
-export const BreadcrumbItem = React.createClass({
-    displayName: "BreadcrumbItem",
+export default React.createClass({
+    displayName: 'BreadcrumbItem',
 
     propTypes: {
-        key: React.PropTypes.string.isRequired,
+        key: React.PropTypes.string,
+        label: React.PropTypes.string,
         removeHandler: React.PropTypes.func.isRequired,
         tag: React.PropTypes.object,
-        toggleModeHandler: React.PropTypes.func.isRequired,
-        type: React.PropTypes.string.isRequired
+        toggleModeHandler: React.PropTypes.func,
+        type: React.PropTypes.string.isRequired,
     },
 
     getInitialState() {
@@ -32,22 +32,22 @@ export const BreadcrumbItem = React.createClass({
     },
 
     render() {
-        const isTag = this.props.type === "tag";
+        const isTag = this.props.type === 'tag';
 
-        const isExcluded = this.props.tag !== null &&
+        const isExcluded = hasValue(this.props.tag) &&
+                           this.props.tag !== null &&
                            this.props.tag.isExcluded;
 
         const classes = styler({
-            "breadcrumb-item": true,
-            "excluded": isExcluded,
-            "notice-delete-action": this.state.removeHovered
+            'breadcrumb-item': true,
+            'excluded': isExcluded,
+            'notice-delete-action': this.state.removeHovered,
         });
 
         let value;
-        if(!isTag) {
-            value = "\"#{this.props.label}\"";
-        }
-        else {
+        if (!isTag) {
+            value = `"${this.props.label}"`;
+        } else {
             value = this.props.tag.label;
         }
 
@@ -58,8 +58,8 @@ export const BreadcrumbItem = React.createClass({
                 <span>{value}</span>
                 <a onClick={this.onClick}
                     onMouseOut={this.onMouseOut}
-                    onMouseOver={this.onMouseOver}>"×"</a>
+                    onMouseOver={this.onMouseOver}>×</a>
             </div>
         );
-    }
+    },
 });

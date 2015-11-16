@@ -1,64 +1,67 @@
-"use strict";
+import {ActionTypes} from '../constants/AppConstants';
+import * as XHRUtils from '../utils/XHRUtils';
 
-import * as AppDispatcher from "../AppDispatcher";
-import * as TagStore from "../stores/TagStore";
-import {ActionTypes} from "../constants/AppConstants";
-import * as XHRUtils from "../utils/XHRUtils";
-
+export const SELECT_TAGS = 'SELECT_TAGS';
 export function selectTags(tags) {
-    AppDispatcher.handleViewAction({
+    return {
         type: ActionTypes.SELECT_TAGS,
-        value: tags
-    });
+        value: tags,
+    };
 }
 
+export const SELECT_SORT_CRITERION = 'SELECT_SORT_CRITERION';
 export function selectSortCriterion(criterion) {
-    AppDispatcher.handleViewAction({
+    localStorage.setItem('sort-criterion', criterion);
+
+    return {
         type: ActionTypes.SELECT_SORT_CRITERION,
-        value: criterion
-    });
-
-    localStorage.setItem("sort-criterion", criterion);
+        value: criterion,
+    };
 }
 
+export const TOGGLE_FAVORITE_TAG = 'TOGGLE_FAVORITE_TAG';
 export function toggleFavorite(label) {
+    return (dispatch, getState) => {
+        const favoriteTags = getState().favoriteTags;
 
-    const favoriteTags = TagStore.getFavoriteTags();
-    // fav the tag
-    if(favoriteTags.indexOf(label) === -1) {
-        AppDispatcher.handleViewAction({
-            type: ActionTypes.TOGGLE_FAVORITE_TAG,
-            value: label
-        });
+        // fav the tag
+        if (favoriteTags.indexOf(label) === -1) {
+            dispatch({
+                type: ActionTypes.TOGGLE_FAVORITE_TAG,
+                value: label,
+            });
 
-        XHRUtils.markTagAsFavorite(label, function() {});
-    }
-    // unfav the tag
-    else {
-        AppDispatcher.handleViewAction({
-            type: ActionTypes.TOGGLE_FAVORITE_TAG,
-            value: label
-        });
+            XHRUtils.markTagAsFavorite(label, () => {});
+        } else { // unfav the tag
+            dispatch({
+                type: ActionTypes.TOGGLE_FAVORITE_TAG,
+                value: label,
+            });
 
-        XHRUtils.unmarkTagAsFavorite(label, function() {});
-    }
+            XHRUtils.unmarkTagAsFavorite(label, () => {});
+        }
+    };
 }
 
+export const MARK_SEARCH_AS_FAVORITE = 'MARK_SEARCH_AS_FAVORITE';
 export function markCurrentSearchAsFavorite() {
-    const selectedTags = TagStore.getSelected();
-    const currentFavoriteSearch = TagStore.getFavoriteSearch();
-    let markAsFavorite;
-    if(JSON.stringify(selectedTags) === JSON.stringify(currentFavoriteSearch)) {
-        markAsFavorite = null;
-    }
-    else {
-        markAsFavorite = selectedTags;
-    }
+    return (dispatch, getState) => {
+        const {selectedTags, favoriteSearch} = getState();
 
-    AppDispatcher.handleViewAction({
-        type: ActionTypes.MARK_SEARCH_AS_FAVORITE,
-        value: markAsFavorite
-    });
+        let markAsFavorite;
+        const serializedSelectedTags = JSON.stringify(selectedTags);
+        const serializedFavoriteSearch = JSON.stringify(favoriteSearch);
+        if (serializedSelectedTags === serializedFavoriteSearch) {
+            markAsFavorite = null;
+        } else {
+            markAsFavorite = selectedTags;
+        }
 
-    XHRUtils.markSearchAsFavorite(markAsFavorite);
+        dispatch({
+            type: ActionTypes.MARK_SEARCH_AS_FAVORITE,
+            value: markAsFavorite,
+        });
+
+        XHRUtils.markSearchAsFavorite(markAsFavorite);
+    };
 }

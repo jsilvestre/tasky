@@ -1,26 +1,25 @@
-"use strict";
+import * as React from 'react/addons';
 
-import * as React from "react/addons";
-
-export const ToggleCheckbox = React.createClass({
-    displayName: "ToogleCheckbox",
+export default React.createClass({
+    displayName: 'ToogleCheckbox',
 
     propTypes: {
-        checked: React.PropTypes.bool.isRequired,
-        onChange: React.PropTypes.func.isRequired
+        id: React.PropTypes.number.isRequired,
+        isChecked: React.PropTypes.bool.isRequired,
+        onToggle: React.PropTypes.func.isRequired,
     },
 
     render() {
-        const id = "checkbox-#{this.props.id}";
+        const id = `checkbox-${this.props.id}`;
 
         return (
             <div role="checkbox">
-                <input checked={this.props.checked}
+                <input checked={this.props.isChecked}
                     id={id}
-                    onChange={this.props.onChange}
+                    onChange={this.props.onToggle}
                     type="checkbox" />
                 <label htmlFor={id}></label>
             </div>
         );
-    }
+    },
 });

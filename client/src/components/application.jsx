@@ -1,37 +1,52 @@
-"use strict";
+import styler from 'classnames';
+import * as React from 'react/addons';
+import { connect } from 'react-redux';
+import * as _ from 'underscore';
 
-import * as React from "react/addons";
-import * as Router from "react-router";
-import * as styler from "classnames";
+import {
+    visibleTasksSelector,
+    visibleTasksDoneSelector
+} from '../selectors/TaskSelectors';
 
-import * as MenuComponent from "./menu";
-import * as TaskListComponent from "./task-list";
+import {
+    treeSelector
+} from '../selectors/TagSelectors';
 
-import * as TaskStore from "../stores/TaskStore";
-import * as TagStore from "../stores/TagStore";
+import Menu from './menu';
+import TaskList from './task-list';
 
-import * as createStoreWatcher from "../mixins/store_watch_mixin";
+import {SortCriterions} from '../constants/AppConstants';
 
-const Menu = React.createFactory(MenuComponent);
-const TaskList = React.createFactory(TaskListComponent);
+const SortCriterionsValue = Object.keys(SortCriterions)
+                            .map(criterion => SortCriterions[criterion]);
 
-export const Application = React.createClass({
-    displayName: "Application",
+const Application = React.createClass({
+    displayName: 'Application',
 
-    mixins: [
-        createStoreWatcher([TagStore, TaskStore]),
-        Router.State,
-        Router.Navigation
-    ],
+    propTypes: {
+        dispatch: React.PropTypes.func.isRequired,
+        favoriteSearch: React.PropTypes.array,
+        isArchivedModeEnabled: React.PropTypes.bool.isRequired,
+        numArchivedTasks: React.PropTypes.number.isRequired,
+        numTasks: React.PropTypes.number.isRequired,
+        searchQuery: React.PropTypes.string,
+        selectedTags: React.PropTypes.array,
+        sortCriterion: React.PropTypes.oneOf(SortCriterionsValue).isRequired,
+        tasks: React.PropTypes.array.isRequired,
+        tasksDone: React.PropTypes.array.isRequired,
+        tree: React.PropTypes.array.isRequired,
+        untaggedTasks: React.PropTypes.array.isRequired,
+    },
 
     getInitialState() {
-        return {isMenuOpen: false};
+        return { isMenuOpen: false };
     },
 
     // Executed only once at startup.
     componentWillMount() {
         // Go to favorite search unless there is no or the user didn't load the
         // home page.
+        /*
         const favoriteSearch = TagStore.getFavoriteSearch();
         if(this.isActive("main") &&
             favoriteSearch !== null &&
@@ -42,10 +57,11 @@ export const Application = React.createClass({
             });
 
             this.replaceWith("todoByTags", {splat: url.join("/")});
-        }
+        }*/
 
     },
 
+    /*
     getStateFromStores() {
         const selectedTags = TagStore.getSelected();
         const tasks = TaskStore.getByTags(selectedTags);
@@ -64,7 +80,7 @@ export const Application = React.createClass({
             isReindexing: TaskStore.isReindexing(),
             favoriteSearch: TagStore.getFavoriteSearch()
         };
-    },
+    },*/
 
     openMenu() {
         const isMenuOpen = !this.state.isMenuOpen;
@@ -73,11 +89,11 @@ export const Application = React.createClass({
 
     render() {
         const styles = styler({
-            "menuOpen": this.state.isMenuOpen
+            'menuOpen': this.state.isMenuOpen,
         });
 
         let reindexerBlock;
-        if(this.state.isReindexing) {
+        if (this.state.isReindexing) {
             reindexerBlock = (
                 <div>
                     <div id="block"></div>
@@ -91,26 +107,46 @@ export const Application = React.createClass({
         return (
             <div className={styles} role="application">
                 <Menu
-                    isArchivedMode={this.state.isArchivedMode}
-                    numArchivedTasks={this.state.numArchivedTasks}
-                    numTasks={this.state.numTasks}
+                    dispatch={this.props.dispatch}
+                    isArchivedModeEnabled={this.props.isArchivedModeEnabled}
+                    numArchivedTasks={this.props.numArchivedTasks}
+                    numTasks={this.props.numTasks}
                     onOpenMenu={this.openMenu}
-                    selectedTags={this.state.selectedTags}
-                    sortCriterion={this.state.sortCriterion}
-                    tree={this.state.tagTree}
-                    untaggedTasks={this.state.untaggedTasks} />
+                    selectedTags={this.props.selectedTags}
+                    sortCriterion={this.props.sortCriterion}
+                    tree={this.props.tree}
+                    untaggedTasks={this.props.untaggedTasks} />
                 <div className="container">
                     <TaskList
-                        favoriteSearch={this.state.favoriteSearch}
-                        isArchivedMode={this.state.isArchivedMode}
+                        dispatch={this.props.dispatch}
+                        favoriteSearch={this.props.favoriteSearch}
+                        isArchivedModeEnabled={this.props.isArchivedModeEnabled}
                         onOpenMenu={this.openMenu}
-                        searchQuery={this.state.searchQuery}
-                        selectedTags={this.state.selectedTags}
-                        tasks={this.state.tasks}
-                        tasksDone={this.state.tasksDone} />
+                        searchQuery={this.props.searchQuery}
+                        selectedTags={this.props.selectedTags}
+                        tasks={this.props.tasks}
+                        tasksDone={this.props.tasksDone} />
                 </div>
                 {reindexerBlock}
             </div>
         );
-    }
+    },
 });
+
+function mapStateToProps(state) {
+    return _.extend(
+        {},
+        state,
+        {
+            numTasks: state.tasks.length,
+            numArchivedTasks: state.archivedTasks.length,
+        },
+        visibleTasksSelector(state),
+        visibleTasksDoneSelector(state),
+        {
+            tree: treeSelector(state),
+        }
+    );
+}
+
+export default connect(mapStateToProps)(Application);

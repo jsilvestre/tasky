@@ -1,34 +1,34 @@
-"use strict";
+import styler from 'classnames';
+import * as React from 'react/addons';
 
-import * as React from "react/addons";
-import * as styler from "classnames";
+import * as TaskActionCreator from '../actions/TaskActionCreator';
+import * as TagActionCreator from '../actions/TagActionCreator';
 
-import * as TaskActionCreator from "../actions/TaskActionCreator";
-import * as TagActionCreator from "../actions/TagActionCreator";
+export default React.createClass({
 
-export const ActionBar = React.createClass({
-
-    displayName: "Actionbar",
+    displayName: 'Actionbar',
 
     propTypes: {
-        favoriteSearch: React.PropTypes.array.isRequired,
-        selectedTags: React.PropTypes.array.isRequired,
-        tasksDone: React.PropTypes.array.isRequired
+        dispatch: React.PropTypes.func.isRequired,
+        favoriteSearch: React.PropTypes.array,
+        selectedTags: React.PropTypes.array,
+        tasksDone: React.PropTypes.array.isRequired,
     },
 
     onArchiveClicked() {
-        TaskActionCreator.archiveTasks(this.props.tasksDone);
+        const action = TaskActionCreator.archiveTasks(this.props.tasksDone);
+        this.props.dispatch(action);
     },
 
     onFavoriteClicked() {
-        TagActionCreator.markCurrentSearchAsFavorite();
+        const action = TagActionCreator.markCurrentSearchAsFavorite();
+        this.props.dispatch(action);
     },
 
     render() {
-
         const archiveStyles = styler({
-            "fa fa-archive": true,
-            "disable": this.props.tasksDone.length === 0
+            'fa fa-archive': true,
+            'disable': this.props.tasksDone.length === 0,
         });
 
         const serializedSelectedTags = JSON.stringify(this.props.selectedTags);
@@ -36,25 +36,25 @@ export const ActionBar = React.createClass({
             JSON.stringify(this.props.favoriteSearch);
 
         const favoriteStyles = styler({
-            "fa fa-star": true,
-            "is-favorite": serializedFavoriteSearch === serializedSelectedTags
+            'fa fa-star': true,
+            'is-favorite': serializedFavoriteSearch === serializedSelectedTags,
         });
 
         return (
             <div id="actions">
-                t("actions headline")
+                {t('actions headline')}
                 <i className={archiveStyles}
-                    onClick={this.onArchivedClicked}
+                    onClick={this.onArchiveClicked}
                     role="button"
-                    title={t("archive button title")} />
+                    title={t('archive button title')} />
                 <i className="fa fa-bookmark disable"
                     role="button"
-                    title={t("coming soon")} />
+                    title={t('coming soon')} />
                 <i className={favoriteStyles}
                     onClick={this.onFavoriteClicked}
                     role="button"
-                    title={t("favorite button title")} />
+                    title={t('favorite button title')} />
             </div>
         );
-    }
+    },
 });

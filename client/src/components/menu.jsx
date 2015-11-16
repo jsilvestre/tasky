@@ -1,49 +1,55 @@
-"use strict";
+import styler from 'classnames';
+import React from 'react/addons';
+import _ from 'underscore';
+import * as TagActionCreator from '../actions/TagActionCreator';
 
-import * as React from "react/addons";
-import * as styler from "classnames";
-import * as _ from "underscore";
+import hasValue from '../utils/hasValue';
 
-import * as hasValue from "../utils/hasValue";
+import {SortCriterions} from '../constants/AppConstants';
 
-import {SortCriterions} from "../constants/AppConstants";
-import * as TagActionCreator from "../actions/TagActionCreator";
-
-import * as MenuItemComponent from "./menu-item";
-const MenuItem = React.createFactory(MenuItemComponent);
+import MenuItem from './menu-item';
 
 const SortCriterionsValue = Object.keys(SortCriterions)
                             .map(criterion => SortCriterions[criterion]);
 
-export const Menu = React.createClass({
-    displayName: "Menu",
+export default React.createClass({
+    displayName: 'Menu',
 
     propTypes: {
-        isArchivedMode: React.PropTypes.bool.isRequired,
+        dispatch: React.PropTypes.func.isRequired,
+        isArchivedModeEnabled: React.PropTypes.bool.isRequired,
         numArchivedTasks: React.PropTypes.number.isRequired,
         numTasks: React.PropTypes.number.isRequired,
-        onOpenMenu: React.PropTypes.bool.isRequired,
-        selectedTags: React.PropTypes.bool.isRequired,
+        onOpenMenu: React.PropTypes.func.isRequired,
+        selectedTags: React.PropTypes.array,
         sortCriterion: React.PropTypes.oneOf(SortCriterionsValue).isRequired,
         tree: React.PropTypes.array.isRequired,
-        untaggedTasks: React.PropTypes.array.isRequired
+        untaggedTasks: React.PropTypes.array.isRequired,
+    },
+
+    onSelectCriterion(criterion, event) {
+        event.preventDefault();
+        this.props.dispatch(TagActionCreator.selectSortCriterion(criterion));
+    },
+
+    onFavorite(tag) {
+        this.props.dispatch(TagActionCreator.toggleFavorite(tag.label));
     },
 
     getMenuItem(tag, depth) {
         const label = tag.label;
 
         let selectedTagNames = null;
-        if(hasValue(this.props.selectedTags)) {
+        if (hasValue(this.props.selectedTags)) {
             selectedTagNames = this.props.selectedTags.map(item => item.label);
         }
 
         // If the tag is the selected tags path, then it has a submenu.
         let getSubmenuHandler = null;
-        if(hasValue(selectedTagNames) && selectedTagNames[depth] === label) {
+        if (hasValue(selectedTagNames) && selectedTagNames[depth] === label) {
             getSubmenuHandler = this.getSubmenu;
-        }
-        else {
-            getSubmenuHandler = function() {};
+        } else {
+            getSubmenuHandler = () => {};
         }
 
         let currentIndex = null;
@@ -59,7 +65,7 @@ export const Menu = React.createClass({
                        selectedTagNames.length === (depth + 1);
 
         let tagsInUrl = [];
-        if(hasValue(selectedTagNames)) {
+        if (hasValue(selectedTagNames)) {
             tagsInUrl = selectedTagNames.slice(0, depth);
         }
 
@@ -73,21 +79,20 @@ export const Menu = React.createClass({
             selectedTagNames.length === currentIndex + 1;
         const lastSelectedTags = currentIndex === depth;
 
-        if(!(inList || parentOfLastSelectedTags || lastSelectedTags)) {
+        if (inList && !(parentOfLastSelectedTags && lastSelectedTags)) {
             tagsInUrl.push(label);
         }
 
-        let prefix = "";
-        if(this.props.isArchivedMode) {
-            prefix = tagsInUrl.length > 0 ? "archivedByTags" : "archived";
-        }
-        else {
-            prefix = tagsInUrl.length > 0 ? "todoByTags" : "";
+        let prefix = '';
+        if (this.props.isArchivedModeEnabled) {
+            prefix = tagsInUrl.length > 0 ? 'archivedByTags' : 'archived';
+        } else {
+            prefix = tagsInUrl.length > 0 ? 'todoByTags' : '';
         }
 
         let url = `#${prefix}`;
-        if(tagsInUrl.length > 0) {
-            url = `#${prefix}/${tagsInUrl.join("/")}`;
+        if (tagsInUrl.length > 0) {
+            url = `#${prefix}/${tagsInUrl.join('/')}`;
         }
 
         return (
@@ -96,7 +101,8 @@ export const Menu = React.createClass({
                 getSubmenu={getSubmenuHandler}
                 isActive={isActive}
                 isSelected={isActive && isLeaf}
-                key="#{label}-#{depth}"
+                key={`${label}-${depth}`}
+                magic={false}
                 onFavorite={this.onFavorite.bind(this, tag)}
                 tag={tag}
                 url={url} />
@@ -105,11 +111,11 @@ export const Menu = React.createClass({
 
     getSortMenu() {
         const countClasses = styler({
-            "selected-sort": this.props.sortCriterion === SortCriterions.COUNT
+            'selected-sort': this.props.sortCriterion === SortCriterions.COUNT,
         });
 
         const sortClasses = styler({
-            "selected-sort": this.props.sortCriterion === SortCriterions.ALPHA
+            'selected-sort': this.props.sortCriterion === SortCriterions.ALPHA,
         });
 
         const selectCriterionAlpha =
@@ -123,30 +129,31 @@ export const Menu = React.createClass({
                 <li className={sortClasses}
                     onClick={selectCriterionAlpha}>
                     <a className="fa fa-sort-alpha-asc" href="#"
-                       title={t("sort numeric")}> </a>
+                       title={t('sort numeric')}> </a>
                 </li>
                 <li className={countClasses} onClick={selectCriterionCount}>
                     <a className="fa fa-sort-numeric-desc" href="#"
-                       title={t("sort alpha")} > </a>
+                       title={t('sort alpha')} > </a>
                 </li>
             </ul>
         );
     },
 
     getSubmenu(depth) {
-        const tags = this.props.tree[depth];
+        if (this.props.tree.length > 0) {
+            const tags = this.props.tree[depth];
+            let untaggedMenuItemBlock = null;
+            if (depth === 0 && this.props.untaggedTasks.length > 0) {
+                untaggedMenuItemBlock = this.getUntaggedMenuItem();
+            }
 
-        let untaggedMenuItemBlock = null;
-        if(depth === 0 && this.props.untaggedTasks.length > 0) {
-            untaggedMenuItemBlock = this.getUntaggedMenuItem();
+            return (
+                <ul className="submenu">
+                    {untaggedMenuItemBlock}
+                    {tags.map(tag => this.getMenuItem(tag, depth))}
+                </ul>
+            );
         }
-
-        return (
-            <ul className="submenu">
-                {untaggedMenuItemBlock}
-                {tags.map(tag => this.getMenuItem(tag, depth))}
-            </ul>
-        );
     },
 
     getUntaggedMenuItem() {
@@ -155,72 +162,51 @@ export const Menu = React.createClass({
                          this.props.selectedTags.length === 0;
 
         let url = null;
-        if(this.props.isArchivedMode) {
-            if(isActive) {
-                url = "#archived";
-            }
-            else {
-                url = "#archivedByTags/";
-            }
-        }
-        else {
-            if(isActive) {
-                url = "#";
-            }
-            else {
-                url = "#todoByTags/";
-            }
+        if (this.props.isArchivedModeEnabled) {
+            url = isActive ? '#archived' : '#archivedByTags/';
+        } else {
+            url = isActive ? '#' : '#todoByTags/';
         }
 
         return (
             <MenuItem
                 depth={0}
-                getSubmenu={function() {}}
+                getSubmenu={() => {}}
                 isActive={isActive}
                 isSelected={isActive}
                 key="untagged"
                 magic={true}
                 tag={
                     {
-                        label: t("untagged"),
+                        label: t('untagged'),
                         count: this.props.untaggedTasks.length,
                         doneCount: this.props.untaggedTasks
-                            .filter(task => task.done).length
+                            .filter(task => task.done).length,
                     }
                 }
                 url={url} />
         );
     },
 
-    onSelectCriterion(criterion, event) {
-        event.preventDefault();
-        TagActionCreator.selectSortCriterion(criterion);
-    },
-
-    onFavorite(tag) {
-        TagActionCreator.toggleFavorite(tag.label);
-    },
-
     render() {
         const archivedMenu = {
-            id: "archived",
-            link: "#archived",
-            label: t("archived"),
-            count: this.props.numArchivedTasks
+            id: 'archived',
+            link: '#archived',
+            label: t('archived'),
+            count: this.props.numArchivedTasks,
         };
 
         const todoMenu = {
-            id: "tobedone",
-            link: "#",
-            label: t("todo"),
-            count: this.props.numTasks
+            id: 'tobedone',
+            link: '#',
+            label: t('todo'),
+            count: this.props.numTasks,
         };
 
         let menu;
-        if(this.props.isArchivedMode) {
+        if (this.props.isArchivedModeEnabled) {
             menu = [todoMenu, archivedMenu];
-        }
-        else {
+        } else {
             menu = [archivedMenu, todoMenu];
         }
 
@@ -234,12 +220,12 @@ export const Menu = React.createClass({
                 <ul>
                     <li className="first-level" id={menu[0].id}>
                         <a href={menu[0].link}>
-                            `${menu[0].label} (${menu[0].count})`
+                            {`${menu[0].label} (${menu[0].count})`}
                         </a>
                     </li>
                     <li className="first-level active" id={menu[1].id}>
                         <a href={menu[1].link}>
-                            `${menu[1].label} (${menu[1].count})`
+                            {`${menu[1].label} (${menu[1].count})`}
                         </a>
                         {menuBlock}
                         {submenuBlock}
@@ -247,5 +233,5 @@ export const Menu = React.createClass({
                 </ul>
             </nav>
         );
-    }
+    },
 });

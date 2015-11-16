@@ -1,31 +1,29 @@
-"use strict";
+import React from 'react/addons';
+import { KeyboardKeys } from '../constants/AppConstants';
 
-import * as React from "react/addons";
-import KeyboardKeys from "../constants/AppConstants";
-
-export const AdjustableInput = React.createClass({
-    displayName: "AdjustableInput",
+export default React.createClass({
+    displayName: 'AdjustableInput',
 
     propTypes: {
         className: React.PropTypes.string.isRequired,
         id: React.PropTypes.string,
         onSubmitHandler: React.PropTypes.func.isRequired,
-        placeholder: React.PropTypes.string.isRequired
+        placeholder: React.PropTypes.string.isRequired,
     },
 
     getInitialState() {
-        return {width: 150, content: ""};
+        return {width: 150, content: ''};
     },
 
     componentDidUpdate() {
-        const node = this.refs["size-calculator"].getDOMNode();
+        const node = this.refs['size-calculator'].getDOMNode();
         const rects = node.getClientRects()[0];
-        if(rects !== null && rects !== void 0) {
+        if (rects !== null && rects !== void 0) {
             const width = node.getClientRects()[0].width;
             const notInitialState = this.state.content.length > 0
                               || this.state.width > 150;
 
-            if(this.state.width !== width && notInitialState) {
+            if (this.state.width !== width && notInitialState) {
                 this.setState({width: width});
             }
         }
@@ -33,7 +31,7 @@ export const AdjustableInput = React.createClass({
 
     onBlur() {
         const node = this.refs.input.getDOMNode();
-        if(node.value.length === 0) {
+        if (node.value.length === 0) {
             this.setState({width: 150});
         }
     },
@@ -46,9 +44,9 @@ export const AdjustableInput = React.createClass({
     onKeyUp(event) {
         const key = event.keyCode || event.charCode;
 
-        if(key === KeyboardKeys.ENTER) {
+        if (key === KeyboardKeys.ENTER) {
             this.props.onSubmitHandler(this.state.content);
-            this.setState({content: ""});
+            this.setState({content: ''});
         }
     },
 
@@ -61,12 +59,12 @@ export const AdjustableInput = React.createClass({
                     onKeyUp={this.onKeyUp}
                     placeholder={this.props.placeholder}
                     ref="input"
-                    style="width: #{this.state.width}"
+                    style={ { width: this.state.width } }
                     type="text"
                     value={this.state.content}/>
                 <span className="size-calculator"
                     ref="size-calculator">{this.state.content}</span>
             </span>
         );
-    }
+    },
 });

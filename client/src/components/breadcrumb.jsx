@@ -1,101 +1,74 @@
-"use strict";
+import React from 'react/addons';
 
-import * as React from "react/addons";
-import * as Router from "react-router";
+import BreadcrumbItem from './breadcrumb-item';
+import AdjustableInput from './adjustable-input';
+import hasValue from '../utils/hasValue';
 
-import * as BreadcrumbItemComponent from "./breadcrumb-item";
-import * as AdjustableInputComponent from "./adjustable-input";
 
-import * as hasValue from "../utils/hasValue";
-
-const BreadcrumbItem = React.createFactory(BreadcrumbItemComponent);
-const AdjustableInput = React.createFactory(AdjustableInputComponent);
-
-export const Breadcrumb = React.createClass({
-    displayName: "Breadcrumb",
+export default React.createClass({
+    displayName: 'Breadcrumb',
 
     propTypes: {
-        isArchivedMode: React.PropTypes.bool.isRequired,
-        onOpenMenu: React.PropTypes.bool.isRequired,
+        isArchivedModeEnabled: React.PropTypes.bool.isRequired,
+        onOpenMenu: React.PropTypes.func.isRequired,
         searchQuery: React.PropTypes.string,
-        selectedTags: React.PropTypes.array
+        selectedTags: React.PropTypes.array,
     },
-
-    mixins: [Router.Navigation],
 
     getInitialState() {
-        return {inputContent: ""};
+        return {inputContent: ''};
     },
 
-    buildUrl(tagsList, searchQuery) {
-        let formattedList = null;
+    onSubmit(newTagValue) {
+        let searchQuery = this.props.searchQuery;
+        let newTagsList = null;
 
-        if(hasValue(tagsList)) {
-            formattedList = tagsList
-                .map(tag => {
-                    return tag.isExcluded ? `!${tag.label}` : `${tag.label}`;
-                })
-                .join("/");
-        }
-        else {
-            formattedList = "";
+        if (hasValue(this.props.selectedTags)) {
+            newTagsList = this.props.selectedTags.slice(0);
         }
 
-        let query = "", prefix = "";
-        // If tags are selected.
-        if(hasValue(tagsList) && tagsList.length > 0) {
-            if(this.props.isArchivedMode) {
-                prefix = "archivedByTags";
-            }
-            else {
-                prefix = "todoByTags/";
-            }
+        // Tag or search query?
+        if (newTagValue.indexOf('#') === 0 || newTagValue.indexOf('!#') === 0) {
+            const isExcluded = newTagValue.indexOf('!') === 0;
 
-            if(hasValue(searchQuery)) {
-                query = `/;search/${searchQuery}`;
-            }
-        }
-        // If there is just a search query.
-        else if(hasValue(searchQuery)) {
-            prefix = "search/";
-            query = searchQuery;
-        }
+            // Removes tag and exclusion markers.
+            const sanitizedTagValue = newTagValue.replace(/[!#]*/, '');
 
-        // Nothing selected.
-        else {
-            if(this.props.isArchivedMode) {
-                prefix = "archived";
+            if (hasValue(newTagsList)) {
+                newTagsList.push({
+                    label: sanitizedTagValue,
+                    isExcluded,
+                });
+            } else {
+                newTagsList = [{
+                    label: sanitizedTagValue,
+                    isExcluded,
+                }];
             }
-            else {
-                prefix = "";
-            }
+        } else {
+            searchQuery = newTagValue;
         }
 
-        const location = `/${prefix}${formattedList}${query}`;
-        this.transitionTo(location);
+        this.buildUrl(newTagsList, searchQuery);
     },
 
     getTitle() {
-        let title = "";
+        let title = '';
 
-        if(!hasValue(this.props.selectedTags)) {
-            if(this.props.isArchivedMode) {
-                title = t("all archived tasks");
+        if (!hasValue(this.props.selectedTags)) {
+            if (this.props.isArchivedModeEnabled) {
+                title = t('all archived tasks');
+            } else {
+                title = t('all tasks');
             }
-            else {
-                title = t("all tasks");
-            }
-        }
-        else if (this.hasNoTagSelected()) {
-            title = t("untagged tasks");
-        }
-        else {
-            const option = {smart_count: this.props.selectedTags.length}; //eslint-disable-line camelcase, max-len
-            if(this.props.isArchivedMode) {
-                title = t("archived tasks of", option);
-            }
-            else {
-                title = t("tasks of", option);
+        } else if (this.hasNoTagSelected()) {
+            title = t('untagged tasks');
+        } else {
+            const option = {smart_count: this.props.selectedTags.length}; // eslint-disable-line camelcase, max-len
+            if (this.props.isArchivedModeEnabled) {
+                title = t('archived tasks of', option);
+            } else {
+                title = t('tasks of', option);
             }
         }
 
@@ -108,34 +81,101 @@ export const Breadcrumb = React.createClass({
                 this.props.selectedTags.length === 0);
     },
 
-    onSubmit(newTagValue) {
+    buildUrl(tagsList, searchQuery) {
+        let formattedList = null;
 
-        let searchQuery = this.props.searchQuery;
+        if (hasValue(tagsList)) {
+            formattedList = tagsList
+                .map(tag => {
+                    return tag.isExcluded ? `!${tag.label}` : `${tag.label}`;
+                })
+                .join('/');
+        } else {
+            formattedList = '';
+        }
+
+        let query = '';
+        let prefix = '';
+        // If tags are selected.
+        if (hasValue(tagsList) && tagsList.length > 0) {
+            if (this.props.isArchivedModeEnabled) {
+                prefix = 'archivedByTags';
+            } else {
+                prefix = 'todoByTags/';
+            }
+
+            if (hasValue(searchQuery)) {
+                query = `/;search/${searchQuery}`;
+            }
+        } else if (hasValue(searchQuery)) {
+            // If there is just a search query.
+            prefix = 'search/';
+            query = searchQuery;
+        } else {
+            // Nothing selected.
+            if (this.props.isArchivedModeEnabled) {
+                prefix = 'archived';
+            } else {
+                prefix = '';
+            }
+        }
+
+        const location = `/${prefix}${formattedList}${query}`;
+        window.location = window.router.createHref(location);
+    },
+
+    removeHandler(tag) {
         let newTagsList = null;
+        let searchQuery = null;
 
-        if(hasValue(this.props.selectedTags)) {
+        if (hasValue(this.props.selectedTags)) {
             newTagsList = this.props.selectedTags.slice(0);
         }
 
-        // Tag or search query?
-        if(newTagValue.indexOf("#") === 0 || newTagValue.indexOf("!#") === 0) {
-            const isExcluded = newTagValue.indexOf("!") === 0;
-
-            // Removes tag and exclusion markers.
-            newTagValue = newTagValue.replace(/[!#]*/, "");
-
-            if(hasValue(newTagsList)) {
-                newTagsList.push({label: newTagValue, isExcluded: isExcluded});
-            }
-            else {
-                newTagsList = [{label: newTagValue, isExcluded: isExcluded}];
-            }
-        }
-        else {
-            searchQuery = newTagValue;
+        if (hasValue(tag) && hasValue(newTagsList)) {
+            const index = newTagsList.indexOf(tag);
+            newTagsList.splice(index, 1);
+        } else {
+            searchQuery = null;
         }
 
         this.buildUrl(newTagsList, searchQuery);
+    },
+
+    toggleModeHandler(tag) {
+        let newTagsList = null;
+
+        if (hasValue(this.props.selectedTags)) {
+            newTagsList = this.props.selectedTags.slice(0);
+        }
+
+        if (hasValue(newTagsList)) {
+            const index = this.props.selectedTags.indexOf(tag);
+            newTagsList[index] = {
+                label: tag.label,
+                isExcluded: !tag.isExcluded,
+            };
+        }
+
+        this.buildUrl(newTagsList, this.props.searchQuery);
+    },
+
+    renderSearchInput() {
+        let translationKey = 'match criterion';
+
+        if (this.hasNoTagSelected()) {
+            translationKey = `${translationKey} no tag`;
+        } else {
+            translationKey = `${translationKey} with tag`;
+        }
+
+        return (
+            <BreadcrumbItem
+                key="search-query"
+                label={this.props.searchQuery}
+                removeHandler={this.removeHandler}
+                type="search" />
+        );
     },
 
     renderSelectedTags() {
@@ -151,84 +191,29 @@ export const Breadcrumb = React.createClass({
         });
     },
 
-    renderSearchInput() {
-        let translationKey = "match criterion";
-
-        if(this.hasNoTagSelected()) {
-            translationKey = `${translationKey} no tag`;
-        }
-        else {
-            translationKey = `${translationKey} with tag`;
-        }
-
-        return (
-            <BreadcrumbItem
-                key="search-query"
-                label={this.props.searchQuery}
-                removeHandler={this.removeHandler.bind(this)}
-                type="search" />
-        );
-    },
-
-    removeHandler(tag) {
-        let newTagsList, searchQuery = null;
-
-        if(hasValue(this.props.selectedTags)) {
-            newTagsList = this.props.selectedTags.slice(0);
-        }
-
-        if(hasValue(tag) && hasValue(newTagsList)) {
-            const index = newTagsList.indexOf(tag);
-            newTagsList.splice(index, 1);
-        }
-        else {
-            searchQuery = null;
-        }
-
-        this.buildUrl(newTagsList, searchQuery);
-    },
-
-    toggleModeHandler(tag) {
-        let newTagsList = null;
-
-        if(hasValue(this.props.selectedTags)) {
-            newTagsList = this.props.selectedTags.slice(0);
-        }
-
-        if(hasValue(newTagsList)) {
-            const index = this.props.selectedTags.indexOf(tag);
-            newTagsList[index] = {
-                label: tag.label,
-                isExcluded: !tag.isExcluded
-            };
-        }
-
-        this.buildUrl(newTagsList, this.props.searchQuery);
-    },
-
     render() {
         const title = this.getTitle();
 
         let selectedTagsBlock = null;
-        if(hasValue(this.props.selectedTags)) {
+        if (hasValue(this.props.selectedTags)) {
             selectedTagsBlock = this.renderSelectedTags();
         }
 
         let searchQueryBlock = null;
-        if(hasValue(this.props.searchQuery)) {
+        if (hasValue(this.props.searchQuery)) {
             searchQueryBlock = this.renderSearchInput();
         }
 
         let inputBlock = null;
         const shouldRenderInput = !hasValue(this.props.selectedTags) ||
             (hasValue(this.props.selectedTags) && !this.hasNoTagSelected());
-        if(shouldRenderInput) {
+        if (shouldRenderInput) {
             inputBlock = (
                 <AdjustableInput
                     className="add-tag"
                     id="add-tag-form"
                     onSubmitHandler={this.onSubmit}
-                    placeholder={t("search tag input")} />
+                    placeholder={t('search tag input')} />
             );
         }
 
@@ -241,5 +226,5 @@ export const Breadcrumb = React.createClass({
                 {inputBlock}
             </h1>
         );
-    }
+    },
 });

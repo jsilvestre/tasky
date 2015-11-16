@@ -1,27 +1,31 @@
-"use strict";
+import styler from 'classnames';
+import React from 'react/addons';
 
-import * as React from "react/addons";
-import * as styler from "classnames";
+import hasValue from '../utils/hasValue';
 
-import * as hasValue from "../utils/hasValue";
-
-export const MenuItem = React.createClass({
-    displayName: "MenuItem",
+export default React.createClass({
+    displayName: 'MenuItem',
 
     propTypes: {
         depth: React.PropTypes.number.isRequired,
         getSubmenu: React.PropTypes.func.isRequired,
         isActive: React.PropTypes.bool.isRequired,
-        isFavorite: React.PropTypes.bool.isRequired,
+        isFavorite: React.PropTypes.bool,
         isSelected: React.PropTypes.bool.isRequired,
         magic: React.PropTypes.bool.isRequired,
-        onFavorite: React.PropTypes.func.isRequired,
+        onFavorite: React.PropTypes.func,
         tag: React.PropTypes.object.isRequired,
-        url: React.PropTypes.string.isRequired
+        url: React.PropTypes.string.isRequired,
     },
 
     getInitialState() {
         return {favorite: false};
+    },
+
+
+    onFavorite(event) {
+        event.preventDefault();
+        this.props.onFavorite();
     },
 
     getCount() {
@@ -42,14 +46,9 @@ export const MenuItem = React.createClass({
         const options = {
             label: label,
             todoCount: todoCount,
-            smart_count: doneCount //eslint-disable-line camelcase
+            smart_count: doneCount, // eslint-disable-line camelcase
         };
-        return t("tag title", options);
-    },
-
-    onFavorite(event) {
-        event.preventDefault();
-        this.props.onFavorite();
+        return t('tag title', options);
     },
 
     render() {
@@ -58,21 +57,21 @@ export const MenuItem = React.createClass({
                          this.props.depth === 0;
 
         const classNames = styler({
-            "menu-tag": true,
-            "active": this.props.isActive,
-            "selected": this.props.isSelected,
-            "magic": this.props.magic
+            'menu-tag': true,
+            'active': this.props.isActive,
+            'selected': this.props.isSelected,
+            'magic': this.props.magic,
         });
 
         const linkStyle = {paddingLeft: (this.props.depth + 1) * 20};
         const linkClasses = styler({
-            "favorite": canBeFav && this.props.tag.isFavorite
+            'favorite': canBeFav && this.props.tag.isFavorite,
         });
 
         const submenuBlock = this.props.getSubmenu(this.props.depth + 1);
 
         let favoriteBlock = null;
-        if(canBeFav) {
+        if (canBeFav) {
             favoriteBlock = (
                 <i className="fa fa-star" onClick={this.onFavorite} />
             );
@@ -83,11 +82,11 @@ export const MenuItem = React.createClass({
                 <a className={linkClasses} href={this.props.url}
                    style={linkStyle} title={this.getTitle()}>
                     <i className="fa fa-tag" />
-                    <span>`${label} (${this.getCount()})`</span>
+                    <span>{`${label} (${this.getCount()})`}</span>
                     {favoriteBlock}
                 </a>
                 {submenuBlock}
             </li>
         );
-    }
+    },
 });
