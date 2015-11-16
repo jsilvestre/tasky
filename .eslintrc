@@ -23,3 +23,4 @@
         "react/jsx-no-duplicate-props": 1
         "react/no-danger": 1
         "react/require-extension": 1
+        "react/jsx-boolean-value": 0
