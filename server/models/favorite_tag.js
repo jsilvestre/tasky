@@ -28,7 +28,7 @@ FavoriteTag.allForTasky = (callback) => {
     });
 };
 
-FavoriteTag.ByLabelForTasky = (label, callback) => {
+FavoriteTag.byLabelForTasky = (label, callback) => {
     invariant(hasValue(label), '`label` is a mandatory parameter');
     invariant(hasValue(callback), '`callback` is a mandatory parameter');
     invariant(typeof label === 'string', '`label` must be a string');
