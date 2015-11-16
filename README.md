@@ -10,7 +10,7 @@ Clone this repository, install dependencies and run server (it requires Node.js)
     git clone git://github.com/jsilvestre/tasky.git
     cd tasky
     npm install
-    npm run dev # starts everything you need
+    npm run dev # start everything you need
 
 **DISCLAMER**
 Windows users, the build system assume that you can run the following UNIX commands:
@@ -30,9 +30,10 @@ Let me know what you would like to see in the application so we can discuss it. 
 Make sure there is not already an issue discussing the feature or the bug you are about to post about!
 
 # Contributors
-* @bnjbvr for the code, precious feedback and ideas machinegun.
+* @bnjbvr for the code, precious feedbacks and ideas machinegun.
 * @benibur for the thoughts on the dynamic tree based on tags.
 * @frankrousseau for the feedback and ideas.
+* @nicofrand for all the issues opened and the follow up!
 
 # What is Cozy?
 
