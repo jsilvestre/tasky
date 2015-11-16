@@ -7,7 +7,6 @@ node_modules/.bin/browserify --debug \
     -r async \
     -r moment \
     -r classnames \
-    -r react-router \
     -r react-redux \
     -r redux \
     -r immutable \
@@ -16,4 +15,6 @@ node_modules/.bin/browserify --debug \
     -r redux-logger \
     -r debug \
     -r invariant \
+    -r "history" \
+    -r url-pattern \
     > client/public/scripts/bundle-vendors.js

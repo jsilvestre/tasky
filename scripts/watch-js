@@ -13,7 +13,6 @@
     -x async \
     -x moment \
     -x classnames \
-    -x react-router \
     -x react-redux \
     -x redux \
     -x immutable \
@@ -21,4 +20,6 @@
     -x redux-thunk \
     -x redux-logger \
     -x debug \
-    -x invariant
+    -x invariant \
+    -x "history" \
+    -x url-pattern
