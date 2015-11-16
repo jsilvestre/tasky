@@ -4,7 +4,7 @@ import hasValue from './hasValue';
 // Weird stuff are for accentated characters.
 // See http://stackoverflow.com/questions/1073412/javascript-validation-issue-
 // with-international-characters.
-const regex = /(^|\s)#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)(?=\s|$)/g; // eslint-disable-line max-len
+const regex = /(^|\s)#([\w\d\-_\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)(?=\s|;|:|,|$)/g; // eslint-disable-line max-len
 
 export function containsTags(task, tags) {
     let result;
