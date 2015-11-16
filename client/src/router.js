@@ -22,7 +22,7 @@ const patterns = {
         ['tags', 'query']
     ),
     'noTagSearch': new UrlPattern('/todoByTags/;search/:query'),
-    'byTags': new UrlPattern(/^\/todoByTags\/([\w/]+)$/),
+    'byTags': new UrlPattern(/^\/todoByTags\/([\w/]*)$/),
     'archivedByTags': new UrlPattern(/^\/archivedByTags\/(.*)$/),
     'archived': new UrlPattern('/archived'),
     'main': new UrlPattern('/'),
