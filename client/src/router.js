@@ -35,11 +35,15 @@ export default function start(store) {
             i++;
         }
 
-        store.dispatch({
-            type: 'ROUTE_UPDATE',
-            name,
-            params,
-        });
+        if (name !== null) {
+            store.dispatch({
+                type: 'ROUTE_UPDATE',
+                name,
+                params,
+            });
+        } else {
+            debug(`Location "${location.pathname}" have not been matched.`);
+        }
     });
 
     return history;
