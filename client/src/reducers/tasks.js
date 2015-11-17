@@ -59,9 +59,9 @@ function reorderTask(tasks, payload) {
     // No need to sort the list, just insert at the right spot
     const result = [].concat(tasks);
     result.splice(oldIndex, 1);
-    results.splice(index, 0, task);
+    result.splice(index, 0, task);
 
-    return results;
+    return result;
 }
 
 

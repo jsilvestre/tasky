@@ -2,7 +2,7 @@ import _ from 'underscore';
 import async from 'async';
 import hasValue from '../utils/hasValue';
 import * as TaskUtil from '../utils/TaskUtil';
-import {getNewOrder} from '../utils/XHRUtils';
+import { getNewOrder } from '../utils/TaskUtil';
 import * as XHRUtils from '../utils/XHRUtils';
 import {Options} from '../constants/AppConstants';
 
@@ -98,6 +98,25 @@ export function persistNewTask(description, previousTask) {
     };
 }
 
+export const EDIT_TASK = 'EDIT_TASK';
+export function editTask(task, newContent) {
+    return dispatch => {
+        const changes = {
+            description: newContent,
+            tags: TaskUtil.extractTags(newContent),
+        };
+        const cid = task.cid;
+        dispatch({
+            type: EDIT_TASK,
+            value: {cid: cid, changes: changes},
+        });
+
+        XHRUtils.update(task.id, changes, () => {
+
+        });
+    };
+}
+
 export const REORDER_TASK = 'REORDER_TASK';
 export function moveUp(task) {
     return (dispatch, getState) => {
@@ -124,7 +143,7 @@ export function moveUp(task) {
             const changes = {order: order};
             const cid = task.cid;
             dispatch({
-                type: UPDATE_TASK,
+                type: EDIT_TASK,
                 value: {cid: cid, changes: changes},
             });
 
@@ -182,7 +201,7 @@ export function moveDown(task) {
             const changes = {order: order};
             const cid = task.cid;
             dispatch({
-                type: UPDATE_TASK,
+                type: EDIT_TASK,
                 value: {cid: cid, changes: changes},
             });
 
@@ -203,25 +222,6 @@ export function moveDown(task) {
                 }
             });
         }
-    };
-}
-
-export const EDIT_TASK = 'EDIT_TASK';
-export function editTask(task, newContent) {
-    return dispatch => {
-        const changes = {
-            description: newContent,
-            tags: TaskUtil.extractTags(newContent),
-        };
-        const cid = task.cid;
-        dispatch({
-            type: EDIT_TASK,
-            value: {cid: cid, changes: changes},
-        });
-
-        XHRUtils.update(task.id, changes, () => {
-
-        });
     };
 }
 
