@@ -5,25 +5,26 @@ import UrlPattern from 'url-pattern';
 const debug = logger('app:router');
 
 export default function start(store) {
-    debug('Start router.');
+    debug('Initialize router.');
 
     // List of URL patterns.
     const patterns = {
         'search': new UrlPattern('/search/:query'),
         'byTagsSearch': new UrlPattern(
-            /^\/todoByTags\/([\w/]+)+\/;search\/([\w]+)$/,
+            /^\/todoByTags\/([_\w/-]+)+\/;search\/([\w]+)$/,
             ['tags', 'query']
         ),
         'noTagSearch': new UrlPattern('/todoByTags/;search/:query'),
-        'byTags': new UrlPattern(/^\/todoByTags\/([\w/]*)$/),
-        'archivedByTags': new UrlPattern(/^\/archivedByTags\/(.*)$/),
+        'byTags': new UrlPattern(/^\/todoByTags\/([_\w/-]*)$/),
+        'archivedByTags': new UrlPattern(/^\/archivedByTags\/([_\w/-]*)$/),
         'archived': new UrlPattern('/archived'),
         'main': new UrlPattern('/'),
     };
+
     const history = createHistory();
 
-    // Everytime the URL changes, dispatch the first URL matched with its
-    // parameter.
+    // Everytime the URL changes, dispatch the first URL matched with the
+    // captured parameters.
     history.listen(location => {
         let name = null;
         let params = null;
