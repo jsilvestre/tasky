@@ -21,8 +21,9 @@
     "jade": "1.11.0"
   },
   "devDependencies": {
-    "eslint-config-airbnb": "0.0.8",
-    "eslint-plugin-react": "3.3.2",
+    "eslint": "1.10.0",
+    "eslint-config-airbnb": "1.0.0",
+    "eslint-plugin-react": "3.10.0",
     "history": "1.13.1",
     "immutable": "3.7.5",
     "mocha": "2.3.4",
