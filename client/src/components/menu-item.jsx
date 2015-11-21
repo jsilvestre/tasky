@@ -1,5 +1,5 @@
 import styler from 'classnames';
-import React from 'react/addons';
+import React from 'react';
 
 import hasValue from '../utils/hasValue';
 

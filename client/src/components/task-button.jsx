@@ -1,5 +1,5 @@
 import styler from 'classnames';
-import * as React from 'react/addons';
+import React from 'react';
 
 export default React.createClass({
     displayName: 'TaskButton',

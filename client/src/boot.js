@@ -1,6 +1,6 @@
 import Application from './components/application';
 import logger from 'debug';
-import React from 'react/addons';
+import React from 'react';
 import { Provider } from 'react-redux';
 import startRouter from './router';
 import { configureStore } from './store.js';
@@ -36,9 +36,7 @@ export default function boot(data) {
 
     const application = (
         <Provider store={store}>
-            {() =>
-                <Application />
-            }
+            <Application />
         </Provider>
     );
 

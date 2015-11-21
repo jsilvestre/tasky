@@ -1,6 +1,6 @@
 import styler from 'classnames';
 import hasValue from '../utils/hasValue';
-import React from 'react/addons';
+import React from 'react';
 
 export default React.createClass({
     displayName: 'BreadcrumbItem',

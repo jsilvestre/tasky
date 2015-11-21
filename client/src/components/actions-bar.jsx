@@ -1,5 +1,5 @@
 import styler from 'classnames';
-import * as React from 'react/addons';
+import React from 'react';
 
 import * as TaskActionCreator from '../actions/TaskActionCreator';
 import * as TagActionCreator from '../actions/TagActionCreator';

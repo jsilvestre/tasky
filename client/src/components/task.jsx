@@ -1,5 +1,5 @@
 import styler from 'classnames';
-import React from 'react/addons';
+import React from 'react';
 import moment from 'moment';
 
 import hasValue from '../utils/hasValue';
@@ -59,7 +59,7 @@ export default React.createClass({
 
             // Only selects the content when the task is focused (first render).
             if (this.state.selectContent) {
-                const node = this.refs['task-content'].getDOMNode();
+                const node = this._taskContent;
                 node.focus();
 
                 const index = node.value.length;
@@ -118,7 +118,7 @@ export default React.createClass({
 
     // Binds the input value to the component's state.
     onChange() {
-        const node = this.refs['task-content'].getDOMNode();
+        const node = this._taskContent;
         this.setState({inputValue: node.value});
     },
 
@@ -137,7 +137,7 @@ export default React.createClass({
     // Removes the task if it's empty with 'backspace' key.
     // If it's a form, adds the selected tags at the beginning.
     onKeyDown(event) {
-        const node = this.refs['task-content'].getDOMNode();
+        const node = this._taskContent;
         const key = event.keyCode || event.charCode;
         const ctrlPressed = event.ctrlKey || event.metaKey;
         const comboKeyPressed = event.metaKey || event.ctrlKey || event.altKey;
@@ -196,9 +196,8 @@ export default React.createClass({
     },
 
     saveDescription() {
-        const ref = this.refs['task-content'];
-        if (hasValue(ref)) {
-            const node = ref.getDOMNode();
+        const node = this._taskContent;
+        if (hasValue(node)) {
             if (hasValue(this.props.task) &&
                node.value !== this.props.task.description) {
                 this.props.saveHandler(node.value);
@@ -283,7 +282,7 @@ export default React.createClass({
                         onKeyDown={this.onKeyDown}
                         onKeyUp={this.onKeyUp}
                         placeholder={this.props.placeholder || ''}
-                        ref="task-content"
+                        ref={(node) => this._taskContent = node }
                         tabIndex={this.props.index + 1}
                         value={this.state.inputValue}
                     />

@@ -1,7 +1,7 @@
 import styler from 'classnames';
-import * as React from 'react/addons';
+import React from 'react';
 import { connect } from 'react-redux';
-import * as _ from 'underscore';
+import _ from 'underscore';
 
 import {
     visibleTasksSelector,

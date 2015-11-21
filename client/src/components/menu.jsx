@@ -1,11 +1,11 @@
 import styler from 'classnames';
-import React from 'react/addons';
+import React from 'react';
 import _ from 'underscore';
 import * as TagActionCreator from '../actions/TagActionCreator';
 
 import hasValue from '../utils/hasValue';
 
-import {SortCriterions} from '../constants/AppConstants';
+import { SortCriterions } from '../constants/AppConstants';
 
 import MenuItem from './menu-item';
 

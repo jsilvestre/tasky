@@ -1,4 +1,4 @@
-import React from 'react/addons';
+import React from 'react';
 
 import BreadcrumbItem from './breadcrumb-item';
 import AdjustableInput from './adjustable-input';

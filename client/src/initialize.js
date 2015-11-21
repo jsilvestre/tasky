@@ -1,6 +1,6 @@
 import boot from './boot';
 import logger from 'debug';
-import React from 'react/addons';
+import ReactDOM from 'react-dom';
 
 const debug = logger('app:init');
 
@@ -21,7 +21,7 @@ window.onload = () => {
 
     debug('Mount React application');
     const node = document.querySelector('#mount-point');
-    React.render(application, node);
+    ReactDOM.render(application, node);
 
     debug('Application started.');
 };

@@ -22,4 +22,5 @@
     -x debug \
     -x invariant \
     -x "history" \
-    -x url-pattern
+    -x url-pattern \
+    -x react-dom

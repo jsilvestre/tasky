@@ -1,4 +1,4 @@
-import React from 'react/addons';
+import React from 'react';
 import { KeyboardKeys } from '../constants/AppConstants';
 
 export default React.createClass({
@@ -16,7 +16,7 @@ export default React.createClass({
     },
 
     componentDidUpdate() {
-        const node = this.refs['size-calculator'].getDOMNode();
+        const node = this._sizeCalculator;
         const rects = node.getClientRects()[0];
         if (rects !== null && rects !== void 0) {
             const width = node.getClientRects()[0].width;
@@ -30,14 +30,14 @@ export default React.createClass({
     },
 
     onBlur() {
-        const node = this.refs.input.getDOMNode();
+        const node = this._input;
         if (node.value.length === 0) {
             this.setState({width: 150});
         }
     },
 
     onChange() {
-        const node = this.refs.input.getDOMNode();
+        const node = this._input;
         this.setState({content: node.value});
     },
 
@@ -58,12 +58,14 @@ export default React.createClass({
                     onChange={this.onChange}
                     onKeyUp={this.onKeyUp}
                     placeholder={this.props.placeholder}
-                    ref="input"
+                    ref={(node) => this._input = node }
                     style={ { width: this.state.width } }
                     type="text"
                     value={this.state.content}/>
                 <span className="size-calculator"
-                    ref="size-calculator">{this.state.content}</span>
+                    ref={(node) => this._sizeCalculator = node }>
+                    {this.state.content}
+                </span>
             </span>
         );
     },

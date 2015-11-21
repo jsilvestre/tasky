@@ -1,7 +1,7 @@
-import * as React from 'react/addons';
+import React from 'react';
 import * as TaskActionCreator from '../actions/TaskActionCreator';
 import hasValue from '../utils/hasValue';
-import {buildTagsList} from '../utils/TaskUtil';
+import { buildTagsList } from '../utils/TaskUtil';
 
 import Breadcrumb from './breadcrumb';
 import Task from './task';

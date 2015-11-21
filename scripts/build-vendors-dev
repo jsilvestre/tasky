@@ -17,4 +17,5 @@ node_modules/.bin/browserify --debug \
     -r invariant \
     -r "history" \
     -r url-pattern \
+    -r react-dom \
     > client/public/scripts/bundle-vendors.js
