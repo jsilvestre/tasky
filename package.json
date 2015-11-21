@@ -50,27 +50,27 @@
     "watchify": "3.6.1"
   },
   "scripts": {
-    "start": "node build/server.js",
+    "start": "node dist/server.js",
     "dev": "DEBUG=app:* npm run watch:server & npm run watch:client",
-    "lint": "node_modules/.bin/eslint server.js server/** client/src/**",
+    "lint": "node_modules/.bin/eslint src/**",
     "test": "node_modules/.bin/mocha --compilers js:babel/register test/*/**/*.js",
     "test:watch:server": "node_modules/.bin/mocha --compilers js:babel/register --bail --watch test/server/**/*.js",
     "postinstall": "chmod u+x scripts/*",
-    "prepare-build": "mkdir -p build/client/public/styles && mkdir -p build/client/public/scripts",
+    "prepare-build": "mkdir -p dist/client/public/styles && mkdir -p dist/client/public/scripts",
     "build:js:client": "./scripts/build-js-client",
     "build:js:server": "./scripts/build-js-server",
     "build:template": "./scripts/build-template",
     "build:css": "./scripts/build-css",
-    "build:assets": "cp -R client/assets/* build/client/public",
+    "build:assets": "cp -R src/client/assets/* dist/client/public",
     "build": "npm run prepare-build && NODE_ENV=production npm run build:js:client && npm run build:js:server && npm run build:template && npm run build:css && npm run build:assets",
-    "prepare-watch": "mkdir -p client/public/styles && mkdir -p client/public/scripts; npm run build:js:vendors; npm run build:assets:dev",
+    "prepare-watch": "mkdir -p src/client/public/styles && mkdir -p src/client/public/scripts; npm run build:js:vendors; npm run build:assets:dev",
     "build:js:vendors": "./scripts/build-vendors-dev",
-    "build:assets:dev": "cp -R client/assets/* client/public",
+    "build:assets:dev": "cp -R src/client/assets/* src/client/public",
     "watch:js": "./scripts/watch-js",
     "watch:css": "./scripts/watch-css",
     "watch:client": "npm run prepare-watch; npm run watch:js & npm run watch:css",
-    "watch:server": "node_modules/.bin/nodemon --ignore client/ --ignore tests/ --exec npm run compile:server",
-    "compile:server": "node_modules/.bin/babel-node server.js"
+    "watch:server": "node_modules/.bin/nodemon --ignore src/client/ --ignore tests/ --ignore scripts/ --ignore node_modules/ --ignore build/ --ignore package.json --exec npm run compile:server",
+    "compile:server": "node_modules/.bin/babel-node src/server.js"
   },
   "cozy-permissions": {
     "Tasky": {
@@ -84,6 +84,6 @@
     }
   },
   "cozy-displayName": "Tasky",
-  "icon-path": "build/client/public/icons/main_icon.svg",
+  "icon-path": "dist/client/public/icons/main_icon.svg",
   "cozy-color": "#3BDA6C"
 }

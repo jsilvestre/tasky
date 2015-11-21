@@ -15,5 +15,5 @@ results
 
 node_modules
 npm-debug.log
-client/public
+src/client/public
 .DS_STORE

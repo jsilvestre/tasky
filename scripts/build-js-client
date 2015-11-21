@@ -5,5 +5,5 @@ node_modules/.bin/browserify \
     -t [ envify --NODE_ENV production ] \
     --extension='.jsx' \
     --extension='.js' \
-    -e client/src/initialize.js \
-    > build/client/public/scripts/bundle.js
+    -e src/client/app/initialize.js \
+    > dist/client/public/scripts/bundle.js

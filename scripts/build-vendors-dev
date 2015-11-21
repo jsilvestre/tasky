@@ -18,4 +18,4 @@ node_modules/.bin/browserify --debug \
     -r "history" \
     -r url-pattern \
     -r react-dom \
-    > client/public/scripts/bundle-vendors.js
+    > src/client/public/scripts/bundle-vendors.js

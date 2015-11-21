@@ -4,8 +4,8 @@
     -t [ envify --NODE_ENV development ] \
     --extension=".jsx" \
     --extension=".js" \
-    -e client/src/initialize.js \
-    -o 'client/public/scripts/bundle.js' \
+    -e 'src/client/app/initialize.js' \
+    -o 'src/client/public/scripts/bundle.js' \
     -x underscore \
     -x react/addons \
     -x superagent \

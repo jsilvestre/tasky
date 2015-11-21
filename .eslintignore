@@ -1,1 +1,2 @@
-client/src/boot.js
+src/client/app/boot.js
+src/client/public

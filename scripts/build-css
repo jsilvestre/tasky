@@ -4,5 +4,5 @@ node_modules/.bin/stylus \
     --sourcemap \
     --sourcemap-inline \
     --use ./node_modules/nib/lib/nib \
-    client/src/styles/application.styl \
-    -o build/client/public/styles
+    src/client/app/styles/application.styl \
+    -o dist/client/public/styles
