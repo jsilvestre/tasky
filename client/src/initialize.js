@@ -25,3 +25,9 @@ window.onload = () => {
 
     debug('Application started.');
 };
+
+// Helper that people can use to enable logging from the console.
+window.debug = (pattern = 'app:*') => {
+    console.info(`Reload the page to see logs that match pattern ${pattern}`); // eslint-disable-line
+    localStorage.setItem('debug', pattern);
+};
