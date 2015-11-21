@@ -10,6 +10,7 @@ import { SortCriterions } from './constants/AppConstants';
 const debug = logger('app:store:init');
 
 export function configureStore(serverData = {}) {
+    debug('Initialize store');
     debug('Add redux middlewares.');
     const loggerMiddleware = createLoggerMiddleware({
         level: 'info',
