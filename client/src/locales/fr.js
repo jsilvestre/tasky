@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default {
     'todo': 'À faire',
     'archived': 'Archivées',

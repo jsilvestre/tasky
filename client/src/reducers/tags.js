@@ -2,7 +2,7 @@ import hasValue from '../utils/hasValue';
 import _ from 'underscore';
 import {
     SELECT_TAGS, TOGGLE_FAVORITE_TAG,
-    MARK_SEARCH_AS_FAVORITE, SELECT_SORT_CRITERION
+    MARK_SEARCH_AS_FAVORITE, SELECT_SORT_CRITERION,
 } from '../actions/TagActionCreator';
 
 

@@ -1,11 +1,10 @@
 import _ from 'underscore';
-import hasValue from '../utils/hasValue';
 
 import {
     CREATE_TASK_REQUEST, CREATE_TASK_SUCCESS, CREATE_TASK_ERROR,
     REMOVE_TASK, EDIT_TASK, REORDER_TASK,
     ARCHIVE_TASK, RESTORE_TASK,
-    SET_ARCHIVE_MODE, SET_SEARCH_QUERY, SET_REINDEX_STATE
+    SET_ARCHIVE_MODE, SET_SEARCH_QUERY, SET_REINDEX_STATE,
 } from '../actions/TaskActionCreator';
 
 function findByCid(cid) {

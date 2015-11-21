@@ -57,7 +57,7 @@ function computeMaxDepth(selectedTagNames) {
     return maxDepth;
 }
 
-function initializeTree(maxDepth)  {
+function initializeTree(maxDepth) {
     const tree = [];
 
     // Initialize an empty object for all depth.

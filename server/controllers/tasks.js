@@ -15,7 +15,7 @@ export function reindexationMiddleware(req, res, next) {
 export function create(req, res, next) {
     Task.create(req.body, (err, task) => {
         if (hasValue(err)) {
-            const message =  `An error occured while creating a task -- ${err}`;
+            const message = `An error occured while creating a task -- ${err}`;
             const error = new Error(message);
             next(error);
         } else {
@@ -49,7 +49,7 @@ export function update(req, res, next) {
     });
 }
 
-export function remove(req, res) {
+export function remove(req, res, next) {
     req.task.destroy((err) => {
         if (hasValue(err)) {
             const message = `An error occured while deleting a task -- ${err}`;
@@ -61,7 +61,7 @@ export function remove(req, res) {
     });
 }
 
-export function reindex(req, res) {
+export function reindex(req, res, next) {
     processIndexation((err, tasks) => {
         if (hasValue(err)) {
             const error = new Error(err);
