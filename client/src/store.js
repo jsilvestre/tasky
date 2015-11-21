@@ -4,7 +4,7 @@ import taskReducer from './reducers/tasks';
 import tagReducer from './reducers/tags';
 import routeReducer from './reducers/routes';
 import thunkMiddleware from 'redux-thunk';
-import createLoggerMiddleware from 'redux-logger';
+import createLogger from 'redux-logger';
 import { SortCriterions } from './constants/AppConstants';
 
 const debug = logger('app:store:init');
@@ -12,9 +12,10 @@ const debug = logger('app:store:init');
 export function configureStore(serverData = {}) {
     debug('Initialize store');
     debug('Add redux middlewares.');
-    const loggerMiddleware = createLoggerMiddleware({
+    const loggerMiddleware = createLogger({
         level: 'info',
         collapsed: true,
+        duration: true,
     });
     const createStoreWithMiddleware = applyMiddleware(
         thunkMiddleware,
