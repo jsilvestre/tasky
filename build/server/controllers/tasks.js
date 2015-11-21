@@ -69,7 +69,7 @@ function update(req, res, next) {
     });
 }
 
-function remove(req, res) {
+function remove(req, res, next) {
     req.task.destroy(function (err) {
         if ((0, _hasValue2['default'])(err)) {
             var message = 'An error occured while deleting a task -- ' + err;
@@ -81,7 +81,7 @@ function remove(req, res) {
     });
 }
 
-function reindex(req, res) {
+function reindex(req, res, next) {
     (0, _libReindexer.processIndexation)(function (err, tasks) {
         if ((0, _hasValue2['default'])(err)) {
             var error = new Error(err);

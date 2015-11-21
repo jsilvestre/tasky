@@ -16,7 +16,7 @@ exports['default'] = {
         byArchiveState: _americano2['default'].defaultRequests.by('isArchived'),
         byOrder: function byOrder(doc) {
             if (!doc.isArchived) {
-                emit(doc.order, doc);
+                emit(doc.order, doc); // eslint-disable-line no-undef
             }
         }
     },
@@ -25,7 +25,7 @@ exports['default'] = {
         allByApp: _americano2['default'].defaultRequests.by('application'),
         byAppByLabel: function byAppByLabel(doc) {
             return emit([doc.application, doc.label], doc);
-        }
-    }
+        } }
 };
 module.exports = exports['default'];
+// eslint-disable-line no-undef, max-len
