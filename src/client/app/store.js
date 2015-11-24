@@ -1,4 +1,5 @@
 import logger from 'debug';
+import hasValue from './utils/hasValue';
 import { createStore, applyMiddleware } from 'redux';
 import taskReducer from './reducers/tasks';
 import tagReducer from './reducers/tags';
@@ -12,10 +13,19 @@ const debug = logger('app:store:init');
 export function configureStore(serverData = {}) {
     debug('Initialize store');
     debug('Add redux middlewares.');
+
+    // Use the same indicator as `debug` to know wether the middleware should
+    // log or not.
+    const debugMode = localStorage.getItem('debug');
+    const shouldLog = process.env.NODE_ENV === 'development' ||
+                      (hasValue(debugMode) &&
+                       debugMode !== 'null' && debugMode !== 'undefined' &&
+                       debugMode !== '');
     const loggerMiddleware = createLogger({
         level: 'info',
         collapsed: true,
         duration: true,
+        predicate: () => shouldLog,
     });
     const createStoreWithMiddleware = applyMiddleware(
         thunkMiddleware,
