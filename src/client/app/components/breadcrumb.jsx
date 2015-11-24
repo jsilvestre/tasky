@@ -15,6 +15,11 @@ export default React.createClass({
         selectedTags: React.PropTypes.array,
     },
 
+    contextTypes: {
+        router: React.PropTypes.object,
+        t: React.PropTypes.func,
+    },
+
     getInitialState() {
         return {inputContent: ''};
     },
@@ -53,6 +58,7 @@ export default React.createClass({
     },
 
     getTitle() {
+        const t = this.context.t;
         let title = '';
 
         if (!hasValue(this.props.selectedTags)) {
@@ -121,7 +127,8 @@ export default React.createClass({
         }
 
         const location = `/${prefix}${formattedList}${query}`;
-        window.location = window.router.createHref(location);
+        const href = this.context.router.createHref(location);
+        window.location = href;
     },
 
     removeHandler(tag) {
@@ -192,6 +199,7 @@ export default React.createClass({
     },
 
     render() {
+        const t = this.context.t;
         const title = this.getTitle();
 
         let selectedTagsBlock = null;

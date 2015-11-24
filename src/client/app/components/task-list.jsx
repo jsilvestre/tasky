@@ -21,6 +21,10 @@ export default React.createClass({
         tasksDone: React.PropTypes.array.isRequired,
     },
 
+    contextTypes: {
+        t: React.PropTypes.func,
+    },
+
     getInitialState() {
         return {focusIndex: 0};
     },
@@ -85,6 +89,7 @@ export default React.createClass({
     },
 
     generatePlaceholder() {
+        const t = this.context.t;
         const options = {
             tagPrefix: '#',
             regularSeparator: ', ',

@@ -18,10 +18,13 @@ export default React.createClass({
         url: React.PropTypes.string.isRequired,
     },
 
+    contextTypes: {
+        t: React.PropTypes.func,
+    },
+
     getInitialState() {
         return {favorite: false};
     },
-
 
     onFavorite(event) {
         event.preventDefault();
@@ -48,7 +51,7 @@ export default React.createClass({
             todoCount: todoCount,
             smart_count: doneCount, // eslint-disable-line camelcase
         };
-        return t('tag title', options);
+        return this.context.t('tag title', options);
     },
 
     render() {

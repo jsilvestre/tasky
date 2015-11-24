@@ -33,6 +33,10 @@ export default React.createClass({
         toggleStateHandler: React.PropTypes.func.isRequired,
     },
 
+    contextTypes: {
+        t: React.PropTypes.func,
+    },
+
     getInitialState() {
         let defaultDescription = '';
         if (hasValue(this.props.task)) {
@@ -222,6 +226,8 @@ export default React.createClass({
 
 
     render() {
+        const t = this.context.t;
+
         const doesntExist = !hasValue(this.props.task) ||
                             !hasValue(this.props.task.id);
         const wrapperClasses = styler({

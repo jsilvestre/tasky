@@ -27,6 +27,10 @@ export default React.createClass({
         untaggedTasks: React.PropTypes.array.isRequired,
     },
 
+    contextTypes: {
+        t: React.PropTypes.func,
+    },
+
     onSelectCriterion(criterion, event) {
         event.preventDefault();
         this.props.dispatch(TagActionCreator.selectSortCriterion(criterion));
@@ -110,6 +114,8 @@ export default React.createClass({
     },
 
     getSortMenu() {
+        const t = this.context.t;
+
         const countClasses = styler({
             'selected-sort': this.props.sortCriterion === SortCriterions.COUNT,
         });
@@ -157,6 +163,8 @@ export default React.createClass({
     },
 
     getUntaggedMenuItem() {
+        const t = this.context.t;
+
         // If tag is in the selected path.
         const isActive = hasValue(this.props.selectedTags) &&
                          this.props.selectedTags.length === 0;
@@ -189,6 +197,8 @@ export default React.createClass({
     },
 
     render() {
+        const t = this.context.t;
+
         const archivedMenu = {
             id: 'archived',
             link: '#archived',

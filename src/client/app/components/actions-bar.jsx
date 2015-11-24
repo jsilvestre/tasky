@@ -15,6 +15,10 @@ export default React.createClass({
         tasksDone: React.PropTypes.array.isRequired,
     },
 
+    contextTypes: {
+        t: React.PropTypes.func,
+    },
+
     onArchiveClicked() {
         const action = TaskActionCreator.archiveTasks(this.props.tasksDone);
         this.props.dispatch(action);
@@ -26,6 +30,7 @@ export default React.createClass({
     },
 
     render() {
+        const t = this.context.t;
         const archiveStyles = styler({
             'fa fa-archive': true,
             'disable': this.props.tasksDone.length === 0,

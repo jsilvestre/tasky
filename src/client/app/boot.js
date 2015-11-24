@@ -38,16 +38,10 @@ export default function boot(data) {
 
     const application = (
         <Provider store={store}>
-            <Application />
+            <Application router={history} t={polyglot.t.bind(polyglot)}/>
         </Provider>
     );
 
-    debug('Application configured, ready to start.');
-    polyglot.t('toto');
-    return {
-        router: history,
-        store,
-        t: polyglot.t.bind(polyglot),
-        application,
-    };
+    debug('Application configured.');
+    return application;
 }

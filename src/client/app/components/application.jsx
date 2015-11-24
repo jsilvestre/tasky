@@ -5,17 +5,17 @@ import _ from 'underscore';
 
 import {
     visibleTasksSelector,
-    visibleTasksDoneSelector
+    visibleTasksDoneSelector,
 } from '../selectors/TaskSelectors';
 
 import {
-    treeSelector
+    treeSelector,
 } from '../selectors/TagSelectors';
 
 import Menu from './menu';
 import TaskList from './task-list';
 
-import {SortCriterions} from '../constants/AppConstants';
+import { SortCriterions } from '../constants/AppConstants';
 
 const SortCriterionsValue = Object.keys(SortCriterions)
                             .map(criterion => SortCriterions[criterion]);
@@ -29,17 +29,31 @@ const Application = React.createClass({
         isArchivedModeEnabled: React.PropTypes.bool.isRequired,
         numArchivedTasks: React.PropTypes.number.isRequired,
         numTasks: React.PropTypes.number.isRequired,
+        router: React.PropTypes.object,
         searchQuery: React.PropTypes.string,
         selectedTags: React.PropTypes.array,
         sortCriterion: React.PropTypes.oneOf(SortCriterionsValue).isRequired,
+        t: React.PropTypes.func,
         tasks: React.PropTypes.array.isRequired,
         tasksDone: React.PropTypes.array.isRequired,
         tree: React.PropTypes.array.isRequired,
         untaggedTasks: React.PropTypes.array.isRequired,
     },
 
+    childContextTypes: {
+        router: React.PropTypes.object,
+        t: React.PropTypes.func,
+    },
+
     getInitialState() {
         return { isMenuOpen: false };
+    },
+
+    getChildContext() {
+        return {
+            router: this.props.router,
+            t: this.props.t,
+        };
     },
 
     // Executed only once at startup.
@@ -77,7 +91,7 @@ const Application = React.createClass({
                 <div>
                     <div id="block"></div>
                     <div id="modal">
-                        <p>t('reindexing message')</p>
+                        <p>this.props.t('reindexing message')</p>
                     </div>
                 </div>
             );
