@@ -27,7 +27,10 @@ export default function boot(data) {
 
     // Initialize polyglot object with phrases.
     const Polyglot = require('node-polyglot');
-    const polyglot = new Polyglot({locale: locale});
+    const polyglot = new Polyglot({
+        allowMissing: process.env.NODE_ENV === 'production',
+        locale: locale,
+    });
     polyglot.extend(phrases);
 
     const store = configureStore(data);
