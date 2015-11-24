@@ -11,7 +11,6 @@ const Task = cozydb.getModel('Tasky', {
         type: Boolean,
     },
     'creationDate': {
-        default: Date.now,
         type: Date,
     },
     'completionDate': {
