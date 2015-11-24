@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 import startRouter from './router';
 import { configureStore } from './store.js';
 
+import en from './locales/en';
+import fr from './locales/fr';
+
 const debug = logger('app:boot');
 
 export default function boot(data) {
@@ -12,11 +15,7 @@ export default function boot(data) {
 
     debug('Get localization strings based on given locale.');
     const locale = data.locale;
-
-    const localesLoader = {
-        en: require('./locales/en'),
-        fr: require('./locales/fr'),
-    };
+    const localesLoader = {en, fr};
 
     let phrases = localesLoader[locale];
 
@@ -41,7 +40,7 @@ export default function boot(data) {
     );
 
     debug('Application configured, ready to start.');
-
+    polyglot.t('toto');
     return {
         router: history,
         store,
