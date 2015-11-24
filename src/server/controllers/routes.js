@@ -2,7 +2,7 @@ import * as index from './index';
 import * as tasks from './tasks';
 import * as tags from './tags';
 
-export default {
+module.exports = {
     '': {
         get: index.main,
     },

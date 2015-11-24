@@ -7,7 +7,7 @@ import path from 'path';
 const builtViewPath = path.resolve(__dirname, '../client/index.js');
 const viewEngine = fs.existsSync(builtViewPath) ? 'js' : 'jade';
 
-export default {
+module.exports = {
     common: {
         use: [
             americano.bodyParser(),
