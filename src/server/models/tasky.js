@@ -34,7 +34,7 @@ const Task = cozydb.getModel('Tasky', {
     },
 });
 
-export default Task;
+module.exports = Task;
 
 Task.all = (callback) => {
     invariant(hasValue(callback), '`callback` is a mandatory parameter');

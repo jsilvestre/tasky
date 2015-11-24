@@ -21,6 +21,13 @@
     "jade": "1.11.0"
   },
   "devDependencies": {
+    "babel-eslint": "4.1.5",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.2.0",
+    "babel-preset-es2015": "6.1.18",
+    "babel-preset-react": "6.1.18",
+    "babel-preset-stage-2": "6.1.18",
+    "babelify": "7.2.0",
+    "envify": "3.4.0",
     "eslint": "1.10.0",
     "eslint-config-airbnb": "1.0.0",
     "eslint-plugin-react": "3.10.0",

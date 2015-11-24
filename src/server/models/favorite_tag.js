@@ -10,7 +10,7 @@ const FavoriteTag = cozydb.getModel('FavoriteTag', {
     'application': String,
 });
 
-export default FavoriteTag;
+module.exports = FavoriteTag;
 
 FavoriteTag.allForTasky = (callback) => {
     invariant(hasValue(callback), '`callback` is a mandatory parameter');

@@ -1,6 +1,6 @@
 import americano from 'americano';
 
-export default {
+module.exports = {
     tasky: {
         all: americano.defaultRequests.all,
         byArchiveState: americano.defaultRequests.by('isArchived'),
