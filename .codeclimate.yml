@@ -1,0 +1,13 @@
+languages:
+   JavaScript: true
+engines:
+   eslint:
+      enabled: true
+
+exclude_paths:
+- "test/**"
+
+ratings:
+   paths:
+      - "src/server/**"
+      - "src/client/app/**"
