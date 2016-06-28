@@ -20,7 +20,7 @@ export default function boot(data) {
     let phrases = localesLoader[locale];
 
     if (!phrases) {
-        debug(`Localized strings could not be found for locale ${locale}, `
+        debug(`Localized strings could not be found for locale ${locale},` +
               `using EN locale instead.`);
         phrases = localesLoader.en;
     }
