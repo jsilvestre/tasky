@@ -1,11 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
 var _cozydb = require('cozydb');
 
 var _cozydb2 = _interopRequireDefault(_cozydb);
@@ -22,43 +16,46 @@ var _hasValue = require('../hasValue');
 
 var _hasValue2 = _interopRequireDefault(_hasValue);
 
-var debug = (0, _debug2['default'])('app:model:tasky');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Task = _cozydb2['default'].getModel('Tasky', {
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+var debug = (0, _debug2.default)('app:model:tasky');
+
+var Task = _cozydb2.default.getModel('Tasky', {
     'done': {
-        'default': false,
+        default: false,
         type: Boolean
     },
     'creationDate': {
-        'default': Date.now,
         type: Date
     },
     'completionDate': {
-        'default': null,
+        default: null,
         type: Date
     },
     'description': {
-        'default': '',
+        default: '',
         type: String
     },
     'order': {
         type: Number
     },
     'tags': {
-        'default': [],
+        default: [],
         type: [String]
     },
     'isArchived': {
-        'default': false,
+        default: false,
         type: Boolean
     }
 });
 
-exports['default'] = Task;
+module.exports = Task;
 
 Task.all = function (callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve all tasks.');
     Task.request('all', {}, function (err, tasks) {
@@ -68,10 +65,10 @@ Task.all = function (callback) {
 };
 
 Task.allInInterval = function (options, callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(options), '`options` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof options === 'object', '`callback` must be an object');
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(options), '`options` is a mandatory parameter');
+    (0, _invariant2.default)((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object', '`callback` must be an object');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve all tasks in given interval.');
     Task.request('byOrder', options, function (err, tasks) {
@@ -81,8 +78,8 @@ Task.allInInterval = function (options, callback) {
 };
 
 Task.allNotArchived = function (callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve all unarchived tasks.');
 
@@ -97,8 +94,8 @@ Task.allNotArchived = function (callback) {
 };
 
 Task.allArchived = function (callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve all archived tasks.');
     var params = {
@@ -109,4 +106,3 @@ Task.allArchived = function (callback) {
         callback(error, tasks);
     });
 };
-module.exports = exports['default'];

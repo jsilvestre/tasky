@@ -1,12 +1,10 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.isReindexing = isReindexing;
 exports.processIndexation = processIndexation;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _async = require('async');
 
@@ -20,15 +18,17 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireDefault(_debug);
 
-var _modelsTasky = require('../models/tasky');
+var _tasky = require('../models/tasky');
 
-var _modelsTasky2 = _interopRequireDefault(_modelsTasky);
+var _tasky2 = _interopRequireDefault(_tasky);
 
 var _hasValue = require('../hasValue');
 
 var _hasValue2 = _interopRequireDefault(_hasValue);
 
-var debug = (0, _debug2['default'])('app:lib:reindexer');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var debug = (0, _debug2.default)('app:lib:reindexer');
 
 // Act like a singleton. Not reindexing by default.
 var flagReindexing = false;
@@ -38,8 +38,8 @@ function isReindexing() {
 }
 
 function processIndexation(callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Start reindexation process.');
 
@@ -47,8 +47,8 @@ function processIndexation(callback) {
     flagReindexing = true;
 
     debug('Retrieve all tasks.');
-    _modelsTasky2['default'].allInInterval({}, function (err, tasks) {
-        if ((0, _hasValue2['default'])(err)) {
+    _tasky2.default.allInInterval({}, function (err, tasks) {
+        if ((0, _hasValue2.default)(err)) {
             callback(err);
         } else {
             (function () {
@@ -58,17 +58,17 @@ function processIndexation(callback) {
                 var numTasks = tasks.length;
                 var step = (maxOrder - minOrder) / (numTasks + 1);
 
-                _async2['default'].mapSeries(tasks, function (task, next) {
+                _async2.default.mapSeries(tasks, function (task, next) {
                     var id = task.id;
                     var order = minOrder + (tasks.indexOf(task) + 1) * step;
                     task.updateAttributes({ order: order }, function (err2) {
-                        if ((0, _hasValue2['default'])(err2)) {
+                        if ((0, _hasValue2.default)(err2)) {
                             debug(err2);
                         }
                         next(null, { id: id, order: order });
                     });
                 }, function (err2, updatedTasks) {
-                    if ((0, _hasValue2['default'])(err2)) {
+                    if ((0, _hasValue2.default)(err2)) {
                         var msg = 'Something went wrong while reindexing tasks\n                                 -- ' + err2;
                         debug(msg);
                     } else {

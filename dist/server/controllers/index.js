@@ -1,11 +1,9 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.main = main;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _async = require('async');
 
@@ -23,46 +21,48 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireDefault(_debug);
 
-var _modelsFavorite_tag = require('../models/favorite_tag');
+var _favorite_tag = require('../models/favorite_tag');
 
-var _modelsFavorite_tag2 = _interopRequireDefault(_modelsFavorite_tag);
+var _favorite_tag2 = _interopRequireDefault(_favorite_tag);
 
 var _hasValue = require('../hasValue');
 
 var _hasValue2 = _interopRequireDefault(_hasValue);
 
-var _modelsTasky = require('../models/tasky');
+var _tasky = require('../models/tasky');
 
-var _modelsTasky2 = _interopRequireDefault(_modelsTasky);
+var _tasky2 = _interopRequireDefault(_tasky);
 
-var debug = (0, _debug2['default'])('app:controller:main');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var debug = (0, _debug2.default)('app:controller:main');
 
 function main(req, res, next) {
     debug('Retrieve data to build HTML.');
 
-    _async2['default'].parallel({
+    _async2.default.parallel({
         tasks: function tasks(done) {
-            _modelsTasky2['default'].allNotArchived(done);
+            _tasky2.default.allNotArchived(done);
         },
         archivedTasks: function archivedTasks(done) {
-            _modelsTasky2['default'].allArchived(done);
+            _tasky2.default.allArchived(done);
         },
         locale: function locale(done) {
-            _cozydb2['default'].api.getCozyLocale(done);
+            _cozydb2.default.api.getCozyLocale(done);
         },
         favoriteTags: function favoriteTags(done) {
-            _modelsFavorite_tag2['default'].allForTasky(done);
+            _favorite_tag2.default.allForTasky(done);
         }
     }, function (err, results) {
-        if ((0, _hasValue2['default'])(err)) {
+        if ((0, _hasValue2.default)(err)) {
             debug('Some data have not been retrieved due to an unexpected ' + 'error.');
             next(err);
         } else {
             (function () {
-                (0, _invariant2['default'])((0, _hasValue2['default'])(results.tasks), '`tasks` is a mandatory ' + 'property');
-                (0, _invariant2['default'])((0, _hasValue2['default'])(results.archivedTasks), '`archivedTasks` is a ' + 'mandatory property');
-                (0, _invariant2['default'])((0, _hasValue2['default'])(results.locale), '`locale` is a mandatory ' + 'property');
-                (0, _invariant2['default'])((0, _hasValue2['default'])(results.favoriteTags), '`favoriteTags` is a ' + 'mandatory property');
+                (0, _invariant2.default)((0, _hasValue2.default)(results.tasks), '`tasks` is a mandatory ' + 'property');
+                (0, _invariant2.default)((0, _hasValue2.default)(results.archivedTasks), '`archivedTasks` is a ' + 'mandatory property');
+                (0, _invariant2.default)((0, _hasValue2.default)(results.locale), '`locale` is a mandatory ' + 'property');
+                (0, _invariant2.default)((0, _hasValue2.default)(results.favoriteTags), '`favoriteTags` is a ' + 'mandatory property');
                 debug('Data have been retrieved.');
 
                 var tasks = results.tasks;

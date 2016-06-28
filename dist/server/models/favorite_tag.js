@@ -1,11 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
 var _cozydb = require('cozydb');
 
 var _cozydb2 = _interopRequireDefault(_cozydb);
@@ -22,23 +16,25 @@ var _hasValue = require('../hasValue');
 
 var _hasValue2 = _interopRequireDefault(_hasValue);
 
-var debug = (0, _debug2['default'])('app:model:favorite_tag');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var FavoriteTag = _cozydb2['default'].getModel('FavoriteTag', {
+var debug = (0, _debug2.default)('app:model:favorite_tag');
+
+var FavoriteTag = _cozydb2.default.getModel('FavoriteTag', {
     'label': String,
     'application': String
 });
 
-exports['default'] = FavoriteTag;
+module.exports = FavoriteTag;
 
 FavoriteTag.allForTasky = function (callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve all favorite tag for app Tasky.');
     FavoriteTag.request('allByApp', { key: 'tasky' }, function (err, tags) {
         var error = err || tags.error;
-        if ((0, _hasValue2['default'])(error)) {
+        if ((0, _hasValue2.default)(error)) {
             callback(error);
         } else {
             var labels = tags.map(function (tag) {
@@ -50,10 +46,10 @@ FavoriteTag.allForTasky = function (callback) {
 };
 
 FavoriteTag.byLabelForTasky = function (label, callback) {
-    (0, _invariant2['default'])((0, _hasValue2['default'])(label), '`label` is a mandatory parameter');
-    (0, _invariant2['default'])((0, _hasValue2['default'])(callback), '`callback` is a mandatory parameter');
-    (0, _invariant2['default'])(typeof label === 'string', '`label` must be a string');
-    (0, _invariant2['default'])(typeof callback === 'function', '`callback` must be a function');
+    (0, _invariant2.default)((0, _hasValue2.default)(label), '`label` is a mandatory parameter');
+    (0, _invariant2.default)((0, _hasValue2.default)(callback), '`callback` is a mandatory parameter');
+    (0, _invariant2.default)(typeof label === 'string', '`label` must be a string');
+    (0, _invariant2.default)(typeof callback === 'function', '`callback` must be a function');
 
     debug('Retrieve a favorite tag given a label, for app Tasky.');
     var options = {
@@ -61,4 +57,3 @@ FavoriteTag.byLabelForTasky = function (label, callback) {
     };
     FavoriteTag.request('byAppByLabel', options, callback);
 };
-module.exports = exports['default'];
