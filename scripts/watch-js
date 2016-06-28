@@ -1,6 +1,6 @@
 #!/bin/bash
 ./node_modules/.bin/watchify -dv \
-    -t babelify \
+    -t [ babelify --presets [ es2015 react stage-2] --plugins [ transform-es2015-modules-commonjs ] ] \
     -t [ envify --NODE_ENV development ] \
     --extension=".jsx" \
     --extension=".js" \

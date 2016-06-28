@@ -1,3 +1,3 @@
 #!/bin/bash
-node_modules/.bin/babel src/server --out-dir dist/server
-node_modules/.bin/babel src/server.js --out-file dist/server.js
+babel src/server --out-dir dist/server
+babel src/server.js --out-file dist/server.js
