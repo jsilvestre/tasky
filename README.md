@@ -1,6 +1,12 @@
 # Description
 Tasky is a simple yet powerful task manager. I found the usual tree structure to organize tasks far too rigid, so I came up with the idea that you can build your own tree on the fly with tags.
 
+# Ownership / Maintainership
+
+I'm not updating the application lately, and don't intend to do so in the next months. I would happily give the ownership/maintainership of the repository to anyone willing to take it over.
+
+[Let me know if you are interested](https://github.com/jsilvestre/tasky/issues/48)!
+
 
 # Development
 Clone this repository, install dependencies and run server (it requires Node.js)
